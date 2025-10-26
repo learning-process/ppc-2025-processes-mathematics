@@ -5,7 +5,7 @@
 
 #include "task/include/task.hpp"
 
-namespace chernykh_s_integration_rectangle_method {
+namespace nesterov_a_test_task_processes {
 
 using InType = int;
 using OutType = int;

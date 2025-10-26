@@ -71,8 +71,8 @@ TEST_P(ChernykhSRunFuncTestsIntegrationRectangleMethod, MatmulFromPic) {
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
 const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<NesterovATestTaskMPI, InType>(kTestParam, PPC_SETTINGS_example_processes),
-                   ppc::util::AddFuncTask<NesterovATestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_example_processes));
+    std::tuple_cat(ppc::util::AddFuncTask<ChernykhSIntegrationRectangleMethodMPI, InType>(kTestParam, PPC_SETTINGS_chernykh_s_integration_rectangle_method),
+                   ppc::util::AddFuncTask<ChernykhSIntegrationRectangleMethodSEQ, InType>(kTestParam, PPC_SETTINGS_chernykh_s_integration_rectangle_method));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
@@ -82,4 +82,4 @@ INSTANTIATE_TEST_SUITE_P(PicMatrixTests, ChernykhSRunFuncTestsIntegrationRectang
 
 }  // namespace
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace chernykh_s_integration_rectangle_method

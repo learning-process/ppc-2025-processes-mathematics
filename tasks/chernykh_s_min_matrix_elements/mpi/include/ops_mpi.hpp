@@ -1,16 +1,16 @@
 #pragma once
 
-#include "chernykh_s_integration_rectangle_method/common/include/common.hpp"
+#include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 #include "task/include/task.hpp"
 
-namespace chernykh_s_integration_rectangle_method {
+namespace chernykh_s_min_matrix_elements {
 
-class ChernykhSIntegrationRectangleMethodMPI : public BaseTask {
+class ChernykhSMinMatrixElementsMPI : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  explicit ChernykhSIntegrationRectangleMethodMPI(const InType &in);
+  explicit ChernykhSMinMatrixElementsMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;
@@ -19,4 +19,4 @@ class ChernykhSIntegrationRectangleMethodMPI : public BaseTask {
   bool PostProcessingImpl() override;
 };
 
-}  // namespace chernykh_s_integration_rectangle_method
+}  // namespace chernykh_s_min_matrix_elements

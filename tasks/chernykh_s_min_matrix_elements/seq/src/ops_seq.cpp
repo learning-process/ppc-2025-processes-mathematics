@@ -1,29 +1,29 @@
-#include "chernykh_s_integration_rectangle_method/seq/include/ops_seq.hpp"
+#include "chernykh_s_min_matrix_elements/seq/include/ops_seq.hpp"
 
 #include <numeric>
 #include <vector>
 
-#include "chernykh_s_integration_rectangle_method/common/include/common.hpp"
+#include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 #include "util/include/util.hpp"
 
-namespace chernykh_s_integration_rectangle_method {
+namespace chernykh_s_min_matrix_elements {
 
-ChernykhSIntegrationRectangleMethodSEQ::ChernykhSIntegrationRectangleMethodSEQ(const InType &in) {
+ChernykhSMinMatrixElementsSEQ::ChernykhSMinMatrixElementsSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodSEQ::ValidationImpl() {
+bool ChernykhSMinMatrixElementsSEQ::ValidationImpl() {
   return (GetInput() > 0) && (GetOutput() == 0);
 }
 
-bool ChernykhSIntegrationRectangleMethodSEQ::PreProcessingImpl() {
+bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
   GetOutput() = 2 * GetInput();
   return GetOutput() > 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodSEQ::RunImpl() {
+bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
   if (GetInput() == 0) {
     return false;
   }
@@ -52,9 +52,9 @@ bool ChernykhSIntegrationRectangleMethodSEQ::RunImpl() {
   return GetOutput() > 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodSEQ::PostProcessingImpl() {
+bool ChernykhSMinMatrixElementsSEQ::PostProcessingImpl() {
   GetOutput() -= GetInput();
   return GetOutput() > 0;
 }
 
-}  // namespace chernykh_s_integration_rectangle_method
+}  // namespace chernykh_s_min_matrix_elements

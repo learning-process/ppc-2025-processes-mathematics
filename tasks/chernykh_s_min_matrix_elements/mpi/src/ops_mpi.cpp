@@ -1,31 +1,31 @@
-#include "chernykh_s_integration_rectangle_method/mpi/include/ops_mpi.hpp"
+#include "chernykh_s_min_matrix_elements/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
 
 #include <numeric>
 #include <vector>
 
-#include "chernykh_s_integration_rectangle_method/common/include/common.hpp"
+#include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 #include "util/include/util.hpp"
 
-namespace chernykh_s_integration_rectangle_method {
+namespace chernykh_s_min_matrix_elements {
 
-ChernykhSIntegrationRectangleMethodMPI::ChernykhSIntegrationRectangleMethodMPI(const InType &in) {
+ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodMPI::ValidationImpl() {
+bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
   return (GetInput() > 0) && (GetOutput() == 0);
 }
 
-bool ChernykhSIntegrationRectangleMethodMPI::PreProcessingImpl() {
+bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {
   GetOutput() = 2 * GetInput();
   return GetOutput() > 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodMPI::RunImpl() {
+bool ChernykhSMinMatrixElementsMPI::RunImpl() {
   auto input = GetInput();
   if (input == 0) {
     return false;
@@ -64,9 +64,9 @@ bool ChernykhSIntegrationRectangleMethodMPI::RunImpl() {
   return GetOutput() > 0;
 }
 
-bool ChernykhSIntegrationRectangleMethodMPI::PostProcessingImpl() {
+bool ChernykhSMinMatrixElementsMPI::PostProcessingImpl() {
   GetOutput() -= GetInput();
   return GetOutput() > 0;
 }
 
-}  // namespace chernykh_s_integration_rectangle_method
+}  // namespace chernykh_s_min_matrix_elements

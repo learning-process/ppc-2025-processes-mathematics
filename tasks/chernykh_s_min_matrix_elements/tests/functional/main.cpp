@@ -12,15 +12,15 @@
 #include <utility>
 #include <vector>
 
-#include "chernykh_s_integration_rectangle_method/common/include/common.hpp"
-#include "chernykh_s_integration_rectangle_method/mpi/include/ops_mpi.hpp"
-#include "chernykh_s_integration_rectangle_method/seq/include/ops_seq.hpp"
+#include "chernykh_s_min_matrix_elements/common/include/common.hpp"
+#include "chernykh_s_min_matrix_elements/mpi/include/ops_mpi.hpp"
+#include "chernykh_s_min_matrix_elements/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
 
-namespace chernykh_s_integration_rectangle_method {
+namespace chernykh_s_min_matrix_elements {
 
-class ChernykhSRunFuncTestsIntegrationRectangleMethod : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
     return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
@@ -34,7 +34,7 @@ class ChernykhSRunFuncTestsIntegrationRectangleMethod : public ppc::util::BaseRu
     std::vector<uint8_t> img;
     // Read image
     {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_integration_rectangle_method, "pic.jpg");
+      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, "pic.jpg");
       auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, 0);
       if (data == nullptr) {
         throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
@@ -64,22 +64,22 @@ class ChernykhSRunFuncTestsIntegrationRectangleMethod : public ppc::util::BaseRu
 
 namespace {
 
-TEST_P(ChernykhSRunFuncTestsIntegrationRectangleMethod, MatmulFromPic) {
+TEST_P(ChernykhSRunFuncTestsMinMatrixElements, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
 const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<ChernykhSIntegrationRectangleMethodMPI, InType>(kTestParam, PPC_SETTINGS_chernykh_s_integration_rectangle_method),
-                   ppc::util::AddFuncTask<ChernykhSIntegrationRectangleMethodSEQ, InType>(kTestParam, PPC_SETTINGS_chernykh_s_integration_rectangle_method));
+    std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),
+                   ppc::util::AddFuncTask<ChernykhSMinMatrixElementsSEQ, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = ChernykhSRunFuncTestsIntegrationRectangleMethod::PrintFuncTestName<ChernykhSRunFuncTestsIntegrationRectangleMethod>;
+const auto kPerfTestName = ChernykhSRunFuncTestsMinMatrixElements::PrintFuncTestName<ChernykhSRunFuncTestsMinMatrixElements>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, ChernykhSRunFuncTestsIntegrationRectangleMethod, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(PicMatrixTests, ChernykhSRunFuncTestsMinMatrixElements, kGtestValues, kPerfTestName);
 
 }  // namespace
 
-}  // namespace chernykh_s_integration_rectangle_method
+}  // namespace chernykh_s_min_matrix_elements

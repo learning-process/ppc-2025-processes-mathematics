@@ -1,4 +1,9 @@
 #include <gtest/gtest.h>
+#include <fstream>
+#include <vector>
+#include <algorithm>
+#include <limits>
+#include <stdexcept>
 
 #include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 #include "chernykh_s_min_matrix_elements/mpi/include/ops_mpi.hpp"
@@ -7,29 +12,56 @@
 
 namespace chernykh_s_min_matrix_elements {
 
+
+
 class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 100;
-  InType input_data_{};
+protected:
+    InType input_data_{};
 
-  void SetUp() override {
-    input_data_ = kCount_;
-  }
+    void SetUp() override {
+        // Файл с матрицей
+        const std::string file_name = "data.bin";
+        std::string abs_path = "../../tasks/chernykh_s_min_matrix_elements/data/data.bin";
+        //std::string abs_path = "../../data/data.bin";
+        std::ifstream inFile(abs_path, std::ios::binary);
+        if (!inFile.is_open()) {
+            throw std::runtime_error("Failed to open file: " + abs_path);
+        }
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    return input_data_ == output_data;
-  }
+        size_t stroki = 0, stolbci = 0;
+        inFile.read(reinterpret_cast<char*>(&stroki), sizeof(size_t));
+        inFile.read(reinterpret_cast<char*>(&stolbci), sizeof(size_t));
 
-  InType GetTestInputData() final {
-    return input_data_;
-  }
+        auto &matrix = std::get<2>(input_data_);
+        matrix.resize(stroki * stolbci);
+        inFile.read(reinterpret_cast<char*>(matrix.data()), sizeof(double) * stroki * stolbci);
+        inFile.close();
+
+        std::get<0>(input_data_) = stroki;
+        std::get<1>(input_data_) = stolbci;
+    }
+
+    bool CheckTestOutputData(OutType &output_data) final {
+        const auto &matrix = std::get<2>(input_data_);
+        if (matrix.empty()) {
+            return output_data == std::numeric_limits<double>::max();
+        }
+        double expected = *std::min_element(matrix.begin(), matrix.end());
+        return output_data == expected;
+    }
+
+    InType GetTestInputData() final {
+        return input_data_;
+    }
 };
 
 TEST_P(ChernykhSRunFuncTestsMinMatrixElements, RunPerfModes) {
-  ExecuteTest(GetParam());
+    ExecuteTest(GetParam());
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, ChernykhSMinMatrixElementsMPI, ChernykhSMinMatrixElementsSEQ>(PPC_SETTINGS_chernykh_s_min_matrix_elements);
+    ppc::util::MakeAllPerfTasks<InType, ChernykhSMinMatrixElementsMPI, ChernykhSMinMatrixElementsSEQ>(
+        PPC_SETTINGS_chernykh_s_min_matrix_elements);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

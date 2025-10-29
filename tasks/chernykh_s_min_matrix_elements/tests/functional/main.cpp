@@ -22,36 +22,41 @@ namespace chernykh_s_min_matrix_elements {
 
 class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
+
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    return test_param;
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, 0);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
-      }
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
-      }
+    TestType params =
+        std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    std::string inFileName = params; //имя файла 
+
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
+    std::ifstream inFile(abs_path, std::ios::in | std::ios::binary);
+
+    if (!inFile.is_open()) {
+      throw std::runtime_error("Failed to open file: " + abs_path);
     }
 
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    size_t stroki = 0, stolbci = 0;
+    inFile.read(reinterpret_cast<char*>(&stroki), sizeof(size_t));
+    inFile.read(reinterpret_cast<char*>(&stolbci), sizeof(size_t));
+
+    std::get<2>(input_data_).resize(stroki * stolbci);
+    inFile.read(reinterpret_cast<char*>(std::get<2>(input_data_).data()), sizeof(double) * stroki * stolbci);
+    
+    inFile.close();
+
+    std::get<0>(input_data_) = stroki;
+    std::get<1>(input_data_) = stolbci;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return (input_data_ == output_data);
+    const auto &mat = std::get<2>(input_data_);
+    double expected_min = *std::min_element(mat.begin(), mat.end());
+    return std::fabs(output_data - expected_min) < 1e-12;
   }
 
   InType GetTestInputData() final {
@@ -59,26 +64,31 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
   }
 
  private:
-  InType input_data_ = 0;
+  InType input_data_;
 };
 
 namespace {
 
-TEST_P(ChernykhSRunFuncTestsMinMatrixElements, MatmulFromPic) {
+TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 1> kTestParam = {"data.bin"};
 
 const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),
-                   ppc::util::AddFuncTask<ChernykhSMinMatrixElementsSEQ, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements));
+    std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),ppc::util::AddFuncTask<ChernykhSMinMatrixElementsSEQ, InType>(kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = ChernykhSRunFuncTestsMinMatrixElements::PrintFuncTestName<ChernykhSRunFuncTestsMinMatrixElements>;
+const auto kPerfTestName =
+    ChernykhSRunFuncTestsMinMatrixElements::PrintFuncTestName<
+        ChernykhSRunFuncTestsMinMatrixElements>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, ChernykhSRunFuncTestsMinMatrixElements, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(
+    MinMatrixTests,
+    ChernykhSRunFuncTestsMinMatrixElements,
+    kGtestValues,
+    kPerfTestName);
 
 }  // namespace
 

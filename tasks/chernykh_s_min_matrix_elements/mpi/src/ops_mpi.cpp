@@ -16,15 +16,16 @@ namespace chernykh_s_min_matrix_elements {
 ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
+  GetOutput()=0.0;
 }
 
 
 
 bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
-    const size_t stroki = std::get<0>(this->input_);
-    const size_t stolbci = std::get<1>(this->input_);
+    const size_t stroki = std::get<0>(this->GetInput());
+    const size_t stolbci = std::get<1>(this->GetInput());
     // ИСПРАВЛЕНО: Добавлен std:: и точка с запятой
-    const std::vector<double> &matrica = std::get<2>(this->input_); 
+    const std::vector<double> &matrica = std::get<2>(this->GetInput()); 
 
     // ИСПРАВЛЕНО: stolbi -> stolbci
     if(matrica.size() != stroki * stolbci) {
@@ -50,9 +51,9 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
     const std::vector<double>* matrica = nullptr; 
 
     if(rank==0){
-      stroki = std::get<0>(this->input_);
-      stolbci = std::get<1>(this->input_);
-      matrica = &std::get<2>(this->input_);
+      stroki = std::get<0>(this->GetInput());
+      stolbci = std::get<1>(this->GetInput());
+      matrica = &std::get<2>(this->GetInput());
     }
 
     MPI_Bcast(&stroki, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
@@ -66,7 +67,7 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
     if(total_elements == 0){
         if(rank == 0){ 
-            this->res_ = global_minimum; 
+            GetOutput() = global_minimum; 
         }
         MPI_Barrier(MPI_COMM_WORLD); 
         return true;
@@ -116,7 +117,7 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
         MPI_COMM_WORLD);
 
     if (rank == 0) {
-        this->res_ = global_minimum;
+        GetOutput() = global_minimum;
     }
     
     MPI_Barrier(MPI_COMM_WORLD); 
@@ -124,8 +125,5 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 }
 
 bool ChernykhSMinMatrixElementsMPI::PostProcessingImpl() {
-    GetOutput() = this->res_; 
     return true;
-}
-
-}  // namespace chernykh_s_min_matrix_elements
+}}// namespace chernykh_s_min_matrix_elements

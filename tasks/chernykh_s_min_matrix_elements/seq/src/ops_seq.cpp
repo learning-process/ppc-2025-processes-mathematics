@@ -15,45 +15,43 @@ ChernykhSMinMatrixElementsSEQ::ChernykhSMinMatrixElementsSEQ(const InType &in) {
 }
 
 bool ChernykhSMinMatrixElementsSEQ::ValidationImpl() {
-
   const size_t stroki = std::get<0>(GetInput());
   const size_t stolbci = std::get<1>(GetInput());
   const std::vector<double> &matrica = std::get<2>(GetInput());
-    if (matrica.size() != stroki * stolbci) {
-        return false;
-    }
-    if (stroki > 0 && stolbci > 0 && matrica.empty()) {
-        return false;
-    }
-    return true;
+  if (matrica.size() != stroki * stolbci) {
+    return false;
+  }
+  if (stroki > 0 && stolbci > 0 && matrica.empty()) {
+    return false;
+  }
+  return true;
 }
 
 bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
-    return true; 
+  return true;
 }
 
 bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
-    const size_t stroki = std::get<0>(GetInput());
-    const size_t stolbci = std::get<1>(GetInput());
-    const std::vector<double> &matrica = std::get<2>(GetInput()); 
-    if (matrica.empty() || stroki == 0 || stolbci == 0) {
-        GetOutput() = std::numeric_limits<double>::max();
-        return true; 
-    }
-    auto min_it = std::min_element(matrica.begin(), matrica.end());
+  const size_t stroki = std::get<0>(GetInput());
+  const size_t stolbci = std::get<1>(GetInput());
+  const std::vector<double> &matrica = std::get<2>(GetInput());
+  if (matrica.empty() || stroki == 0 || stolbci == 0) {
+    GetOutput() = std::numeric_limits<double>::max();
+    return true;
+  }
+  auto min_it = std::min_element(matrica.begin(), matrica.end());
 
-    if (min_it != matrica.end()) {
-        GetOutput() = *min_it;
-    } else {
+  if (min_it != matrica.end()) {
+    GetOutput() = *min_it;
+  } else {
+    GetOutput() = std::numeric_limits<double>::max();
+  }
 
-        GetOutput() = std::numeric_limits<double>::max();
-    }
-    
-    return true; 
+  return true;
 }
 
 bool ChernykhSMinMatrixElementsSEQ::PostProcessingImpl() {
-    return GetOutput() != std::numeric_limits<double>::max();
+  return GetOutput() != std::numeric_limits<double>::max();
 }
 
 }  // namespace chernykh_s_min_matrix_elements

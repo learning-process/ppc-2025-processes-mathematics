@@ -22,7 +22,6 @@ namespace chernykh_s_min_matrix_elements {
 
 class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-
   static std::string PrintTestParam(const TestType &test_param) {
     return test_param;
   }
@@ -32,8 +31,8 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
     TestType params =
         std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::string inFileName = params; //имя файла 
-    std::string abs_path ="/chernykh_s_min_matrix_elements/data";
-    //std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
+    
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
     std::ifstream inFile(abs_path, std::ios::in | std::ios::binary);
 
     if (!inFile.is_open()) {
@@ -91,5 +90,4 @@ INSTANTIATE_TEST_SUITE_P(
     kPerfTestName);
 
 }  // namespace
-
-}  // namespace chernykh_s_min_matrix_elements
+}// namespace chernykh_s_min_matrix_elements

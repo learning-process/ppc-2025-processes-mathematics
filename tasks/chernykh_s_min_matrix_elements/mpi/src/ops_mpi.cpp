@@ -1,11 +1,11 @@
 #include "chernykh_s_min_matrix_elements/mpi/include/ops_mpi.hpp"
 
+#include <algorithm> 
 #include <mpi.h>
 #include <numeric>
 #include <vector>
-#include <algorithm> // Для std::min_element
-#include <limits>    // Для std::numeric_limits
-#include <cmath>     // Для std::fmin
+#include <limits>    
+#include <cmath>     
 
 #include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -26,11 +26,11 @@ bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
 
     const size_t stroki = std::get<0>(this->GetInput());
     const size_t stolbci = std::get<1>(this->GetInput());
-    // ИСПРАВЛЕНО: Добавлен std:: и точка с запятой
+    
     const std::vector<double> &matrica = std::get<2>(this->GetInput()); 
 
 
-    // ИСПРАВЛЕНО: stolbi -> stolbci
+    
     if(matrica.size() != stroki * stolbci) {
         return false;
     }
@@ -47,7 +47,7 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
     MPI_Comm_size(MPI_COMM_WORLD, &size);
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     
-    // 1. ИЗВЛЕЧЕНИЕ ДАННЫХ И ШИРОКОВЕЩАТЕЛЬНАЯ ПЕРЕДАЧА РАЗМЕРОВ
+    
     
     size_t stroki = 0; 
     size_t stolbci = 0; 

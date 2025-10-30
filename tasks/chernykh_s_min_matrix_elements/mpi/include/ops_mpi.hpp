@@ -18,5 +18,4 @@ class ChernykhSMinMatrixElementsMPI : public BaseTask {
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 };
-
 }  // namespace chernykh_s_min_matrix_elements

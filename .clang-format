@@ -7,6 +7,7 @@ AllowShortFunctionsOnASingleLine: Empty
 IndentPPDirectives: AfterHash
 SortIncludes: true
 FixNamespaceComments: true
+InsertBraces: true
 QualifierAlignment: Left
 PointerAlignment: Right
 ReferenceAlignment: Right
@@ -14,4 +15,8 @@ SortUsingDeclarations: LexicographicNumeric
 InsertNewlineAtEOF: true
 LambdaBodyIndentation: OuterScope
 MaxEmptyLinesToKeep: 1
+KeepEmptyLines:
+  AtStartOfFile: false
+  AtStartOfBlock: false
+  AtEndOfFile: false
 LineEnding: LF

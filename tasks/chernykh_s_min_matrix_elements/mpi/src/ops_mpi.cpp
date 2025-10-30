@@ -13,7 +13,6 @@
 
 namespace chernykh_s_min_matrix_elements {
 
-// ... (Ваш конструктор)
 ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;

@@ -29,8 +29,7 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    std::string inFileName = params;  // имя файла
-
+    std::string inFileName = params;
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
     std::ifstream inFile(abs_path, std::ios::in | std::ios::binary);
 
@@ -71,7 +70,7 @@ TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 1> kTestParam = {"data.bin"};
+const std::array<TestType, 1> kTestParam = {"data"};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(
                                                kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),

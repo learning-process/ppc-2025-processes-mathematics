@@ -19,9 +19,9 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
 
   void SetUp() override {
     // Файл с матрицей
-    const std::string file_name = "data.bin";
-    std::string abs_path = "../../tasks/chernykh_s_min_matrix_elements/data/data.bin";
-    // std::string abs_path = "../../data/data.bin";
+    const std::string file_name = "data";
+    std::string abs_path = "../../tasks/chernykh_s_min_matrix_elements/data/data";
+
     std::ifstream inFile(abs_path, std::ios::binary);
     if (!inFile.is_open()) {
       throw std::runtime_error("Failed to open file: " + abs_path);

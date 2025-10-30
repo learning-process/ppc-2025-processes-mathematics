@@ -4,6 +4,7 @@
 #include <array>
 #include <cstddef>
 #include <fstream>
+#include <iostream>
 #include <string>
 #include <tuple>
 
@@ -49,6 +50,7 @@ class OrehovNCharacterFrequencyFuncTests : public ppc::util::BaseRunFuncTests<In
         correct_result++;
       }
     }
+    std::cout << "functional test:\ncorrect_result:" << correct_result << "\noutput_result: " << output_data << "\n";
     return correct_result == output_data;
   }
 

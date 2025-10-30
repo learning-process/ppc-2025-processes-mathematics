@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
-#include <algorithm>
 #include <array>
 #include <random>
 #include <tuple>
@@ -55,7 +54,7 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
     if (rank == 0) {
       bool result_correct = (output_data == reference_max_);
       if (!result_correct) {
-        std::cout << "Rank 0: Expected " << reference_max_ << ", got " << output_data << std::endl;
+        std::cout << "Rank 0: Expected " << reference_max_ << ", got " << output_data << "\n";
       }
       return result_correct;
     } else {
@@ -110,7 +109,7 @@ const auto kFuncTestName = MoskaevVMaxValueElemMatrixFuncTests::PrintFuncTestNam
 INSTANTIATE_TEST_SUITE_P(FuncTests, MoskaevVMaxValueElemMatrixFuncTests, kGtestValues, kFuncTestName);
 
 // Индивидуальные тест кейсы
-TEST(moskaev_v_max_value_elem_matrix_mpi, test_small_matrix) {
+TEST(MoskaevVMaxValueElemMatrixMpi, test_small_matrix) {
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте
   MoskaevVMaxValueElemMatrixMPI task(matrix);  // Передаем в реализацию
   EXPECT_TRUE(task.Validation());
@@ -120,7 +119,7 @@ TEST(moskaev_v_max_value_elem_matrix_mpi, test_small_matrix) {
   EXPECT_GT(task.GetOutput(), 0);
 }
 
-TEST(moskaev_v_max_value_elem_matrix_seq, test_small_matrix) {
+TEST(MoskaevVMaxValueElemMatrixSeq, test_small_matrix) {
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
   EXPECT_TRUE(task.Validation());

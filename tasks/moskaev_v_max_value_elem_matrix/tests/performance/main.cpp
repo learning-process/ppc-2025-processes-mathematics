@@ -64,7 +64,7 @@ const auto kPerfTestName = MoskaevVMaxValueElemMatrixPerfTests::CustomPerfTestNa
 INSTANTIATE_TEST_SUITE_P(PerfTests, MoskaevVMaxValueElemMatrixPerfTests, kGtestValues, kPerfTestName);
 
 // Тесты на производительность (ровно 2 теста на технологию)
-TEST(moskaev_v_max_value_elem_matrix_mpi, test_pipeline_run) {
+TEST(MoskaevVMaxValueElemMatrixMpi, test_pipeline_run) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -90,7 +90,7 @@ TEST(moskaev_v_max_value_elem_matrix_mpi, test_pipeline_run) {
   }
 }
 
-TEST(moskaev_v_max_value_elem_matrix_mpi, test_task_run) {
+TEST(MoskaevVMaxValueElemMatrixMpi, test_task_run) {
   int rank;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -115,7 +115,7 @@ TEST(moskaev_v_max_value_elem_matrix_mpi, test_task_run) {
   }
 }
 
-TEST(moskaev_v_max_value_elem_matrix_seq, test_pipeline_run) {
+TEST(MoskaevVMaxValueElemMatrixSeq, test_pipeline_run) {
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
 
@@ -134,7 +134,7 @@ TEST(moskaev_v_max_value_elem_matrix_seq, test_pipeline_run) {
   std::cout << "SEQ Pipeline time: " << duration.count() << "ms" << std::endl;
 }
 
-TEST(moskaev_v_max_value_elem_matrix_seq, test_task_run) {
+TEST(MoskaevVMaxValueElemMatrixSeq, test_task_run) {
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
 

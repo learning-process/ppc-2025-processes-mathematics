@@ -1,9 +1,7 @@
 #include "moskaev_v_max_value_elem_matrix/seq/include/ops_seq.hpp"
-
-#include <algorithm>
+#include <algorithm> 
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace moskaev_v_max_value_elem_matrix {
 
@@ -32,9 +30,7 @@ bool MoskaevVMaxValueElemMatrixSEQ::RunImpl() {
   int max_element = matrix[0][0];
   for (const auto &row : matrix) {
     for (int element : row) {
-      if (element > max_element) {
-        max_element = element;
-      }
+      max_element = std::max(element, max_element);
     }
   }
 

@@ -2,21 +2,21 @@
 
 #include <mpi.h>
 
-#include <algorithm>
 #include <vector>
+#include <algorithm> 
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace moskaev_v_max_value_elem_matrix {
 
-static std::vector<std::vector<int>> g_local_matrix;
 
-static void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, int rank, int size) {
+std::vector<std::vector<int>> g_local_matrix;
+
+void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, int rank, int size) {
   int matrix_dim = full_matrix.size();
 
   if (rank == 0) {
-    // Процесс 0 распределяет данные (матрица пришла из тестов)
+  // Процесс 0 распределяет данные (матрица пришла из тестов)
     int rows_per_process = matrix_dim / size;
     int remainder = matrix_dim % size;
 
@@ -49,6 +49,7 @@ static void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, i
   }
 }
 
+
 MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;  // Получаем готовую матрицу из тестов
@@ -60,7 +61,7 @@ bool MoskaevVMaxValueElemMatrixMPI::ValidationImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PreProcessingImpl() {
-  int rank, size;
+  int rank = 0, size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
@@ -82,9 +83,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   int local_max = g_local_matrix[0][0];
   for (const auto &row : g_local_matrix) {
     for (int element : row) {
-      if (element > local_max) {
-        local_max = element;
-      }
+      local_max = std::max(element, local_max);
     }
   }
 

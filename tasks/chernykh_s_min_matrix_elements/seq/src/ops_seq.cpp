@@ -32,21 +32,21 @@ bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
 }
 
 bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
-  const size_t stroki = std::get<0>(GetInput());
-  const size_t stolbci = std::get<1>(GetInput());
+  const size_t &stroki = std::get<0>(GetInput());
+  const size_t &stolbci = std::get<1>(GetInput());
   const std::vector<double> &matrica = std::get<2>(GetInput());
+  double global_min = std::numeric_limits<double>::max();
   if (matrica.empty() || stroki == 0 || stolbci == 0) {
     GetOutput() = std::numeric_limits<double>::max();
     return true;
   }
-  auto min_it = std::min_element(matrica.begin(), matrica.end());
 
-  if (min_it != matrica.end()) {
-    GetOutput() = *min_it;
-  } else {
-    GetOutput() = std::numeric_limits<double>::max();
+  for (size_t i = 0; i < stroki * stolbci; i++) {
+    if (matrica[i] < global_min) {
+      global_min = matrica[i];
+    }
   }
-
+  GetOutput() = global_min;
   return true;
 }
 

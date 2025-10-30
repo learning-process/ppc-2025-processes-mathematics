@@ -16,7 +16,7 @@ namespace chernykh_s_min_matrix_elements {
 ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0.0;
+  GetOutput() = std::numeric_limits<double>::max();
 }
 
 bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
@@ -29,6 +29,13 @@ bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
     return false;
   }
 
+  if (stroki == 0 || stolbci == 0) {
+    return false;
+  }
+
+  if (matrica.empty()) {
+    return false;
+  }
   return true;
 }
 
@@ -37,61 +44,42 @@ bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {
 }
 
 bool ChernykhSMinMatrixElementsMPI::RunImpl() {
-  int size, rank;
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  int rank = 0;
+  int size = 0;
+  std::vector<double> local_data;
+  double local_min = std::numeric_limits<double>::max();
+  double global_min = std::numeric_limits<double>::max();
+
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  size_t stroki = 0;
-  size_t stolbci = 0;
-  const std::vector<double> *matrica = nullptr;
+  // std::cout<<"rank = "<<rank<<std::endl<<"size = "<<size<<std::endl;
 
-  if (rank == 0) {
-    stroki = std::get<0>(this->GetInput());
-    stolbci = std::get<1>(this->GetInput());
-    matrica = &std::get<2>(this->GetInput());
-  }
+  const size_t &stroki = std::get<0>(GetInput());
+  const size_t &stolbci = std::get<1>(GetInput());
+  const std::vector<double> &matrica = std::get<2>(GetInput());
+  const size_t total_elements = stroki * stolbci;
 
-  MPI_Bcast(&stroki, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&stolbci, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+  size_t kolvo_na_process = total_elements / size;
+  size_t ostatok = total_elements % size;
 
-  size_t total_elements = stroki * stolbci;
+  // std::cout<<"kolvo_na_process = "<<kolvo_na_process<<std::endl<<"ostatok = "<<ostatok<<std::endl;
 
-  double local_minimum = std::numeric_limits<double>::max();
-  double global_minimum = std::numeric_limits<double>::max();
+  size_t start = rank * kolvo_na_process;
+  size_t end = start + kolvo_na_process;
+  end += (rank == size) ? ostatok : 0;
 
-  if (total_elements == 0) {
-    if (rank == 0) {
-      GetOutput() = global_minimum;
+  for (size_t i = start; i < end; ++i) {
+    if (matrica[i] < local_min) {
+      local_min = matrica[i];
     }
-    MPI_Barrier(MPI_COMM_WORLD);
-    return true;
   }
 
-  int razmer_bloka = (int)(total_elements / size);
-  int remainder = (int)(total_elements % size);  // остаток, который будет обрабатывать ТОЛЬКО Master.
+  // std::cout<<"local_min = "<<local_min<<std::endl<<"global_min = "<<global_min<<std::endl;
+  MPI_Allreduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
-  std::vector<double> local_data(razmer_bloka);
+  GetOutput() = global_min;
 
-  MPI_Scatter((rank == 0) ? (void *)matrica->data() : nullptr, razmer_bloka, MPI_DOUBLE, local_data.data(),
-              razmer_bloka, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-  if (!local_data.empty()) {
-    local_minimum = *std::min_element(local_data.begin(), local_data.end());
-  }
-
-  if (rank == 0 && remainder > 0) {
-    const double *remainder_start = matrica->data() + (size * razmer_bloka);
-    double remainder_min = *std::min_element(remainder_start, remainder_start + remainder);
-    local_minimum = std::fmin(local_minimum, remainder_min);
-  }
-
-  MPI_Reduce(&local_minimum, &global_minimum, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-
-  if (rank == 0) {
-    GetOutput() = global_minimum;
-  }
-
-  MPI_Barrier(MPI_COMM_WORLD);
   return true;
 }
 

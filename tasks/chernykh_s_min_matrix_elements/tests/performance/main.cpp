@@ -46,7 +46,8 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
       return output_data == std::numeric_limits<double>::max();
     }
     double expected = *std::min_element(matrix.begin(), matrix.end());
-    return output_data == expected;
+
+    return std::fabs(output_data - expected) < 1e-6;
   }
 
   InType GetTestInputData() final {

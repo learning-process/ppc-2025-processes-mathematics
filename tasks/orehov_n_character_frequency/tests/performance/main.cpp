@@ -5,10 +5,15 @@
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
 
+#include <string>
+#include <fstream>
+#include <tuple>
+#include <cstddef>
+
 namespace orehov_n_character_frequency {
 
 class OrehovNCharacterFrequencyPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
 
   void SetUp() override {
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_orehov_n_character_frequency, "string3.txt");
@@ -17,7 +22,8 @@ class OrehovNCharacterFrequencyPerfTests : public ppc::util::BaseRunPerfTests<In
       throw "file not open\n";
     }
 
-    std::string str, symbol;
+    std::string str;
+    std::string symbol;
     std::getline(file, str);
     std::getline(file, symbol);
 
@@ -26,7 +32,6 @@ class OrehovNCharacterFrequencyPerfTests : public ppc::util::BaseRunPerfTests<In
     input_data_ = std::make_tuple(str, symbol);
   }
 
-#include <iostream>
   bool CheckTestOutputData(OutType &output_data) final {
     int correct_result{};
     std::string str = std::get<0>(input_data_);

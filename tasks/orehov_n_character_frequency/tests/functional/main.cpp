@@ -1,24 +1,15 @@
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
-#include <algorithm>
 #include <array>
-#include <cstddef>
-#include <cstdint>
 #include <fstream>
-#include <iostream>
-#include <numeric>
-#include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
-#include <vector>
 
 #include "orehov_n_character_frequency/common/include/common.hpp"
 #include "orehov_n_character_frequency/mpi/include/ops_mpi.hpp"
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
-#include "util/include/util.hpp"
 
 namespace orehov_n_character_frequency {
 
@@ -37,7 +28,8 @@ class OrehovNCharacterFrequencyFuncTests : public ppc::util::BaseRunFuncTests<In
       throw "file not open\n";
     }
 
-    std::string str, symbol;
+    std::string str;
+    std::string symbol;
     std::getline(file, str);
     std::getline(file, symbol);
 
@@ -47,7 +39,7 @@ class OrehovNCharacterFrequencyFuncTests : public ppc::util::BaseRunFuncTests<In
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    int correct_result{};
+    int correct_result = 0;
     std::string str = std::get<0>(input_data_);
     std::string symbol = std::get<1>(input_data_);
     for (size_t i = 0; i < str.length(); i++) {
@@ -63,7 +55,7 @@ class OrehovNCharacterFrequencyFuncTests : public ppc::util::BaseRunFuncTests<In
   }
 
  private:
-  InType input_data_{};
+  InType input_data_;
 };
 
 namespace {

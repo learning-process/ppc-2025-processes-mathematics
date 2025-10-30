@@ -1,10 +1,9 @@
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 
-#include <numeric>
-#include <vector>
-
 #include "orehov_n_character_frequency/common/include/common.hpp"
-#include "util/include/util.hpp"
+
+#include <string>
+#include <cstddef>
 
 namespace orehov_n_character_frequency {
 
@@ -21,8 +20,6 @@ bool OrehovNCharacterFrequencySEQ::ValidationImpl() {
 bool OrehovNCharacterFrequencySEQ::PreProcessingImpl() {
   return true;
 }
-
-#include <iostream>
 
 bool OrehovNCharacterFrequencySEQ::RunImpl() {
   std::string str = std::get<0>(GetInput());

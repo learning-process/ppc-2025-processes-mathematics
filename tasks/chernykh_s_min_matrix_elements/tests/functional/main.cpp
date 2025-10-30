@@ -32,8 +32,8 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
     TestType params =
         std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::string inFileName = params; //имя файла 
-
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
+    std::string abs_path ="/chernykh_s_min_matrix_elements/data";
+    //std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
     std::ifstream inFile(abs_path, std::ios::in | std::ios::binary);
 
     if (!inFile.is_open()) {

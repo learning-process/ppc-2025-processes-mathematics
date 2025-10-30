@@ -1,5 +1,6 @@
 #include "moskaev_v_max_value_elem_matrix/seq/include/ops_seq.hpp"
-#include <algorithm> 
+
+#include <algorithm>
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
 

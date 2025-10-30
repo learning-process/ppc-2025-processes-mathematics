@@ -2,13 +2,12 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <vector>
-#include <algorithm> 
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
 
 namespace moskaev_v_max_value_elem_matrix {
-
 
 std::vector<std::vector<int>> g_local_matrix;
 
@@ -16,7 +15,7 @@ void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, int rank
   int matrix_dim = full_matrix.size();
 
   if (rank == 0) {
-  // Процесс 0 распределяет данные (матрица пришла из тестов)
+    // Процесс 0 распределяет данные (матрица пришла из тестов)
     int rows_per_process = matrix_dim / size;
     int remainder = matrix_dim % size;
 
@@ -48,7 +47,6 @@ void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, int rank
     }
   }
 }
-
 
 MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());

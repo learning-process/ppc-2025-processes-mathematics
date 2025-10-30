@@ -2,9 +2,9 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <string>
 #include <tuple>
-#include <algorithm>
 
 #include "orehov_n_character_frequency/common/include/common.hpp"
 
@@ -42,8 +42,10 @@ bool OrehovNCharacterFrequencyMPI::RunImpl() {
 
   int local_result = 0;
 
-  for (int i = start; i < end; i++){
-    if (str[i] == symbol[0]) local_result++;
+  for (int i = start; i < end; i++) {
+    if (str[i] == symbol[0]) {
+      local_result++;
+    }
   }
 
   int global_result = 0;

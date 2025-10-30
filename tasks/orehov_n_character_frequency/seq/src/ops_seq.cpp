@@ -1,9 +1,9 @@
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 
-#include "orehov_n_character_frequency/common/include/common.hpp"
-
-#include <string>
 #include <cstddef>
+#include <string>
+
+#include "orehov_n_character_frequency/common/include/common.hpp"
 
 namespace orehov_n_character_frequency {
 

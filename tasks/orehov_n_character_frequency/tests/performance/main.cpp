@@ -1,14 +1,14 @@
 #include <gtest/gtest.h>
 
+#include <cstddef>
+#include <fstream>
+#include <string>
+#include <tuple>
+
 #include "orehov_n_character_frequency/common/include/common.hpp"
 #include "orehov_n_character_frequency/mpi/include/ops_mpi.hpp"
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
-
-#include <string>
-#include <fstream>
-#include <tuple>
-#include <cstddef>
 
 namespace orehov_n_character_frequency {
 

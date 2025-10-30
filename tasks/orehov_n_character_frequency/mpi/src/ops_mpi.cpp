@@ -38,7 +38,7 @@ bool OrehovNCharacterFrequencyMPI::RunImpl() {
   int remains = length % size;
 
   int start = (rank * part_size) + std::min(rank, remains);
-  int end = (rank + 1) * part_size + std::min(rank + 1, remains);
+  int end = ((rank + 1) * part_size) + std::min(rank + 1, remains);
 
   int local_result = 0;
 

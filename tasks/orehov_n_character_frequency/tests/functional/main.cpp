@@ -2,6 +2,7 @@
 #include <stb/stb_image.h>
 
 #include <array>
+#include <cstddef>
 #include <fstream>
 #include <string>
 #include <tuple>
@@ -10,6 +11,7 @@
 #include "orehov_n_character_frequency/mpi/include/ops_mpi.hpp"
 #include "orehov_n_character_frequency/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace orehov_n_character_frequency {
 

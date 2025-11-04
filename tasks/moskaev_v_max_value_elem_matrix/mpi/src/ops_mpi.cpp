@@ -30,9 +30,9 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  const auto& matrix = GetInput();
+  const auto &matrix = GetInput();
   auto total_rows = matrix.size();
-  
+
   if (total_rows == 0) {
     return false;
   }
@@ -40,7 +40,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   // Рассчитываем диапазон строк для текущего процесса
   int rows_per_process = total_rows / size;
   int remainder = total_rows % size;
-  
+
   int start_row = rank * rows_per_process + std::min(rank, remainder);
   int end_row = start_row + rows_per_process + (rank < remainder ? 1 : 0);
 
@@ -61,7 +61,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   if (rank == 0) {
     GetOutput() = global_max;
   } else {
-    GetOutput() = local_max; // или 0, в зависимости от требований
+    GetOutput() = local_max;  // или 0, в зависимости от требований
   }
 
   return true;

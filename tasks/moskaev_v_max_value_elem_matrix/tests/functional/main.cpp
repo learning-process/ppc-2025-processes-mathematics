@@ -1,12 +1,11 @@
-#include <string>
-#include <cstddef>
-#include <iostream>
-
 #include <gtest/gtest.h>
 #include <mpi.h>
 
 #include <array>
+#include <cstddef>
+#include <iostream>
 #include <random>
+#include <string>
 #include <tuple>
 #include <vector>
 

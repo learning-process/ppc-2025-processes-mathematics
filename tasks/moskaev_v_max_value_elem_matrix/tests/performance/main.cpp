@@ -1,22 +1,24 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
+#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
 #include <vector>
 
+#include "../../modules/util/include/perf_test_util.hpp"
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
 #include "moskaev_v_max_value_elem_matrix/mpi/include/ops_mpi.hpp"
 #include "moskaev_v_max_value_elem_matrix/seq/include/ops_seq.hpp"
-#include "util/include/perf_test_util.hpp"
 
 namespace moskaev_v_max_value_elem_matrix {
 
 // Функция для генерации тестовой матрицы для perf тестов
 static InType GeneratePerfTestMatrix(int size) {
   InType matrix(size, std::vector<int>(size));
-  std::mt19937 gen(42);
+  std::random_device rd;
+  std::mt19937 gen(rd());
   std::uniform_int_distribution<int> dist(1, 5000);
 
   for (int i = 0; i < size; ++i) {
@@ -65,7 +67,7 @@ INSTANTIATE_TEST_SUITE_P(PerfTests, MoskaevVMaxValueElemMatrixPerfTests, kGtestV
 
 // Тесты на производительность (ровно 2 теста на технологию)
 TEST(MoskaevVMaxValueElemMatrixMpi, testPipelineRun) {
-  int rank;
+  int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте

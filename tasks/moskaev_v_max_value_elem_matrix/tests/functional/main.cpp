@@ -9,10 +9,10 @@
 #include <tuple>
 #include <vector>
 
+#include "../../modules/util/include/func_test_util.hpp"
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
 #include "moskaev_v_max_value_elem_matrix/mpi/include/ops_mpi.hpp"
 #include "moskaev_v_max_value_elem_matrix/seq/include/ops_seq.hpp"
-#include "util/include/func_test_util.hpp"
 
 namespace moskaev_v_max_value_elem_matrix {
 

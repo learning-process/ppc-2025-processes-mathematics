@@ -38,19 +38,17 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   }
 
   // Рассчитываем диапазон строк для текущего процесса
-  int rows_per_process = total_rows / size;
-  int remainder = total_rows % size;
+  auto rows_per_process = total_rows / size;
+  auto remainder = total_rows % size;
 
-  int start_row = rank * rows_per_process + std::min(rank, remainder);
+  int start_row = (rank * rows_per_process) + std::min(rank, static_cast<int>(remainder));
   int end_row = start_row + rows_per_process + (rank < remainder ? 1 : 0);
 
   // Поиск локального максимума в своей части матрицы
   int local_max = matrix[start_row][0];
   for (int i = start_row; i < end_row; ++i) {
     for (int element : matrix[i]) {
-      if (element > local_max) {
-        local_max = element;
-      }
+      local_max = std::max(element, local_max);
     }
   }
 

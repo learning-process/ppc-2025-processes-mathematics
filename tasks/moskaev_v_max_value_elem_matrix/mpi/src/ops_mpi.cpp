@@ -2,8 +2,8 @@
 
 #include <mpi.h>
 
-#include <cstddef>
 #include <algorithm>
+#include <cstddef>
 #include <vector>
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
@@ -39,7 +39,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   }
 
   // Рассчитываем диапазон строк для текущего процесса
-  auto rows_per_process = total_rows / size; 
+  auto rows_per_process = total_rows / size;
   auto remainder = total_rows % size;
 
   auto start_row = (rank * rows_per_process) + std::min(static_cast<size_t>(rank), remainder);

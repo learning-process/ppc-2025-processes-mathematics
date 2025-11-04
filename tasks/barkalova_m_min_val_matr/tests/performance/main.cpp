@@ -29,7 +29,8 @@ TEST_P(BarkalovaMMinValMatrPerfTest, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BarkalovaMMinValMatrMPI, BarkalovaMMinValMatrSEQ>(PPC_SETTINGS_barkalova_m_min_val_matr);
+    ppc::util::MakeAllPerfTasks<InType, BarkalovaMMinValMatrMPI,
+BarkalovaMMinValMatrSEQ>(PPC_SETTINGS_barkalova_m_min_val_matr);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
@@ -38,8 +39,6 @@ const auto kPerfTestName = BarkalovaMMinValMatrPerfTest::CustomPerfTestName;
 INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMMinValMatrPerfTest, kGtestValues, kPerfTestName);
 
 }  // namespace barkalova_m_min_val_matr*/
-
-
 
 namespace barkalova_m_min_val_matr {
 
@@ -50,25 +49,25 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
     // Оставляем маленькую матрицу
     const size_t rows = 100;
     const size_t stolb = 100;
-    
+
     std::vector<std::vector<int>> matrix(rows, std::vector<int>(stolb));
-    
+
     for (size_t i = 0; i < rows; ++i) {
       for (size_t j = 0; j < stolb; ++j) {
         matrix[i][j] = static_cast<int>(i + j + 1);
       }
     }
-    
+
     input_data_ = matrix;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    const auto& matrix = input_data_;
-    
+    const auto &matrix = input_data_;
+
     if (output_data.empty()) {
-      return false; 
+      return false;
     }
-    
+
     if (output_data.size() != matrix[0].size()) {
       return false;
     }
@@ -81,7 +80,7 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
         }
       }
     }
-    
+
     return output_data == correct_result;
   }
 
@@ -94,8 +93,8 @@ TEST_P(BarkalovaMMinValMatrPerfTest, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BarkalovaMMinValMatrMPI, BarkalovaMMinValMatrSEQ>(PPC_SETTINGS_barkalova_m_min_val_matr);
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, BarkalovaMMinValMatrMPI, BarkalovaMMinValMatrSEQ>(
+    PPC_SETTINGS_barkalova_m_min_val_matr);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

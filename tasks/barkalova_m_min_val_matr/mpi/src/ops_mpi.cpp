@@ -2,54 +2,46 @@
 
 #include <mpi.h>
 
+#include <climits>
 #include <numeric>
 #include <vector>
-#include <climits>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
 #include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 
-BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) 
-{
+BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = std::vector<int>();
 }
 
-bool BarkalovaMMinValMatrMPI::ValidationImpl() 
-{
-  const auto& matrix = GetInput();
-  if(matrix.empty())
-  {
+bool BarkalovaMMinValMatrMPI::ValidationImpl() {
+  const auto &matrix = GetInput();
+  if (matrix.empty()) {
     return false;
   }
   size_t stolb = matrix[0].size();
-  for(const auto& row : matrix)
-  {
-    if(row.size() != stolb)
-    {
+  for (const auto &row : matrix) {
+    if (row.size() != stolb) {
       return false;
     }
   }
   return true;
 }
 
-bool BarkalovaMMinValMatrMPI::PreProcessingImpl() 
-{
-  if(!GetInput().empty())
-  {
+bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
+  if (!GetInput().empty()) {
     size_t stolb = GetInput()[0].size();
-    GetOutput() = std::vector<int>(stolb,INT_MAX);
+    GetOutput() = std::vector<int>(stolb, INT_MAX);
   }
   return true;
 }
 
-bool BarkalovaMMinValMatrMPI::RunImpl() 
-{
-  const auto& matrix = GetInput();
-  auto& res = GetOutput();
+bool BarkalovaMMinValMatrMPI::RunImpl() {
+  const auto &matrix = GetInput();
+  auto &res = GetOutput();
 
   int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -87,21 +79,14 @@ bool BarkalovaMMinValMatrMPI::RunImpl()
   res.resize(stolb, INT_MAX);
   // Используем правильные типы
   int send_count = static_cast<int>(col_stolb);
-  
-  MPI_Gatherv(
-    loc_min.data(),
-    send_count,              // int вместо size_t
-    MPI_INT,
-    res.data(),
-    recv_counts.data(),
-    displacements.data(),
-    MPI_INT,
-    0,                      // root процесс
-    MPI_COMM_WORLD
-  );
 
-  if (size > 1) 
-  {
+  MPI_Gatherv(loc_min.data(),
+              send_count,  // int вместо size_t
+              MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT,
+              0,  // root процесс
+              MPI_COMM_WORLD);
+
+  if (size > 1) {
     MPI_Bcast(res.data(), stolb, MPI_INT, 0, MPI_COMM_WORLD);
   }
 

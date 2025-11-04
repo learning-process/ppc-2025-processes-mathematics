@@ -24,6 +24,7 @@ bool BarkalovaMMinValMatrSEQ::ValidationImpl()
     return false;
   }
   size_t stolb = matrix[0].size();
+  //все строки должны иметь одинак разм
   for(const auto& row : matrix)
   {
     if(row.size() != stolb)
@@ -48,9 +49,9 @@ bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto& matrix = GetInput();
   auto& res = GetOutput();
 
-  for(int j=0;j<res.size();++j)
+  for(size_t j=0;j<res.size();++j)
   {
-    for (int i=0;i<matrix.size();++i)
+    for (size_t i=0;i<matrix.size();++i)
     {
       if(matrix[i][j]<res[j])
       {
@@ -61,8 +62,13 @@ bool BarkalovaMMinValMatrSEQ::RunImpl() {
   return true;
 }
 
+/*bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
+  return true;
+}*/
 bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
+  if (!GetInput().empty() && GetOutput().empty()) {
+    return false;
+  }
   return true;
 }
-
 }  // namespace barkalova_m_min_val_matr

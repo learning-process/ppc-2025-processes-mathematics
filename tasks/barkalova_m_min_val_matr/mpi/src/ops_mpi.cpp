@@ -38,7 +38,7 @@ bool BarkalovaMMinValMatrMPI::ValidationImpl()
 
 bool BarkalovaMMinValMatrMPI::PreProcessingImpl() 
 {
-  if(GetInput().empty())
+  if(!GetInput().empty())
   {
     size_t stolb = GetInput()[0].size();
     GetOutput() = std::vector<int>(stolb,INT_MAX);
@@ -57,53 +57,58 @@ bool BarkalovaMMinValMatrMPI::RunImpl()
 
   size_t rows = matrix.size();
   size_t stolb = matrix[0].size();
-  //распр строк между процессами
-  size_t loc_rows = rows/size;
-  size_t ostatok = rows%size;
-  //опр диапозон строк для текущ процесса
-  size_t start_row = rank*loc_rows+std::min(rank,(int)ostatok);
-  size_t end_row = start_row +loc_rows+(rank < (int)ostatok ? 1 : 0);
+  // Распределение столбцов
+  size_t loc_stolb = stolb / size;
+  size_t ostatok = stolb % size;
+  size_t start_stolb = rank * loc_stolb + (rank < (int)ostatok ? rank : ostatok);
+  size_t end_stolb = start_stolb + loc_stolb + (rank < (int)ostatok ? 1 : 0);
+  size_t col_stolb = end_stolb - start_stolb;
 
-  std::vector<int> loc_min(stolb,INT_MAX);
-  for(int i = start_row; i < end_row; ++i)
-  {
-    for (int j = 0; j < stolb; ++j)
-    {
-      if(matrix[i][j]<loc_min[j])
-      {
-        loc_min[j] = matrix[i][j];
+  std::vector<int> loc_min(col_stolb, INT_MAX);
+  for (size_t k = 0; k < col_stolb; ++k) {
+    size_t stolb_index = start_stolb + k;
+    for (size_t i = 0; i < rows; ++i) {
+      if (matrix[i][stolb_index] < loc_min[k]) {
+        loc_min[k] = matrix[i][stolb_index];
       }
     }
   }
-//перед сбором результатов
-  MPI_Barrier(MPI_COMM_WORLD);
 
-  if(rank == 0)
-  {
-    res = loc_min;
-    std::vector<int> other_min(stolb);
-    for(int source = 1; source < size; ++source)
-    {
-      MPI_Recv(other_min.data(), stolb, MPI_INT, source, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      for(int j = 0; j < stolb; ++j)
-      {
-        if(other_min[j]<res[j])
-        {
-          res[j] = other_min[j];
-        }
-      }
-    }
+  // Подготовка Gatherv
+  std::vector<int> recv_counts(size);
+  std::vector<int> displacements(size);
+
+  for (int i = 0; i < size; i++) {
+    size_t i_start = i * loc_stolb + (i < (int)ostatok ? i : ostatok);
+    size_t i_end = i_start + loc_stolb + (i < (int)ostatok ? 1 : 0);
+    recv_counts[i] = static_cast<int>(i_end - i_start);
+    displacements[i] = static_cast<int>(i_start);
   }
-  else
+  res.resize(stolb, INT_MAX);
+  // Используем правильные типы
+  int send_count = static_cast<int>(col_stolb);
+  
+  MPI_Gatherv(
+    loc_min.data(),
+    send_count,              // int вместо size_t
+    MPI_INT,
+    res.data(),
+    recv_counts.data(),
+    displacements.data(),
+    MPI_INT,
+    0,                      // root процесс
+    MPI_COMM_WORLD
+  );
+
+  if (size > 1) 
   {
-    MPI_Send(loc_min.data(), stolb, MPI_INT, 0, 0, MPI_COMM_WORLD);
+    MPI_Bcast(res.data(), stolb, MPI_INT, 0, MPI_COMM_WORLD);
   }
-  MPI_Barrier(MPI_COMM_WORLD);
+
   return true;
 }
 
 bool BarkalovaMMinValMatrMPI::PostProcessingImpl() {
   return true;
 }
-
 }  // namespace barkalova_m_min_val_matr

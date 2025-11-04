@@ -43,7 +43,7 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
     int size = std::get<0>(params);
 
     // Генерируем тестовую матрицу (ТОЛЬКО здесь)
-    
+
     input_data_ = GenerateTestMatrix(size);
     reference_max_ = CalculateReferenceMax(input_data_);
   }

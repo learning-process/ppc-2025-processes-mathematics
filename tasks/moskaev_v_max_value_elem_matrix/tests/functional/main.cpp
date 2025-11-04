@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
+#include <algorithm>
 #include <array>
 #include <cstddef>
 #include <iostream>
@@ -19,7 +20,8 @@ namespace moskaev_v_max_value_elem_matrix {
 // Функция для генерации тестовой матрицы (ТОЛЬКО в тестах)
 static InType GenerateTestMatrix(int size) {
   InType matrix(size, std::vector<int>(size));
-  std::mt19937 gen(42);
+  std::random_device rd;
+  std::mt19937 gen(rd());
   std::uniform_int_distribution<int> dist(1, 100000);
 
   for (int i = 0; i < size; ++i) {

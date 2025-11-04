@@ -41,8 +41,8 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   auto rows_per_process = total_rows / size;
   auto remainder = total_rows % size;
 
-  int start_row = (rank * rows_per_process) + std::min(rank, static_cast<int>(remainder));
-  int end_row = start_row + rows_per_process + (rank < static_cast<int>(remainder) ? 1 : 0);
+  auto start_row = (rank * rows_per_process) + std::min(static_cast<size_t>(rank), remainder);
+  auto end_row = start_row + rows_per_process + (static_cast<size_t>(rank) < remainder ? 1 : 0);
 
   // Поиск локального максимума в своей части матрицы
   int local_max = matrix[start_row][0];

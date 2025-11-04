@@ -1,7 +1,6 @@
 #include <gtest/gtest.h>
 #include <mpi.h>
 
-#include <algorithm>
 #include <chrono>
 #include <iostream>
 #include <random>
@@ -93,7 +92,7 @@ TEST(MoskaevVMaxValueElemMatrixMpi, testPipelineRun) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
-  int rank;
+  int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте

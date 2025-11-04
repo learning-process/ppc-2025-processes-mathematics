@@ -1,15 +1,15 @@
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
-// #include <algorithm>
 #include <array>
 #include <cstddef>
-// #include <cstdint>
-// #include <stdexcept>
 #include <string>
 #include <tuple>
-// #include <utility>
 #include <vector>
+// #include <cstdint>
+// #include <stdexcept>
+// #include <algorithm>
+// #include <utility>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
 #include "barkalova_m_min_val_matr/mpi/include/ops_mpi.hpp"

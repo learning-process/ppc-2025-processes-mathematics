@@ -46,7 +46,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
 
   // Поиск локального максимума в своей части матрицы
   int local_max = matrix[start_row][0];
-  for (int i = start_row; i < end_row; ++i) {
+  for (size_t i = start_row; i < end_row; ++i) {
     for (int element : matrix[i]) {
       local_max = std::max(element, local_max);
     }

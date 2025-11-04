@@ -2,11 +2,13 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <climits>
+#include <cstddef>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
-#include "util/include/util.hpp"
+// #include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 
@@ -22,12 +24,7 @@ bool BarkalovaMMinValMatrMPI::ValidationImpl() {
     return false;
   }
   size_t stolb = matrix[0].size();
-  for (const auto &row : matrix) {
-    if (row.size() != stolb) {
-      return false;
-    }
-  }
-  return true;
+  return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
 }
 
 bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
@@ -42,7 +39,8 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
 
-  int rank, size;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 

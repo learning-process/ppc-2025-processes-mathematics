@@ -9,48 +9,9 @@
 
 namespace moskaev_v_max_value_elem_matrix {
 
-std::vector<std::vector<int>> g_local_matrix;
-
-void DistributeMatrix(const std::vector<std::vector<int>> &full_matrix, int rank, int size) {
-  int matrix_dim = full_matrix.size();
-
-  if (rank == 0) {
-    // Процесс 0 распределяет данные (матрица пришла из тестов)
-    int rows_per_process = matrix_dim / size;
-    int remainder = matrix_dim % size;
-
-    // Обрабатываем свою часть сначала
-    int start_row = 0;
-    int end_row = rows_per_process + (0 < remainder ? 1 : 0);
-    g_local_matrix.assign(full_matrix.begin() + start_row, full_matrix.begin() + end_row);
-
-    // Отправляем данные другим процессам
-    for (int proc = 1; proc < size; ++proc) {
-      start_row = end_row;
-      end_row = start_row + rows_per_process + (proc < remainder ? 1 : 0);
-      int rows_to_send = end_row - start_row;
-
-      MPI_Send(&rows_to_send, 1, MPI_INT, proc, 0, MPI_COMM_WORLD);
-
-      for (int i = start_row; i < end_row; ++i) {
-        MPI_Send(full_matrix[i].data(), matrix_dim, MPI_INT, proc, 0, MPI_COMM_WORLD);
-      }
-    }
-  } else {
-    // Получаем данные от процесса 0
-    int rows_to_receive;
-    MPI_Recv(&rows_to_receive, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-
-    g_local_matrix.resize(rows_to_receive, std::vector<int>(matrix_dim));
-    for (int i = 0; i < rows_to_receive; ++i) {
-      MPI_Recv(g_local_matrix[i].data(), matrix_dim, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    }
-  }
-}
-
 MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;  // Получаем готовую матрицу из тестов
+  GetInput() = in;
   GetOutput() = 0;
 }
 
@@ -59,29 +20,37 @@ bool MoskaevVMaxValueElemMatrixMPI::ValidationImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PreProcessingImpl() {
-  int rank = 0, size = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-  // Распределяем матрицу (пришедшую из тестов) по процессам
-  DistributeMatrix(GetInput(), rank, size);
-
+  // Каждый процесс имеет всю матрицу, ничего не распределяем
   return true;
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
-  int rank;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  if (g_local_matrix.empty()) {
+  const auto& matrix = GetInput();
+  auto total_rows = matrix.size();
+  
+  if (total_rows == 0) {
     return false;
   }
 
-  // Поиск локального максимума
-  int local_max = g_local_matrix[0][0];
-  for (const auto &row : g_local_matrix) {
-    for (int element : row) {
-      local_max = std::max(element, local_max);
+  // Рассчитываем диапазон строк для текущего процесса
+  int rows_per_process = total_rows / size;
+  int remainder = total_rows % size;
+  
+  int start_row = rank * rows_per_process + std::min(rank, remainder);
+  int end_row = start_row + rows_per_process + (rank < remainder ? 1 : 0);
+
+  // Поиск локального максимума в своей части матрицы
+  int local_max = matrix[start_row][0];
+  for (int i = start_row; i < end_row; ++i) {
+    for (int element : matrix[i]) {
+      if (element > local_max) {
+        local_max = element;
+      }
     }
   }
 
@@ -92,15 +61,14 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   if (rank == 0) {
     GetOutput() = global_max;
   } else {
-    GetOutput() = local_max;
+    GetOutput() = local_max; // или 0, в зависимости от требований
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
   return true;
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PostProcessingImpl() {
-  g_local_matrix.clear();
+  // Ничего не нужно очищать, так как не выделяли дополнительной памяти
   return true;
 }
 

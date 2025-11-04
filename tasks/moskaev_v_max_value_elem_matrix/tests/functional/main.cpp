@@ -1,3 +1,7 @@
+#include <string>
+#include <cstddef>
+#include <iostream>
+
 #include <gtest/gtest.h>
 #include <mpi.h>
 
@@ -14,7 +18,7 @@
 namespace moskaev_v_max_value_elem_matrix {
 
 // Функция для генерации тестовой матрицы (ТОЛЬКО в тестах)
-InType GenerateTestMatrix(int size) {
+static InType GenerateTestMatrix(int size) {
   InType matrix(size, std::vector<int>(size));
   std::mt19937 gen(42);
   std::uniform_int_distribution<int> dist(1, 100000);
@@ -58,9 +62,8 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
         std::cout << "Rank 0: Expected " << reference_max_ << ", got " << output_data << "\n";
       }
       return result_correct;
-    } else {
-      return output_data > 0;
     }
+    return output_data > 0;
   }
 
   InType GetTestInputData() final {
@@ -71,7 +74,7 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
   InType input_data_;
   OutType reference_max_ = 0;
 
-  OutType CalculateReferenceMax(const InType &matrix) {
+  static OutType CalculateReferenceMax(const InType &matrix) {
     if (matrix.empty()) {
       return 0;
     }
@@ -79,9 +82,7 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
     OutType max_val = matrix[0][0];
     for (const auto &row : matrix) {
       for (int val : row) {
-        if (val > max_val) {
-          max_val = val;
-        }
+        max_val = std::max(val, max_val);
       }
     }
     return max_val;
@@ -90,7 +91,7 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
 
 namespace {
 
-TEST_P(MoskaevVMaxValueElemMatrixFuncTests, test_find_max_element) {
+TEST_P(MoskaevVMaxValueElemMatrixFuncTests, TestFindMaxElement) {
   ExecuteTest(GetParam());
 }
 
@@ -110,7 +111,7 @@ const auto kFuncTestName = MoskaevVMaxValueElemMatrixFuncTests::PrintFuncTestNam
 INSTANTIATE_TEST_SUITE_P(FuncTests, MoskaevVMaxValueElemMatrixFuncTests, kGtestValues, kFuncTestName);
 
 // Индивидуальные тест кейсы
-TEST(MoskaevVMaxValueElemMatrixMpi, test_small_matrix) {
+TEST(MoskaevVMaxValueElemMatrixMpi, testSmallMatrix) {
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте
   MoskaevVMaxValueElemMatrixMPI task(matrix);  // Передаем в реализацию
   EXPECT_TRUE(task.Validation());
@@ -120,7 +121,7 @@ TEST(MoskaevVMaxValueElemMatrixMpi, test_small_matrix) {
   EXPECT_GT(task.GetOutput(), 0);
 }
 
-TEST(MoskaevVMaxValueElemMatrixSeq, test_small_matrix) {
+TEST(MoskaevVMaxValueElemMatrixSeq, testSmallMatrix) {
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
   EXPECT_TRUE(task.Validation());

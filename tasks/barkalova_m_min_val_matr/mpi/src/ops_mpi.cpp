@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
@@ -49,8 +50,10 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   // Распределение столбцов
   size_t loc_stolb = stolb / size;
   size_t ostatok = stolb % size;
-  size_t start_stolb = (rank * loc_stolb) + (rank < static_cast<int>(ostatok) ? rank : ostatok);
-  size_t end_stolb = start_stolb + loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
+  // size_t start_stolb = (rank * loc_stolb) + (rank < static_cast<int>(ostatok) ? rank : ostatok);
+  // size_t end_stolb = start_stolb + loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
+  size_t start_stolb = (rank * loc_stolb) + (std::cmp_less(rank, ostatok) ? rank : ostatok);
+  size_t end_stolb = start_stolb + loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
   size_t col_stolb = end_stolb - start_stolb;
 
   std::vector<int> loc_min(col_stolb, INT_MAX);
@@ -66,8 +69,10 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   std::vector<int> displacements(size);
 
   for (int i = 0; i < size; i++) {
-    size_t i_start = (i * loc_stolb) + (i < static_cast<int>(ostatok) ? i : ostatok);
-    size_t i_end = i_start + loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    // size_t i_start = (i * loc_stolb) + (i < static_cast<int>(ostatok) ? i : ostatok);
+    // size_t i_end = i_start + loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    size_t i_start = (i * loc_stolb) + (std::cmp_less(i, ostatok) ? i : ostatok);
+    size_t i_end = i_start + loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
     recv_counts[i] = static_cast<int>(i_end - i_start);
     displacements[i] = static_cast<int>(i_start);
   }

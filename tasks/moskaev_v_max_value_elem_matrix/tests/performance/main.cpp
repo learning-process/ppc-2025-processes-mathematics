@@ -51,7 +51,7 @@ class MoskaevVMaxValueElemMatrixPerfTests : public ppc::util::BaseRunPerfTests<I
   }
 };
 
-TEST_P(MoskaevVMaxValueElemMatrixPerfTests, testPipelineRun) {
+TEST_P(MoskaevVMaxValueElemMatrixPerfTests, TestPipelineRun) {
   ExecuteTest(GetParam());
 }
 
@@ -66,7 +66,7 @@ const auto kPerfTestName = MoskaevVMaxValueElemMatrixPerfTests::CustomPerfTestNa
 INSTANTIATE_TEST_SUITE_P(PerfTests, MoskaevVMaxValueElemMatrixPerfTests, kGtestValues, kPerfTestName);
 
 // Тесты на производительность (ровно 2 теста на технологию)
-TEST(MoskaevVMaxValueElemMatrixMpi, testPipelineRun) {
+TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
@@ -117,7 +117,7 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
   }
 }
 
-TEST(MoskaevVMaxValueElemMatrixSeq, testPipelineRun) {
+TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
 

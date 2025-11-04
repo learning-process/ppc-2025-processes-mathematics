@@ -1,5 +1,6 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 
+#include <algorithm>
 #include <climits>
 #include <cstddef>
 #include <vector>
@@ -22,12 +23,7 @@ bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
   }
   size_t stolb = matrix[0].size();
   // все строки должны иметь одинак разм
-  for (const auto &row : matrix) {
-    if (row.size() != stolb) {
-      return false;
-    }
-  }
-  return true;
+  return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
 }
 
 bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
@@ -38,7 +34,7 @@ bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
   return true;
 }
 
-bool BarkalovaMMinValMatrSEQ::RunImpl() {
+/*bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
 
@@ -50,15 +46,26 @@ bool BarkalovaMMinValMatrSEQ::RunImpl() {
     }
   }
   return true;
+}*/
+bool BarkalovaMMinValMatrSEQ::RunImpl() {
+  const auto &matrix = GetInput();
+  auto &res = GetOutput();
+  for (auto &elem : res) {
+    elem = INT_MAX;
+  }
+
+  for (size_t j = 0; j < res.size(); ++j) {
+    for (const auto &row : matrix) {
+      res[j] = std::min(row[j], res[j]);
+    }
+  }
+  return true;
 }
 
 /*bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
   return true;
 }*/
 bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
-  if (!GetInput().empty() && GetOutput().empty()) {
-    return false;
-  }
-  return true;
+  return GetInput().empty() || !GetOutput().empty();
 }
 }  // namespace barkalova_m_min_val_matr

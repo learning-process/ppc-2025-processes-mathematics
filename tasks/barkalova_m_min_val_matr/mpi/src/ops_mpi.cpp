@@ -49,17 +49,15 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   // Распределение столбцов
   size_t loc_stolb = stolb / size;
   size_t ostatok = stolb % size;
-  size_t start_stolb = rank * loc_stolb + (rank < (int)ostatok ? rank : ostatok);
-  size_t end_stolb = start_stolb + loc_stolb + (rank < (int)ostatok ? 1 : 0);
+  size_t start_stolb = (rank * loc_stolb) + (rank < static_cast<int>(ostatok) ? rank : ostatok);
+  size_t end_stolb = start_stolb + loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
   size_t col_stolb = end_stolb - start_stolb;
 
   std::vector<int> loc_min(col_stolb, INT_MAX);
   for (size_t k = 0; k < col_stolb; ++k) {
     size_t stolb_index = start_stolb + k;
     for (size_t i = 0; i < rows; ++i) {
-      if (matrix[i][stolb_index] < loc_min[k]) {
-        loc_min[k] = matrix[i][stolb_index];
-      }
+      loc_min[k] = std::min(matrix[i][stolb_index], loc_min[k]);
     }
   }
 
@@ -68,8 +66,8 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   std::vector<int> displacements(size);
 
   for (int i = 0; i < size; i++) {
-    size_t i_start = i * loc_stolb + (i < (int)ostatok ? i : ostatok);
-    size_t i_end = i_start + loc_stolb + (i < (int)ostatok ? 1 : 0);
+    size_t i_start = (i * loc_stolb) + (i < static_cast<int>(ostatok) ? i : ostatok);
+    size_t i_end = i_start + loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
     recv_counts[i] = static_cast<int>(i_end - i_start);
     displacements[i] = static_cast<int>(i_start);
   }
@@ -84,7 +82,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
               MPI_COMM_WORLD);
 
   if (size > 1) {
-    MPI_Bcast(res.data(), stolb, MPI_INT, 0, MPI_COMM_WORLD);
+    MPI_Bcast(res.data(), static_cast<int>(stolb), MPI_INT, 0, MPI_COMM_WORLD);
   }
 
   return true;

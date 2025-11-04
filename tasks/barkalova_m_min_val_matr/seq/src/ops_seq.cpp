@@ -1,10 +1,11 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 
 #include <climits>
+#include <cstddef>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
-#include "util/include/util.hpp"
+// #include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 

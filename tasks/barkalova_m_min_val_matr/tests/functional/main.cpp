@@ -117,21 +117,22 @@ class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType,
 namespace {
 
 // Тестовые данные
-const std::vector<std::vector<int>> matrix1 = {{3, 7, 2, 8}, {1, 9, 6, 4}, {5, 2, 8, 3}, {7, 1, 4, 9}};
-const std::vector<int> expected1 = {1, 1, 2, 3};
+const std::vector<std::vector<int>> kMatrix1 = {{3, 7, 2, 8}, {1, 9, 6, 4}, {5, 2, 8, 3}, {7, 1, 4, 9}};
+const std::vector<int> kExpected1 = {1, 1, 2, 3};
 
-const std::vector<std::vector<int>> matrix2 = {{5, 8, 3}, {2, 6, 7}, {4, 3, 8}};
-const std::vector<int> expected2 = {2, 3, 3};
+const std::vector<std::vector<int>> kMatrix2 = {{5, 8, 3}, {2, 6, 7}, {4, 3, 8}};
+const std::vector<int> kExpected2 = {2, 3, 3};
 
-const std::vector<std::vector<int>> matrix3 = {{10, 20}, {15, 5}, {8, 12}};
-const std::vector<int> expected3 = {8, 5};
+const std::vector<std::vector<int>> kMatrix3 = {{10, 20}, {15, 5}, {8, 12}};
+const std::vector<int> kExpected3 = {8, 5};
 
 TEST_P(BarkalovaMMinValMatrFuncTests, MinValuesInColumns) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(matrix1, expected1), std::make_tuple(matrix2, expected2),
-                                            std::make_tuple(matrix3, expected3)};
+const std::array<TestType, 3> kTestParam = {std::make_tuple(kMatrix1, kExpected1),
+                                            std::make_tuple(kMatrix2, kExpected2),
+                                            std::make_tuple(kMatrix3, kExpected3)};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<BarkalovaMMinValMatrMPI, InType>(kTestParam, PPC_SETTINGS_barkalova_m_min_val_matr),

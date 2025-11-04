@@ -3,7 +3,6 @@
 #include <mpi.h>
 
 #include <climits>
-#include <numeric>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"

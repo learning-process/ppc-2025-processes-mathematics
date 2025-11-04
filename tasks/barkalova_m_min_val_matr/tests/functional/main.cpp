@@ -5,7 +5,6 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>

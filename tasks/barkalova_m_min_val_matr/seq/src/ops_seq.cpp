@@ -1,7 +1,6 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 
 #include <climits>
-#include <numeric>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"

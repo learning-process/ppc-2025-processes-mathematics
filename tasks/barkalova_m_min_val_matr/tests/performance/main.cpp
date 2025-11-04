@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <climits>
+#include <cstddef>
+#include <vector>
+
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
 #include "barkalova_m_min_val_matr/mpi/include/ops_mpi.hpp"
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
@@ -43,7 +48,7 @@ INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMMinValMatrPerfTest, kGtestValue
 namespace barkalova_m_min_val_matr {
 
 class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
 
   void SetUp() override {
     // Оставляем маленькую матрицу
@@ -74,10 +79,8 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
 
     std::vector<int> correct_result(matrix[0].size(), INT_MAX);
     for (size_t j = 0; j < matrix[0].size(); ++j) {
-      for (size_t i = 0; i < matrix.size(); ++i) {
-        if (matrix[i][j] < correct_result[j]) {
-          correct_result[j] = matrix[i][j];
-        }
+      for (const auto &row : matrix) {
+        correct_result[j] = std::min(row[j], correct_result[j]);
       }
     }
 

@@ -117,14 +117,14 @@ class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType,
 namespace {
 
 // Тестовые данные
-std::vector<std::vector<int>> matrix1 = {{3, 7, 2, 8}, {1, 9, 6, 4}, {5, 2, 8, 3}, {7, 1, 4, 9}};
-std::vector<int> expected1 = {1, 1, 2, 3};
+const std::vector<std::vector<int>> matrix1 = {{3, 7, 2, 8}, {1, 9, 6, 4}, {5, 2, 8, 3}, {7, 1, 4, 9}};
+const std::vector<int> expected1 = {1, 1, 2, 3};
 
-std::vector<std::vector<int>> matrix2 = {{5, 8, 3}, {2, 6, 7}, {4, 3, 8}};
-std::vector<int> expected2 = {2, 3, 3};
+const std::vector<std::vector<int>> matrix2 = {{5, 8, 3}, {2, 6, 7}, {4, 3, 8}};
+const std::vector<int> expected2 = {2, 3, 3};
 
-std::vector<std::vector<int>> matrix3 = {{10, 20}, {15, 5}, {8, 12}};
-std::vector<int> expected3 = {8, 5};
+const std::vector<std::vector<int>> matrix3 = {{10, 20}, {15, 5}, {8, 12}};
+const std::vector<int> expected3 = {8, 5};
 
 TEST_P(BarkalovaMMinValMatrFuncTests, MinValuesInColumns) {
   ExecuteTest(GetParam());

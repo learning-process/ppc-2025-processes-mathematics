@@ -53,6 +53,9 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
   bool CheckTestOutputData(OutType &output_data) final {
     const auto &mat = std::get<2>(input_data_);
     double expected_min = *std::min_element(mat.begin(), mat.end());
+
+    // std::cout<<"expected_min = " << expected_min <<std::endl;
+    // std::cout<<"output_data - expected_min = " << output_data - expected_min <<std::endl;
     return std::fabs(output_data - expected_min) < 1e-6;
   }
 

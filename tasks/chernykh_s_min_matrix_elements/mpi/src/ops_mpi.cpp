@@ -74,7 +74,6 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
     start += ostatok;
   }
   size_t end = start + count;
-  end += (rank == size) ? ostatok : 0;
 
   for (size_t i = start; i < end; ++i) {
     if (matrica[i] < local_min) {
@@ -82,13 +81,11 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
     }
   }
 
-  // std::cout<<"local_min = "<<local_min<<std::endl<<"global_min = "<<global_min<<std::endl;
   MPI_Reduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 
-  if (rank == 0) {
-    GetOutput() = global_min;
-  }
+  MPI_Bcast(&global_min, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
+  GetOutput() = global_min;
   return true;
 }
 

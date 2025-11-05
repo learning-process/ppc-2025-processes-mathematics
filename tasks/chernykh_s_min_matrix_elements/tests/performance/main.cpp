@@ -40,14 +40,24 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
     std::get<1>(input_data_) = stolbci;
   }
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    const auto &matrix = std::get<2>(input_data_);
-    if (matrix.empty()) {
-      return output_data == std::numeric_limits<double>::max();
-    }
-    double expected = *std::min_element(matrix.begin(), matrix.end());
+  // bool CheckTestOutputData(OutType &output_data) final {
+  //   const auto &matrix = std::get<2>(input_data_);
+  //   if (matrix.empty()) {
+  //     return output_data == std::numeric_limits<double>::max();
+  //   }
 
-    return std::fabs(output_data - expected) < 1e-6;
+  //   double expected = *std::min_element(matrix.begin(), matrix.end());
+
+  //   return std::fabs(output_data - expected) < 1e-6;
+  // }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    const auto &mat = std::get<2>(input_data_);
+    double expected_min = *std::min_element(mat.begin(), mat.end());
+    // std::cout<<"Perfomance" << std::endl;
+    // std::cout<<"expected_min = " << expected_min <<std::endl;
+    // std::cout<<"output_data - expected_min = " << output_data - expected_min <<std::endl;
+    return std::fabs(output_data - expected_min) < 1e-6;
   }
 
   InType GetTestInputData() final {

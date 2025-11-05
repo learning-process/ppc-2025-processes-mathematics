@@ -20,7 +20,23 @@ ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
 }
 
 bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
-  return !GetInput().empty() && (GetOutput() == 0);
+  const size_t stroki = std::get<0>(this->GetInput());
+  const size_t stolbci = std::get<1>(this->GetInput());
+
+  const std::vector<double> &matrica = std::get<2>(this->GetInput());
+
+  if (matrica.size() != stroki * stolbci) {
+    return false;
+  }
+
+  if (stroki == 0 || stolbci == 0) {
+    return false;
+  }
+
+  if (matrica.empty()) {
+    return false;
+  }
+  return true;
 }
 
 bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {

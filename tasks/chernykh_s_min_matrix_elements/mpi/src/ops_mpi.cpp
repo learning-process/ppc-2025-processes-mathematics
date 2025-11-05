@@ -62,11 +62,18 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
   size_t kolvo_na_process = total_elements / size;
   size_t ostatok = total_elements % size;
+  size_t count = kolvo_na_process;
+  if (rank == 0) {
+    count += ostatok;
+  }
 
   // std::cout<<"kolvo_na_process = "<<kolvo_na_process<<std::endl<<"ostatok = "<<ostatok<<std::endl;
 
   size_t start = rank * kolvo_na_process;
-  size_t end = start + kolvo_na_process;
+  if (rank > 0) {
+    start += ostatok;
+  }
+  size_t end = start + count;
   end += (rank == size) ? ostatok : 0;
 
   for (size_t i = start; i < end; ++i) {

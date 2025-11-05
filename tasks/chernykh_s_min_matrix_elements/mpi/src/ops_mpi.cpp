@@ -53,8 +53,8 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  // std::cout<<"rank = "<<rank<<std::endl<<"size = "<<size<<std::endl;
-
+  std::cout << "rank = " << rank << std::endl << "size = " << size << std::endl;
+  fflush(stdout);
   const size_t &stroki = std::get<0>(GetInput());
   const size_t &stolbci = std::get<1>(GetInput());
   const std::vector<double> &matrica = std::get<2>(GetInput());
@@ -83,7 +83,13 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
   MPI_Reduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 
+  printf("Process %d: MPI_Reduce finished, starting MPI_Bcast\n", rank);
+  fflush(stdout);
+
   MPI_Bcast(&global_min, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+  printf("Process %d: MPI_Bcast finished, setting output and returning\n", rank);
+  fflush(stdout);
 
   GetOutput() = global_min;
   return true;

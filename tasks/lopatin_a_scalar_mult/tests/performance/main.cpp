@@ -28,8 +28,8 @@ TEST_P(LopatinAScalarMultPerfTests, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, LopatinAScalarMultMPI, LopatinAScalarMultSEQ>(PPC_SETTINGS_lopatin_a_scalar_mult);
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, LopatinAScalarMultMPI, LopatinAScalarMultSEQ>(
+    PPC_SETTINGS_lopatin_a_scalar_mult);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

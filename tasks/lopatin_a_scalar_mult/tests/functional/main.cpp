@@ -71,9 +71,9 @@ TEST_P(LopatinAScalarMultFuncTests, MatmulFromPic) {
 
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
-const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<LopatinAScalarMultMPI, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult),
-                   ppc::util::AddFuncTask<LopatinAScalarMultSEQ, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult));
+const auto kTestTasksList = std::tuple_cat(
+    ppc::util::AddFuncTask<LopatinAScalarMultMPI, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult),
+    ppc::util::AddFuncTask<LopatinAScalarMultSEQ, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 

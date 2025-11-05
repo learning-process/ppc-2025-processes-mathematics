@@ -20,23 +20,7 @@ ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
 }
 
 bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
-  const size_t stroki = std::get<0>(this->GetInput());
-  const size_t stolbci = std::get<1>(this->GetInput());
-
-  const std::vector<double> &matrica = std::get<2>(this->GetInput());
-
-  if (matrica.size() != stroki * stolbci) {
-    return false;
-  }
-
-  if (stroki == 0 || stolbci == 0) {
-    return false;
-  }
-
-  if (matrica.empty()) {
-    return false;
-  }
-  return true;
+  return !GetInput().empty() && (GetOutput() == 0);
 }
 
 bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {
@@ -83,9 +67,13 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
   }
 
   // std::cout<<"local_min = "<<local_min<<std::endl<<"global_min = "<<global_min<<std::endl;
-  MPI_Allreduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
+  MPI_Reduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
 
-  GetOutput() = global_min;
+  if (rank == 0) {
+    GetOutput() = global_min;
+  } else {
+    GetOutput() = local_min;
+  }
 
   return true;
 }

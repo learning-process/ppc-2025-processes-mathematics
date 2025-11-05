@@ -87,8 +87,6 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
   if (rank == 0) {
     GetOutput() = global_min;
-  } else {
-    GetOutput() = local_min;
   }
 
   return true;

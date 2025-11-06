@@ -94,7 +94,6 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
   if (rank == 0) {
     std::cout << "MPI Pipeline time: " << duration.count() << "ms\n";
   }
-  MPI_Finalize();
 }
 
 TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
@@ -125,7 +124,6 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
   if (rank == 0) {
     std::cout << "MPI Task time: " << duration.count() << "ms\n";
   }
-  MPI_Finalize();
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
@@ -150,7 +148,6 @@ TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
   std::cout << "SEQ Pipeline time: " << duration.count() << "ms\n";
-  MPI_Finalize();
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestTaskRun) {
@@ -174,7 +171,6 @@ TEST(MoskaevVMaxValueElemMatrixSeq, TestTaskRun) {
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
   std::cout << "SEQ Task time: " << duration.count() << "ms\n";
-  MPI_Finalize();
 }
 
 }  // namespace moskaev_v_max_value_elem_matrix

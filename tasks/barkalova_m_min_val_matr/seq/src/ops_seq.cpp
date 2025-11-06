@@ -33,7 +33,6 @@ bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
   }
   return true;
 }
-
 /*bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();

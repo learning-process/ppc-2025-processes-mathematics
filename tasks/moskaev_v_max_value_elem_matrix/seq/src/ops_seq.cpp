@@ -8,7 +8,7 @@ namespace moskaev_v_max_value_elem_matrix {
 
 MoskaevVMaxValueElemMatrixSEQ::MoskaevVMaxValueElemMatrixSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;  // Получаем готовую матрицу из тестов
+  GetInput() = InType(in);  // Получаем готовую матрицу из тестов
   GetOutput() = 0;
 }
 

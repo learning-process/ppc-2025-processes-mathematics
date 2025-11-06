@@ -3,6 +3,7 @@
 #include <mpi.h>
 
 #include <algorithm>
+#include <climits>
 #include <cstddef>
 #include <utility>
 #include <vector>
@@ -13,7 +14,7 @@ namespace moskaev_v_max_value_elem_matrix {
 
 MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
+  GetInput() = InType(in);
   GetOutput() = 0;
 }
 
@@ -47,7 +48,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   auto end_row = start_row + rows_per_process + (std::cmp_less(static_cast<size_t>(rank), remainder) ? 1 : 0);
 
   // Поиск локального максимума в своей части матрицы
-  int local_max = matrix[start_row][0];
+  int local_max = INT_MIN;
   for (size_t i = start_row; i < end_row; ++i) {
     for (int element : matrix[i]) {
       local_max = std::max(element, local_max);
@@ -61,7 +62,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   if (rank == 0) {
     GetOutput() = global_max;
   } else {
-    GetOutput() = local_max;  // или 0, в зависимости от требований
+    GetOutput() = 0;
   }
 
   return true;

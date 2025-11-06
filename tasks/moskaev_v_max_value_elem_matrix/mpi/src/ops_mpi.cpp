@@ -46,7 +46,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   // ИСПРАВЛЕНИЕ 1: Правильное распределение строк
   size_t start_row = rank * rows_per_process + std::min(static_cast<size_t>(rank), remainder);
   size_t end_row = start_row + rows_per_process;
-  if (rank < remainder) {
+  if (static_cast<size_t>(rank) < remainder) {
     end_row += 1;
   }
 

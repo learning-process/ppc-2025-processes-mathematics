@@ -23,7 +23,6 @@ bool MoskaevVMaxValueElemMatrixMPI::ValidationImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PreProcessingImpl() {
-  // Каждый процесс имеет всю матрицу, ничего не распределяем
   return true;
 }
 
@@ -44,8 +43,12 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   auto rows_per_process = total_rows / size;
   auto remainder = total_rows % size;
 
-  auto start_row = (rank * rows_per_process) + std::min(static_cast<size_t>(rank), remainder);
-  auto end_row = start_row + rows_per_process + (std::cmp_less(static_cast<size_t>(rank), remainder) ? 1 : 0);
+  // ИСПРАВЛЕНИЕ 1: Правильное распределение строк
+  size_t start_row = rank * rows_per_process + std::min(static_cast<size_t>(rank), remainder);
+  size_t end_row = start_row + rows_per_process;
+  if (rank < remainder) {
+    end_row += 1;
+  }
 
   // Поиск локального максимума в своей части матрицы
   int local_max = INT_MIN;
@@ -55,21 +58,25 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
     }
   }
 
-  // Находим глобальный максимумs
+  // Находим глобальный максимум
   int global_max = 0;
-  MPI_Reduce(&local_max, &global_max, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
 
-  if (rank == 0) {
-    GetOutput() = global_max;
+  // ИСПРАВЛЕНИЕ 2: Все процессы должны получать результат
+  if (size == 1) {
+    // Если только один процесс, просто копируем
+    global_max = local_max;
   } else {
-    GetOutput() = 0;
+    // Используем MPI_Allreduce вместо MPI_Reduce, чтобы все процессы получили результат
+    MPI_Allreduce(&local_max, &global_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
   }
+
+  // ИСПРАВЛЕНИЕ 3: Все процессы сохраняют результат
+  GetOutput() = global_max;
 
   return true;
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PostProcessingImpl() {
-  // Ничего не нужно очищать, так как не выделяли дополнительной памяти
   return true;
 }
 

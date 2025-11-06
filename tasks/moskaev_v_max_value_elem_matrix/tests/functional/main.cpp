@@ -18,6 +18,20 @@
 
 namespace moskaev_v_max_value_elem_matrix {
 
+// Глобальная инициализация MPI для всех тестов
+class MPIEnvironment : public ::testing::Environment {
+ public:
+  void SetUp() override {
+    int argc = 0;
+    char **argv = nullptr;
+    MPI_Init(&argc, &argv);
+  }
+
+  void TearDown() override {
+    MPI_Finalize();
+  }
+};
+
 // Функция для генерации тестовой матрицы (ТОЛЬКО в тестах)
 static InType GenerateTestMatrix(int size) {
   InType matrix(size, std::vector<int>(size));
@@ -136,3 +150,12 @@ TEST(MoskaevVMaxValueElemMatrixSeq, testSmallMatrix) {
 }  // namespace
 
 }  // namespace moskaev_v_max_value_elem_matrix
+
+int main_func(int argc, char **argv) {
+  ::testing::InitGoogleTest(&argc, argv);
+
+  // Добавляем инициализацию MPI
+  ::testing::AddGlobalTestEnvironment(new moskaev_v_max_value_elem_matrix::MPIEnvironment());
+
+  return RUN_ALL_TESTS();
+}

@@ -151,7 +151,7 @@ TEST(MoskaevVMaxValueElemMatrixSeq, testSmallMatrix) {
 
 }  // namespace moskaev_v_max_value_elem_matrix
 
-int main_func(int argc, char **argv) {
+static int main_func(int argc, char **argv) {
   ::testing::InitGoogleTest(&argc, argv);
 
   // Добавляем инициализацию MPI

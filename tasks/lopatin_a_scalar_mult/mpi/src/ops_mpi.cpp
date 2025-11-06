@@ -13,60 +13,63 @@ namespace lopatin_a_scalar_mult {
 LopatinAScalarMultMPI::LopatinAScalarMultMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0;
+  GetOutput() = 0.0;
 }
 
 bool LopatinAScalarMultMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  return (!GetInput().first.empty() && !GetInput().second.empty()) &&
+         (GetInput().first.size() == GetInput().second.size());
 }
 
 bool LopatinAScalarMultMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  GetOutput() = 0.0;
+  return !GetOutput();
 }
 
 bool LopatinAScalarMultMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
-    return false;
+  int proc_num = 0, proc_rank = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &proc_num);
+  MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+
+  const auto &input = GetInput();
+  const auto n = input.first.size();
+  OutType &total_res = GetOutput();
+
+  size_t local_n = n / proc_num;
+
+  if (local_n > 0) {
+    InType local_data = std::make_pair(std::vector<double>(local_n), std::vector<double>(local_n));
+
+    MPI_Scatter(input.first.data(), local_n, MPI_DOUBLE, local_data.first.data(), local_n, MPI_DOUBLE, 0,
+                MPI_COMM_WORLD);
+    MPI_Scatter(input.second.data(), local_n, MPI_DOUBLE, local_data.second.data(), local_n, MPI_DOUBLE, 0,
+                MPI_COMM_WORLD);
+
+    OutType proc_res = OutType();
+    for (size_t i = 0; i < local_n; ++i) {
+      proc_res += local_data.first[i] * local_data.second[i];
+    }
+
+    MPI_Reduce(&proc_res, &total_res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
+  if (!proc_rank) {
+    if (n % proc_num) {
+      size_t tail_index = n - (n % proc_num);
+      for (size_t i = tail_index; i < n; ++i) {
+        total_res += input.first[i] * input.second[i];
       }
     }
   }
 
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
-    }
-
-    if (counter != 0) {
-      GetOutput() /= counter;
-    }
-  }
+  MPI_Bcast(&total_res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
   MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+  return true;
 }
 
 bool LopatinAScalarMultMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace lopatin_a_scalar_mult

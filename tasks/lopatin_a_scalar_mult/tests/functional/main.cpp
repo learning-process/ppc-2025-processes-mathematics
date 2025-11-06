@@ -23,36 +23,50 @@ namespace lopatin_a_scalar_mult {
 class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    return test_param;
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image in RGB to ensure consistent channel count
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_lopatin_a_scalar_mult, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
+    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    std::string filename = params + ".txt";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_lopatin_a_scalar_mult, filename);
+    std::ifstream infile(abs_path, std::ios::in);
+    if (!infile.is_open()) {
+      throw std::runtime_error("Failed to open file: " + filename);
+    }
+
+    int count = 0;
+    std::string line;
+    while (std::getline(infile, line)) {
+      if (line.empty()) {
+        continue;
       }
-      channels = STBI_rgb;
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
+
+      std::istringstream iss(line);
+      double value;
+
+      if (!count) {
+        while (iss >> value) {
+          input_data_.first.push_back(value);
+        }
+        ++count;
+      } else if (count) {
+        if (count > 1) {
+          throw std::runtime_error("Too much data in file: " + filename);
+        }
+        while (iss >> value) {
+          input_data_.second.push_back(value);
+        }
+        ++count;
       }
     }
 
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    infile.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return (input_data_ == output_data);
+    return output_data == 3;
   }
 
   InType GetTestInputData() final {
@@ -60,16 +74,16 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
   }
 
  private:
-  InType input_data_ = 0;
+  InType input_data_ = InType();
 };
 
 namespace {
 
-TEST_P(LopatinAScalarMultFuncTests, MatmulFromPic) {
+TEST_P(LopatinAScalarMultFuncTests, ScalarMult) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 1> kTestParam = {std::string("test_vectors_func")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<LopatinAScalarMultMPI, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult),
@@ -79,7 +93,7 @@ const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
 const auto kPerfTestName = LopatinAScalarMultFuncTests::PrintFuncTestName<LopatinAScalarMultFuncTests>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, LopatinAScalarMultFuncTests, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(ScalarMultFuncTests, LopatinAScalarMultFuncTests, kGtestValues, kPerfTestName);
 
 }  // namespace
 

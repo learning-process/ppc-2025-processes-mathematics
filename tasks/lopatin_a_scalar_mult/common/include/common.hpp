@@ -7,9 +7,9 @@
 
 namespace lopatin_a_scalar_mult {
 
-using InType = int;
-using OutType = int;
-using TestType = std::tuple<int, std::string>;
+using InType = std::pair<std::vector<double>, std::vector<double>>;
+using OutType = double;
+using TestType = std::string;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
 }  // namespace lopatin_a_scalar_mult

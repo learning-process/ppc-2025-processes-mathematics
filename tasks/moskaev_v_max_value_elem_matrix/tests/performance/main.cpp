@@ -127,11 +127,6 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
-  int initialized;
-  MPI_Initialized(&initialized);
-  if (!initialized) {
-    MPI_Init(nullptr, nullptr);
-  }
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
 
@@ -151,11 +146,6 @@ TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestTaskRun) {
-  int initialized;
-  MPI_Initialized(&initialized);
-  if (!initialized) {
-    MPI_Init(nullptr, nullptr);
-  }
   auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
 

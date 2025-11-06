@@ -54,18 +54,27 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
     reference_max_ = CalculateReferenceMax(input_data_);
   }
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    int rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  // bool CheckTestOutputData(OutType &output_data) final {
+  //   int rank = 0;
+  //   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-    if (rank == 0) {
-      bool result_correct = (output_data == reference_max_);
-      if (!result_correct) {
-        std::cout << "Rank 0: Expected " << reference_max_ << ", got " << output_data << "\n";
-      }
-      return result_correct;
+  //   if (rank == 0) {
+  //     bool result_correct = (output_data == reference_max_);
+  //     if (!result_correct) {
+  //       std::cout << "Rank 0: Expected " << reference_max_ << ", got " << output_data << "\n";
+  //     }
+  //     return result_correct;
+  //   }
+  //   return true;
+  // }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    // Всегда проверяем результат для всех типов задач
+    bool result_correct = (output_data == reference_max_);
+    if (!result_correct) {
+      std::cout << "Expected " << reference_max_ << ", got " << output_data << "\n";
     }
-    return true;
+    return result_correct;
   }
 
   InType GetTestInputData() final {
@@ -129,11 +138,6 @@ TEST(MoskaevVMaxValueElemMatrixMpi, testSmallMatrix) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, testSmallMatrix) {
-  int initialized;
-  MPI_Initialized(&initialized);
-  if (!initialized) {
-    MPI_Init(nullptr, nullptr);
-  }
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте
   MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
   EXPECT_TRUE(task.Validation());

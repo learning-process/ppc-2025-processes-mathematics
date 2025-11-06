@@ -54,7 +54,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
     }
   }
 
-  // Находим глобальный максимумs
+  // Находим глобальный максимум
   int global_max = 0;
   MPI_Reduce(&local_max, &global_max, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
 

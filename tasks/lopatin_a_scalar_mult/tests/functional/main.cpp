@@ -36,9 +36,9 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
       throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    int count = 0;
     std::string line;
-    while (std::getline(infile, line)) {
+    int count;
+    for (count = 0; count < 3 && std::getline(infile, line); )  {
       if (line.empty()) {
         continue;
       }
@@ -46,27 +46,31 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
       std::istringstream iss(line);
       double value;
 
-      if (!count) {
+      if (count == 0) {
         while (iss >> value) {
           input_data_.first.push_back(value);
         }
-        ++count;
-      } else if (count) {
-        if (count > 1) {
-          throw std::runtime_error("Too much data in file: " + filename);
+      } else if (count == 1) {
+          while (iss >> value) {
+            input_data_.second.push_back(value);
+          }
         }
-        while (iss >> value) {
-          input_data_.second.push_back(value);
-        }
-        ++count;
+      else {
+        iss >> output_chekup_data_;
       }
-    }
 
+      ++count;
+    }
+   
     infile.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return output_data == 3;
+    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    if (params == "test_vectors_func_n_4") return abs(output_data - output_chekup_data_) < 1e-12;
+    if (params == "test_vectors_func_n_19") return abs(output_data - output_chekup_data_) < 0.1;
+    if (params == "test_vectors_func_n_7_ort") return abs(output_data - output_chekup_data_) < 1e-9;
+    return false;
   }
 
   InType GetTestInputData() final {
@@ -74,7 +78,8 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
   }
 
  private:
-  InType input_data_ = InType();
+  InType input_data_{};
+  OutType output_chekup_data_{};
 };
 
 namespace {
@@ -83,7 +88,7 @@ TEST_P(LopatinAScalarMultFuncTests, ScalarMult) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 1> kTestParam = {std::string("test_vectors_func")};
+const std::array<TestType, 3> kTestParam = {std::string("test_vectors_func_n_4"), std::string("test_vectors_func_n_19"),  std::string("test_vectors_func_n_7_ort")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<LopatinAScalarMultMPI, InType>(kTestParam, PPC_SETTINGS_lopatin_a_scalar_mult),

@@ -9,46 +9,32 @@ namespace lopatin_a_scalar_mult {
 
 class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
   InType input_data_{};
+  OutType output_chekup_data_{};
 
   void SetUp() override {
-    std::string filename = "test_vectors_func.txt";
+    std::string filename = "test_vectors_perf_n_4194304.bin";
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_lopatin_a_scalar_mult, filename);
-    std::ifstream infile(abs_path, std::ios::in);
+    std::ifstream infile(abs_path, std::ios::binary | std::ios::in);
     if (!infile.is_open()) {
       throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    int count = 0;
-    std::string line;
-    while (std::getline(infile, line)) {
-      if (line.empty()) {
-        continue;
-      }
+    int vector_size;
+    infile.read(reinterpret_cast<char*>(&vector_size), sizeof(vector_size));
 
-      std::istringstream iss(line);
-      double value;
+    input_data_.first.resize(vector_size);
+    input_data_.second.resize(vector_size);
 
-      if (!count) {
-        while (iss >> value) {
-          input_data_.first.push_back(value);
-        }
-        ++count;
-      } else if (count) {
-        if (count > 1) {
-          throw std::runtime_error("Too much data in file: " + filename);
-        }
-        while (iss >> value) {
-          input_data_.second.push_back(value);
-        }
-        ++count;
-      }
-    }
+    infile.read(reinterpret_cast<char*>(input_data_.first.data()), vector_size * sizeof(double));
+    infile.read(reinterpret_cast<char*>(input_data_.second.data()), vector_size * sizeof(double));
+
+    infile.read(reinterpret_cast<char*>(&output_chekup_data_), sizeof(output_chekup_data_));
 
     infile.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return output_data == 3;
+    return abs(output_data - output_chekup_data_) < 0.1;
   }
 
   InType GetTestInputData() final {

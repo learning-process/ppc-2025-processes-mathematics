@@ -20,15 +20,15 @@ class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, O
     }
 
     int vector_size;
-    infile.read(reinterpret_cast<char*>(&vector_size), sizeof(vector_size));
+    infile.read(reinterpret_cast<char *>(&vector_size), sizeof(vector_size));
 
     input_data_.first.resize(vector_size);
     input_data_.second.resize(vector_size);
 
-    infile.read(reinterpret_cast<char*>(input_data_.first.data()), vector_size * sizeof(double));
-    infile.read(reinterpret_cast<char*>(input_data_.second.data()), vector_size * sizeof(double));
+    infile.read(reinterpret_cast<char *>(input_data_.first.data()), vector_size * sizeof(double));
+    infile.read(reinterpret_cast<char *>(input_data_.second.data()), vector_size * sizeof(double));
 
-    infile.read(reinterpret_cast<char*>(&output_chekup_data_), sizeof(output_chekup_data_));
+    infile.read(reinterpret_cast<char *>(&output_chekup_data_), sizeof(output_chekup_data_));
 
     infile.close();
   }

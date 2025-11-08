@@ -1,15 +1,14 @@
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
-#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <numeric>
+#include <fstream>
+#include <sstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
@@ -37,14 +36,14 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
     }
 
     std::string line;
-    int count;
+    int count = 0;
     for (count = 0; count < 3 && std::getline(infile, line);) {
       if (line.empty()) {
         continue;
       }
 
       std::istringstream iss(line);
-      double value;
+      double value = NAN;
 
       if (count == 0) {
         while (iss >> value) {
@@ -83,7 +82,7 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
   }
 
  private:
-  InType input_data_{};
+  InType input_data_;
   OutType output_chekup_data_{};
 };
 

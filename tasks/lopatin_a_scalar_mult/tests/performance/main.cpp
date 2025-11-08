@@ -1,14 +1,20 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
 #include "lopatin_a_scalar_mult/mpi/include/ops_mpi.hpp"
 #include "lopatin_a_scalar_mult/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace lopatin_a_scalar_mult {
 
 class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
   OutType output_chekup_data_{};
 
   void SetUp() override {
@@ -19,14 +25,16 @@ class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, O
       throw std::runtime_error("Failed to open file: " + filename);
     }
 
-    int vector_size;
+    int vector_size = 0;
     infile.read(reinterpret_cast<char *>(&vector_size), sizeof(vector_size));
 
     input_data_.first.resize(vector_size);
     input_data_.second.resize(vector_size);
 
-    infile.read(reinterpret_cast<char *>(input_data_.first.data()), vector_size * sizeof(double));
-    infile.read(reinterpret_cast<char *>(input_data_.second.data()), vector_size * sizeof(double));
+    infile.read(reinterpret_cast<char *>(input_data_.first.data()),
+                static_cast<unsigned long>(vector_size) * sizeof(double));
+    infile.read(reinterpret_cast<char *>(input_data_.second.data()),
+                static_cast<unsigned long>(vector_size) * sizeof(double));
 
     infile.read(reinterpret_cast<char *>(&output_chekup_data_), sizeof(output_chekup_data_));
 

@@ -1,0 +1,91 @@
+#include "orehov_n_character_frequency/mpi/include/ops_mpi.hpp"
+
+#include <mpi.h>
+
+#include <algorithm>
+#include <string>
+#include <tuple>
+
+#include "orehov_n_character_frequency/common/include/common.hpp"
+
+namespace orehov_n_character_frequency {
+
+OrehovNCharacterFrequencyMPI::OrehovNCharacterFrequencyMPI(const InType &in) {
+  SetTypeOfTask(GetStaticTypeOfTask());
+  GetInput() = in;
+  GetOutput() = 0;
+}
+
+bool OrehovNCharacterFrequencyMPI::ValidationImpl() {
+  return (!std::get<0>(GetInput()).empty()) && (std::get<1>(GetInput()).length() == 1);
+}
+
+bool OrehovNCharacterFrequencyMPI::PreProcessingImpl() {
+  return true;
+}
+
+bool OrehovNCharacterFrequencyMPI::RunImpl() {
+  int rank = 0;
+  int size = 0;
+
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+  std::string local_str;
+  std::string symbol;
+  int length = 0;
+  int global_result = 0;
+  int local_result = 0;
+
+  if (rank == 0) {
+    std::string str = std::get<0>(GetInput());
+    symbol = std::get<1>(GetInput());
+    length = str.length();
+    MPI_Bcast(&symbol[0], 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int part_size = length / size;
+    int remains = length % size;
+
+    std::vector<int> sendcounts(size);
+    std::vector<int> displs(size);
+
+    for (int i = 0; i < size; i++) {
+      sendcounts[i] = part_size + (i < remains ? 1 : 0);
+      displs[i] = i * part_size + std::min(i, remains);
+    }
+
+    local_str.resize(sendcounts[0]);
+
+    MPI_Scatterv(str.c_str(), sendcounts.data(), displs.data(), MPI_CHAR, &local_str[0], sendcounts[0], MPI_CHAR, 0,
+                 MPI_COMM_WORLD);
+  } else {
+    MPI_Bcast(&symbol[0], 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int part_size = length / size;
+    int remains = length % size;
+
+    int local_size = part_size + (rank < remains ? 1 : 0);
+    local_str.resize(local_size);
+
+    MPI_Scatterv(nullptr, nullptr, nullptr, MPI_CHAR, &local_str[0], local_size, MPI_CHAR, 0, MPI_COMM_WORLD);
+  }
+
+  for (size_t i = 0; i < local_str.length(); i++) {
+    if (local_str[i] == symbol[0]) {
+      local_result++;
+    }
+  }
+
+  MPI_Allreduce(&local_result, &global_result, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+  GetOutput() = global_result;
+
+  return true;
+}
+
+bool OrehovNCharacterFrequencyMPI::PostProcessingImpl() {
+  return true;
+}
+
+}  // namespace orehov_n_character_frequency

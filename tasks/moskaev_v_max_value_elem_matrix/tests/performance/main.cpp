@@ -66,9 +66,9 @@ INSTANTIATE_TEST_SUITE_P(PerfTests, MoskaevVMaxValueElemMatrixPerfTests, kGtestV
 
 // Тесты на производительность (ровно 2 теста на технологию)
 TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
-  int initialized;
+  int initialized = 0;
   MPI_Initialized(&initialized);
-  if (!initialized) {
+  if (initialized == 0) {
     MPI_Init(nullptr, nullptr);
   }
   int rank = 0;
@@ -97,9 +97,9 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
-  int initialized;
+  int initialized = 0;
   MPI_Initialized(&initialized);
-  if (!initialized) {
+  if (initialized == 0) {
     MPI_Init(nullptr, nullptr);
   }
   int rank = 0;

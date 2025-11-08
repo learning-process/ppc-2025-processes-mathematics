@@ -6,7 +6,6 @@
 #include <climits>
 #include <cstddef>
 #include <utility>
-#include <vector>
 
 #include "moskaev_v_max_value_elem_matrix/common/include/common.hpp"
 
@@ -44,7 +43,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   auto remainder = total_rows % size;
 
   // ИСПРАВЛЕНИЕ 1: Правильное распределение строк
-  size_t start_row = rank * rows_per_process + std::min(static_cast<size_t>(rank), remainder);
+  size_t start_row = (rank * rows_per_process + std::min(static_cast<size_t>(rank), remainder));
   size_t end_row = start_row + rows_per_process;
   if (static_cast<size_t>(rank) < remainder) {
     end_row += 1;

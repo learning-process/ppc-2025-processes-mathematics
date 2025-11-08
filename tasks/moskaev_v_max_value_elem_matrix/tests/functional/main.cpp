@@ -123,9 +123,9 @@ INSTANTIATE_TEST_SUITE_P(FuncTests, MoskaevVMaxValueElemMatrixFuncTests, kGtestV
 
 // Индивидуальные тест кейсы
 TEST(MoskaevVMaxValueElemMatrixMpi, testSmallMatrix) {
-  int initialized;
+  int initialized = 0;
   MPI_Initialized(&initialized);
-  if (!initialized) {
+  if (initialized == 0) {
     MPI_Init(nullptr, nullptr);
   }
   auto matrix = GenerateTestMatrix(10);        // Генерируем в тесте

@@ -6,6 +6,7 @@
 #include <cstddef>
 #include <string>
 #include <tuple>
+#include <vector>
 
 #include "orehov_n_character_frequency/common/include/common.hpp"
 

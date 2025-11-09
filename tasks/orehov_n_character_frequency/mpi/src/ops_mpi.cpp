@@ -3,6 +3,7 @@
 #include <mpi.h>
 
 #include <algorithm>
+#include <cstddef>
 #include <string>
 #include <tuple>
 
@@ -17,7 +18,7 @@ OrehovNCharacterFrequencyMPI::OrehovNCharacterFrequencyMPI(const InType &in) {
 }
 
 bool OrehovNCharacterFrequencyMPI::ValidationImpl() {
-  return (!std::get<0>(GetInput()).empty()) && (std::get<1>(GetInput()).length() == 1);
+  return true;
 }
 
 bool OrehovNCharacterFrequencyMPI::PreProcessingImpl() {
@@ -40,8 +41,8 @@ bool OrehovNCharacterFrequencyMPI::RunImpl() {
   if (rank == 0) {
     std::string str = std::get<0>(GetInput());
     symbol = std::get<1>(GetInput());
-    length = str.length();
-    MPI_Bcast(&symbol[0], 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    length = static_cast<int>(str.length());
+    MPI_Bcast(symbol.data(), 1, MPI_CHAR, 0, MPI_COMM_WORLD);
     MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     int part_size = length / size;
@@ -52,15 +53,16 @@ bool OrehovNCharacterFrequencyMPI::RunImpl() {
 
     for (int i = 0; i < size; i++) {
       sendcounts[i] = part_size + (i < remains ? 1 : 0);
-      displs[i] = i * part_size + std::min(i, remains);
+      displs[i] = (i * part_size) + std::min(i, remains);
     }
 
     local_str.resize(sendcounts[0]);
 
-    MPI_Scatterv(str.c_str(), sendcounts.data(), displs.data(), MPI_CHAR, &local_str[0], sendcounts[0], MPI_CHAR, 0,
+    MPI_Scatterv(str.data(), sendcounts.data(), displs.data(), MPI_CHAR, local_str.data(), sendcounts[0], MPI_CHAR, 0,
                  MPI_COMM_WORLD);
   } else {
-    MPI_Bcast(&symbol[0], 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    symbol.resize(1);
+    MPI_Bcast(symbol.data(), 1, MPI_CHAR, 0, MPI_COMM_WORLD);
     MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
     int part_size = length / size;
@@ -69,7 +71,7 @@ bool OrehovNCharacterFrequencyMPI::RunImpl() {
     int local_size = part_size + (rank < remains ? 1 : 0);
     local_str.resize(local_size);
 
-    MPI_Scatterv(nullptr, nullptr, nullptr, MPI_CHAR, &local_str[0], local_size, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Scatterv(nullptr, nullptr, nullptr, MPI_CHAR, local_str.data(), local_size, MPI_CHAR, 0, MPI_COMM_WORLD);
   }
 
   for (size_t i = 0; i < local_str.length(); i++) {

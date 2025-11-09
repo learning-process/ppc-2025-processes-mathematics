@@ -8,7 +8,7 @@ namespace moskaev_v_max_value_elem_matrix {
 
 MoskaevVMaxValueElemMatrixSEQ::MoskaevVMaxValueElemMatrixSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = InType(in);  // Получаем готовую матрицу из тестов
+  GetInput() = InType(in);
   GetOutput() = 0;
 }
 
@@ -17,17 +17,16 @@ bool MoskaevVMaxValueElemMatrixSEQ::ValidationImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::PreProcessingImpl() {
-  return true;  // Матрица уже готова, переданная из тестов
+  return true;  // Матрица передана из тестов
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::RunImpl() {
-  const auto &matrix = GetInput();  // Используем матрицу из входных данных
+  const auto &matrix = GetInput();
 
   if (matrix.empty()) {
     return false;
   }
 
-  // Только поиск максимального элемента
   int max_element = matrix[0][0];
   for (const auto &row : matrix) {
     for (int element : row) {

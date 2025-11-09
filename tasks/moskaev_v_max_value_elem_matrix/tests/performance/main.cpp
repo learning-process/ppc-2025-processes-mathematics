@@ -13,7 +13,6 @@
 
 namespace moskaev_v_max_value_elem_matrix {
 
-// Функция для генерации тестовой матрицы для perf тестов
 static InType GeneratePerfTestMatrix(int size) {
   InType matrix(size, std::vector<int>(size));
   std::random_device rd;
@@ -26,18 +25,16 @@ static InType GeneratePerfTestMatrix(int size) {
     }
   }
 
-  // Устанавливаем известный максимальный элемент
   matrix[size / 2][size / 2] = 99999;
 
   return matrix;
 }
 
 class MoskaevVMaxValueElemMatrixPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kMatrixSize_ = 5000;  // Увеличим размер матрицы
+  const int kMatrixSize_ = 5000;
   InType input_data_;
 
   void SetUp() override {
-    // Генерируем матрицу для perf тестов
     input_data_ = GeneratePerfTestMatrix(kMatrixSize_);
   }
 
@@ -64,7 +61,6 @@ const auto kPerfTestName = MoskaevVMaxValueElemMatrixPerfTests::CustomPerfTestNa
 
 INSTANTIATE_TEST_SUITE_P(PerfTests, MoskaevVMaxValueElemMatrixPerfTests, kGtestValues, kPerfTestName);
 
-// Тесты на производительность (ровно 2 теста на технологию)
 TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
   int initialized = 0;
   MPI_Initialized(&initialized);
@@ -74,10 +70,9 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
-  MoskaevVMaxValueElemMatrixMPI task(matrix);  // Передаем в реализацию
+  auto matrix = GeneratePerfTestMatrix(5000);
+  MoskaevVMaxValueElemMatrixMPI task(matrix);
 
-  // Pipeline run: отдельно измеряем время выполнения Run()
   EXPECT_TRUE(task.Validation());
   EXPECT_TRUE(task.PreProcessing());
 
@@ -90,7 +85,6 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestPipelineRun) {
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-  // Выводим время только из процесса 0
   if (rank == 0) {
     std::cout << "MPI Pipeline time: " << duration.count() << "ms\n";
   }
@@ -105,10 +99,9 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
   int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
-  MoskaevVMaxValueElemMatrixMPI task(matrix);  // Передаем в реализацию
+  auto matrix = GeneratePerfTestMatrix(5000);
+  MoskaevVMaxValueElemMatrixMPI task(matrix);
 
-  // Task run: измеряем полное время выполнения
   auto start_time = std::chrono::high_resolution_clock::now();
   EXPECT_TRUE(task.Validation());
   EXPECT_TRUE(task.PreProcessing());
@@ -120,17 +113,15 @@ TEST(MoskaevVMaxValueElemMatrixMpi, TestTaskRun) {
 
   auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end_time - start_time);
 
-  // Выводим время только из процесса 0
   if (rank == 0) {
     std::cout << "MPI Task time: " << duration.count() << "ms\n";
   }
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
-  auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
-  MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
+  auto matrix = GeneratePerfTestMatrix(5000);
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
 
-  // Pipeline run: отдельно измеряем время выполнения Run()
   EXPECT_TRUE(task.Validation());
   EXPECT_TRUE(task.PreProcessing());
 
@@ -146,10 +137,9 @@ TEST(MoskaevVMaxValueElemMatrixSeq, TestPipelineRun) {
 }
 
 TEST(MoskaevVMaxValueElemMatrixSeq, TestTaskRun) {
-  auto matrix = GeneratePerfTestMatrix(5000);  // Генерируем в тесте
-  MoskaevVMaxValueElemMatrixSEQ task(matrix);  // Передаем в реализацию
+  auto matrix = GeneratePerfTestMatrix(5000);
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
 
-  // Task run: измеряем полное время выполнения
   auto start_time = std::chrono::high_resolution_clock::now();
   EXPECT_TRUE(task.Validation());
   EXPECT_TRUE(task.PreProcessing());

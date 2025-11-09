@@ -51,8 +51,8 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
   InType input_data_;
 
   void SetUp() override {
-    const size_t rows = 100;
-    const size_t stolb = 100;
+    const size_t rows = 1000;
+    const size_t stolb = 1000;
 
     std::vector<std::vector<int>> matrix(rows, std::vector<int>(stolb));
 

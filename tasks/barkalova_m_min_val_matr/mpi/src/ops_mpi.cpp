@@ -64,8 +64,6 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   // Распределение столбцов
   size_t loc_stolb = stolb / size;
   size_t ostatok = stolb % size;
-  // size_t start_stolb = (rank * loc_stolb) + (rank < static_cast<int>(ostatok) ? rank : ostatok);
-  // size_t end_stolb = start_stolb + loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
   size_t start_stolb = (rank * loc_stolb) + (std::cmp_less(rank, ostatok) ? rank : ostatok);
   size_t end_stolb = start_stolb + loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
   size_t col_stolb = end_stolb - start_stolb;
@@ -83,8 +81,6 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   std::vector<int> displacements(size);
 
   for (int i = 0; i < size; i++) {
-    // size_t i_start = (i * loc_stolb) + (i < static_cast<int>(ostatok) ? i : ostatok);
-    // size_t i_end = i_start + loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
     size_t i_start = (i * loc_stolb) + (std::cmp_less(i, ostatok) ? i : ostatok);
     size_t i_end = i_start + loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
     recv_counts[i] = static_cast<int>(i_end - i_start);
@@ -97,11 +93,10 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   MPI_Gatherv(loc_min.data(), send_count, MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT, 0,
               MPI_COMM_WORLD);
 
-  /*
   if (size > 1) {
-  int stolb_int = static_cast<int>(stolb);
-  MPI_Bcast(res.data(), stolb_int, MPI_INT, 0, MPI_COMM_WORLD);
-}*/
+    int stolb_int = static_cast<int>(stolb);
+    MPI_Bcast(res.data(), stolb_int, MPI_INT, 0, MPI_COMM_WORLD);
+  }
 
   return true;
 }

@@ -5,23 +5,22 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
-#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
 
 namespace barkalova_m_min_val_matr {
-/*
+
 BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
-  // GetOutput() = std::vector<int>();
+  // GetInput() = in;
+  //  GetOutput() = std::vector<int>();
+  //  Вместо присваивания - копируем элементы
+  GetInput().resize(in.size());
+  for (size_t i = 0; i < in.size(); ++i) {
+    GetInput()[i] = in[i];
+  }
   GetOutput().clear();
-}*/
-BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
-  SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
-  GetOutput() = {};  // Инициализация пустым вектором
 }
 
 bool BarkalovaMMinValMatrMPI::ValidationImpl() {

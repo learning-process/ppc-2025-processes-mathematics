@@ -8,19 +8,18 @@
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
 
 namespace barkalova_m_min_val_matr {
-/*
-BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
-  SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
-  // GetOutput() = std::vector<int>();
-  GetOutput().clear();
-}*/
-BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
-  SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
-  GetOutput() = {};  // Инициализация пустым вектором
-}
 
+BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
+  SetTypeOfTask(GetStaticTypeOfTask());
+  // GetInput() = in;
+  //  GetOutput() = std::vector<int>();
+  //  Вместо присваивания - копируем элементы
+  GetInput().resize(in.size());
+  for (size_t i = 0; i < in.size(); ++i) {
+    GetInput()[i] = in[i];
+  }
+  GetOutput().clear();
+}
 bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
   const auto &matrix = GetInput();
   if (matrix.empty()) {

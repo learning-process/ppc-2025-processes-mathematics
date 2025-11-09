@@ -2,7 +2,7 @@
 
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "task/include/task.hpp"
- 
+
 namespace krymova_k_lex_order {
 
 class KrymovaKLexOrderMPI : public BaseTask {

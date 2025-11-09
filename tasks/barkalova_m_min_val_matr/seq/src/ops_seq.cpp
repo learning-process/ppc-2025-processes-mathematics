@@ -6,7 +6,6 @@
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
-// #include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 

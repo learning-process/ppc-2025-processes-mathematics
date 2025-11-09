@@ -9,7 +9,6 @@
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
-// #include "util/include/util.hpp"
 
 namespace barkalova_m_min_val_matr {
 
@@ -77,13 +76,10 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     displacements[i] = static_cast<int>(i_start);
   }
   res.resize(stolb, INT_MAX);
-  // Используем правильные типы
+
   int send_count = static_cast<int>(col_stolb);
 
-  MPI_Gatherv(loc_min.data(),
-              send_count,  // int вместо size_t
-              MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT,
-              0,  // root процесс
+  MPI_Gatherv(loc_min.data(), send_count, MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT, 0,
               MPI_COMM_WORLD);
 
   if (size > 1) {

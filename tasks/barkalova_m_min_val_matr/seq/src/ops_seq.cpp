@@ -41,12 +41,13 @@ bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
 bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
   if (!GetInput().empty()) {
     size_t stolb = GetInput()[0].size();
-    GetOutput().resize(stolb, INT_MAX);  // ← использовать resize вместо присваивания
+    GetOutput().resize(stolb, INT_MAX);
   } else {
     GetOutput().clear();
   }
   return true;
 }
+
 /*bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
@@ -60,24 +61,41 @@ bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
   }
   return true;
 }*/
-bool BarkalovaMMinValMatrSEQ::RunImpl() {
+
+/*bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
   for (auto &elem : res) {
     elem = INT_MAX;
   }
-  /*
-    for (size_t j = 0; j < res.size(); ++j) {
-      for (const auto &row : matrix) {
-        res[j] = std::min(row[j], res[j]);
-      }
-    }
-  */
+
+    //for (size_t j = 0; j < res.size(); ++j) {
+      //for (const auto &row : matrix) {
+        //res[j] = std::min(row[j], res[j]);
+      //}
+    //}
+
   for (const auto &row : matrix) {             // внешний - строки
     for (size_t j = 0; j < res.size(); ++j) {  // внутренний - столбцы
       res[j] = std::min(row[j], res[j]);
     }
   }
+  return true;
+}*/
+bool BarkalovaMMinValMatrSEQ::RunImpl() {
+  const auto &matrix = GetInput();
+  auto &res = GetOutput();
+
+  for (size_t j = 0; j < res.size(); ++j) {
+    int min_val = INT_MAX;
+    for (size_t i = 0; i < matrix.size(); ++i) {
+      if (matrix[i][j] < min_val) {
+        min_val = matrix[i][j];
+      }
+    }
+    res[j] = min_val;
+  }
+
   return true;
 }
 

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"

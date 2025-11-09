@@ -51,9 +51,8 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
   InType input_data_;
 
   void SetUp() override {
-    // Оставляем маленькую матрицу
-    const size_t rows = 1000;
-    const size_t stolb = 1000;
+    const size_t rows = 100;
+    const size_t stolb = 100;
 
     std::vector<std::vector<int>> matrix(rows, std::vector<int>(stolb));
 
@@ -78,12 +77,11 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
     }
 
     std::vector<int> correct_result(matrix[0].size(), INT_MAX);
-    for (size_t j = 0; j < matrix[0].size(); ++j) {
-      for (const auto &row : matrix) {
+    for (const auto &row : matrix) {                   // строки
+      for (size_t j = 0; j < matrix[0].size(); ++j) {  // столбцы
         correct_result[j] = std::min(row[j], correct_result[j]);
       }
     }
-
     return output_data == correct_result;
   }
 

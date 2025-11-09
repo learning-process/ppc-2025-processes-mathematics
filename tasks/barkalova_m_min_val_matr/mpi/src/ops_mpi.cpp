@@ -43,7 +43,7 @@ bool BarkalovaMMinValMatrMPI::ValidationImpl() {
 bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
   if (!GetInput().empty()) {
     size_t stolb = GetInput()[0].size();
-    GetOutput().resize(stolb, INT_MAX);  // ← использовать resize вместо присваивания
+    GetOutput().resize(stolb, INT_MAX);
   } else {
     GetOutput().clear();
   }
@@ -97,9 +97,11 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   MPI_Gatherv(loc_min.data(), send_count, MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT, 0,
               MPI_COMM_WORLD);
 
+  /*
   if (size > 1) {
-    MPI_Bcast(res.data(), static_cast<int>(stolb), MPI_INT, 0, MPI_COMM_WORLD);
-  }
+  int stolb_int = static_cast<int>(stolb);
+  MPI_Bcast(res.data(), stolb_int, MPI_INT, 0, MPI_COMM_WORLD);
+}*/
 
   return true;
 }

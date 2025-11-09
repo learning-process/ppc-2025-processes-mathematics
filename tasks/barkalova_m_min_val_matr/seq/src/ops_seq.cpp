@@ -66,18 +66,21 @@ bool BarkalovaMMinValMatrSEQ::RunImpl() {
   for (auto &elem : res) {
     elem = INT_MAX;
   }
-
-  for (size_t j = 0; j < res.size(); ++j) {
-    for (const auto &row : matrix) {
+  /*
+    for (size_t j = 0; j < res.size(); ++j) {
+      for (const auto &row : matrix) {
+        res[j] = std::min(row[j], res[j]);
+      }
+    }
+  */
+  for (const auto &row : matrix) {             // внешний - строки
+    for (size_t j = 0; j < res.size(); ++j) {  // внутренний - столбцы
       res[j] = std::min(row[j], res[j]);
     }
   }
   return true;
 }
 
-/*bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
-  return true;
-}*/
 bool BarkalovaMMinValMatrSEQ::PostProcessingImpl() {
   return GetInput().empty() || !GetOutput().empty();
 }

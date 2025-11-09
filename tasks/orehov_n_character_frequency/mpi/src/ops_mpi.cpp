@@ -18,7 +18,7 @@ OrehovNCharacterFrequencyMPI::OrehovNCharacterFrequencyMPI(const InType &in) {
 }
 
 bool OrehovNCharacterFrequencyMPI::ValidationImpl() {
-  return true;
+  return (!std::get<0>(GetInput()).empty()) && (std::get<1>(GetInput()).length() == 1);
 }
 
 bool OrehovNCharacterFrequencyMPI::PreProcessingImpl() {

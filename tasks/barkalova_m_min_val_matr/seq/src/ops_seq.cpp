@@ -88,10 +88,8 @@ bool BarkalovaMMinValMatrSEQ::RunImpl() {
 
   for (size_t j = 0; j < res.size(); ++j) {
     int min_val = INT_MAX;
-    for (size_t i = 0; i < matrix.size(); ++i) {
-      if (matrix[i][j] < min_val) {
-        min_val = matrix[i][j];
-      }
+    for (const auto &row : matrix) {
+      min_val = std::min(row[j], min_val);
     }
     res[j] = min_val;
   }

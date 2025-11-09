@@ -15,7 +15,8 @@ namespace barkalova_m_min_val_matr {
 BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = std::vector<int>();
+  // GetOutput() = std::vector<int>();
+  GetOutput().clear();
 }
 
 bool BarkalovaMMinValMatrMPI::ValidationImpl() {
@@ -26,11 +27,21 @@ bool BarkalovaMMinValMatrMPI::ValidationImpl() {
   size_t stolb = matrix[0].size();
   return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
 }
-
-bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
+// было изначально
+/*bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
   if (!GetInput().empty()) {
     size_t stolb = GetInput()[0].size();
     GetOutput() = std::vector<int>(stolb, INT_MAX);
+  }
+  }
+  return true;
+}*/
+bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
+  if (!GetInput().empty()) {
+    size_t stolb = GetInput()[0].size();
+    GetOutput().resize(stolb, INT_MAX);  // ← использовать resize вместо присваивания
+  } else {
+    GetOutput().clear();
   }
   return true;
 }

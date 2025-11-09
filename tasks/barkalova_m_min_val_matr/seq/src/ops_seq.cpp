@@ -12,7 +12,8 @@ namespace barkalova_m_min_val_matr {
 BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = std::vector<int>();
+  // GetOutput() = std::vector<int>();
+  GetOutput().clear();
 }
 
 bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
@@ -24,11 +25,21 @@ bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
   // все строки должны иметь одинак разм
   return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
 }
-
-bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
+// было изначально
+/*bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
   if (!GetInput().empty()) {
     size_t stolb = GetInput()[0].size();
     GetOutput() = std::vector<int>(stolb, INT_MAX);
+  }
+  }
+  return true;
+}*/
+bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
+  if (!GetInput().empty()) {
+    size_t stolb = GetInput()[0].size();
+    GetOutput().resize(stolb, INT_MAX);  // ← использовать resize вместо присваивания
+  } else {
+    GetOutput().clear();
   }
   return true;
 }

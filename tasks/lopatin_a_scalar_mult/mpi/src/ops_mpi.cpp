@@ -36,7 +36,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
   const auto n = input.first.size();
   OutType &total_res = GetOutput();
 
-  int local_n = n / proc_num;
+  int local_n = static_cast<int>(n / proc_num);
 
   if (local_n > 0) {
     InType local_data = std::make_pair(std::vector<double>(local_n), std::vector<double>(local_n));

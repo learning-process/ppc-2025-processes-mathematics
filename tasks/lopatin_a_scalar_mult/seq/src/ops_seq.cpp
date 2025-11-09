@@ -1,5 +1,6 @@
 #include "lopatin_a_scalar_mult/seq/include/ops_seq.hpp"
 
+#include <cstddef>
 #include <vector>
 
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
@@ -24,10 +25,10 @@ bool LopatinAScalarMultSEQ::PreProcessingImpl() {
 
 bool LopatinAScalarMultSEQ::RunImpl() {
   const auto &input = GetInput();
-  const int n = input.first.size();
+  const auto n = input.first.size();
   OutType &res = GetOutput();
 
-  for (int i = 0; i < n; ++i) {
+  for (size_t i = 0; i < n; ++i) {
     res += input.first[i] * input.second[i];
   }
 

@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -32,7 +33,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 
   const auto &input = GetInput();
-  const int n = input.first.size();
+  const auto n = input.first.size();
   OutType &total_res = GetOutput();
 
   int local_n = n / proc_num;
@@ -55,8 +56,8 @@ bool LopatinAScalarMultMPI::RunImpl() {
 
   if (proc_rank == 0) {
     if (n % proc_num != 0) {
-      int tail_index = n - (n % proc_num);
-      for (int i = tail_index; i < n; ++i) {
+      size_t tail_index = n - (n % proc_num);
+      for (size_t i = tail_index; i < n; ++i) {
         total_res += input.first[i] * input.second[i];
       }
     }

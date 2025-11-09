@@ -2,6 +2,7 @@
 
 #include <cmath>
 #include <fstream>
+#include <ios>
 #include <stdexcept>
 #include <string>
 
@@ -32,9 +33,9 @@ class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, O
     input_data_.second.resize(vector_size);
 
     infile.read(reinterpret_cast<char *>(input_data_.first.data()),
-                static_cast<unsigned long>(vector_size) * sizeof(double));
+                static_cast<std::streamsize>(vector_size * sizeof(double)));
     infile.read(reinterpret_cast<char *>(input_data_.second.data()),
-                static_cast<unsigned long>(vector_size) * sizeof(double));
+                static_cast<std::streamsize>(vector_size * sizeof(double)));
 
     infile.read(reinterpret_cast<char *>(&output_chekup_data_), sizeof(output_chekup_data_));
 

@@ -20,7 +20,7 @@ namespace moskaev_v_max_value_elem_matrix {
 
 static InType GenerateTestMatrix(int size) {
   if (size == 0) {
-    return std::vector<std::vector<int>>();
+    return std::vector<std::vector<int>>{};
   }
   InType matrix(size, std::vector<int>(size));
   std::random_device rd;

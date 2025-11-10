@@ -10,41 +10,6 @@
 #include "barkalova_m_min_val_matr/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
 
-/*namespace barkalova_m_min_val_matr {
-
-class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 100;
-  InType input_data_{};
-
-  void SetUp() override {
-    input_data_ = kCount_;
-  }
-
-  bool CheckTestOutputData(OutType &output_data) final {
-    return input_data_ == output_data;
-  }
-
-  InType GetTestInputData() final {
-    return input_data_;
-  }
-};
-
-TEST_P(BarkalovaMMinValMatrPerfTest, RunPerfModes) {
-  ExecuteTest(GetParam());
-}
-
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BarkalovaMMinValMatrMPI,
-BarkalovaMMinValMatrSEQ>(PPC_SETTINGS_barkalova_m_min_val_matr);
-
-const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
-
-const auto kPerfTestName = BarkalovaMMinValMatrPerfTest::CustomPerfTestName;
-
-INSTANTIATE_TEST_SUITE_P(RunModeTests, BarkalovaMMinValMatrPerfTest, kGtestValues, kPerfTestName);
-
-}  // namespace barkalova_m_min_val_matr*/
-
 namespace barkalova_m_min_val_matr {
 
 class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, OutType> {
@@ -77,8 +42,8 @@ class BarkalovaMMinValMatrPerfTest : public ppc::util::BaseRunPerfTests<InType, 
     }
 
     std::vector<int> correct_result(matrix[0].size(), INT_MAX);
-    for (const auto &row : matrix) {                   // строки
-      for (size_t j = 0; j < matrix[0].size(); ++j) {  // столбцы
+    for (const auto &row : matrix) {
+      for (size_t j = 0; j < matrix[0].size(); ++j) {
         correct_result[j] = std::min(row[j], correct_result[j]);
       }
     }

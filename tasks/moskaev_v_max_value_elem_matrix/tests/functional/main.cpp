@@ -92,8 +92,9 @@ TEST_P(MoskaevVMaxValueElemMatrixFuncTests, TestFindMaxElement) {
 }
 
 // Тестовые случаи
-const std::array<TestType, 4> kTestParam = {std::make_tuple(10, "10x10"), std::make_tuple(20, "20x20"),
-                                            std::make_tuple(50, "50x50"), std::make_tuple(100, "100x100")};
+const std::array<TestType, 5> kTestParam = {std::make_tuple(7, "7x7"), std::make_tuple(20, "20x20"),
+                                            std::make_tuple(50, "50x50"), std::make_tuple(100, "100x100"),
+                                            std::make_tuple(11, "11x11")};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<MoskaevVMaxValueElemMatrixMPI, InType>(
                                                kTestParam, PPC_SETTINGS_moskaev_v_max_value_elem_matrix),

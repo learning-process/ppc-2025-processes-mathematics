@@ -13,19 +13,18 @@ MoskaevVMaxValueElemMatrixSEQ::MoskaevVMaxValueElemMatrixSEQ(const InType &in) {
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::ValidationImpl() {
-  return !GetInput().empty() && (GetOutput() == 0);
+  return ((!GetInput().empty()) && (GetOutput() == 0));
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::PreProcessingImpl() {
-  return true;  // Матрица передана из тестов
+  return !GetInput().empty();
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::RunImpl() {
-  const auto &matrix = GetInput();
-
-  if (matrix.empty()) {
+  if (GetInput().empty()) {
     return false;
   }
+  const auto &matrix = GetInput();
 
   int max_element = matrix[0][0];
   for (const auto &row : matrix) {
@@ -39,7 +38,7 @@ bool MoskaevVMaxValueElemMatrixSEQ::RunImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixSEQ::PostProcessingImpl() {
-  return true;
+  return !GetInput().empty();
 }
 
 }  // namespace moskaev_v_max_value_elem_matrix

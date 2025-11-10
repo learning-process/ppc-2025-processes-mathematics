@@ -18,14 +18,17 @@ MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::ValidationImpl() {
-  return !GetInput().empty() && (GetOutput() == 0);
+  return ((!GetInput().empty()) && (GetOutput() == 0));
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PreProcessingImpl() {
-  return true;
+  return !GetInput().empty();
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
+  if (GetInput().empty()) {
+    return false;
+  }
   int rank = 0;
   int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -56,11 +59,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
 
   int global_max = 0;
 
-  if (size == 1) {
-    global_max = local_max;
-  } else {
-    MPI_Allreduce(&local_max, &global_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
-  }
+  MPI_Allreduce(&local_max, &global_max, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
   GetOutput() = global_max;
 
@@ -68,7 +67,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PostProcessingImpl() {
-  return true;
+  return !GetInput().empty();
 }
 
 }  // namespace moskaev_v_max_value_elem_matrix

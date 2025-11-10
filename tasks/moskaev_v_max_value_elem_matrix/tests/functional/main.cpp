@@ -19,6 +19,9 @@
 namespace moskaev_v_max_value_elem_matrix {
 
 static InType GenerateTestMatrix(int size) {
+  if (size == 0) {
+    return std::vector<std::vector<int>>();
+  }
   InType matrix(size, std::vector<int>(size));
   std::random_device rd;
   std::mt19937 gen(rd());
@@ -104,6 +107,34 @@ const auto kFuncTestName = MoskaevVMaxValueElemMatrixFuncTests::PrintFuncTestNam
 INSTANTIATE_TEST_SUITE_P(FuncTests, MoskaevVMaxValueElemMatrixFuncTests, kGtestValues, kFuncTestName);
 
 // Индивидуальные тест кейсы
+
+TEST(MoskaevVMaxValueElemMatrixMpi, testZeroMatrix) {
+  int initialized = 0;
+  MPI_Initialized(&initialized);
+  if (initialized == 0) {
+    MPI_Init(nullptr, nullptr);
+  }
+  auto matrix = GenerateTestMatrix(0);
+  MoskaevVMaxValueElemMatrixMPI task(matrix);
+
+  EXPECT_FALSE(task.Validation());
+
+  EXPECT_FALSE(task.PreProcessing());
+  EXPECT_FALSE(task.Run());
+  EXPECT_FALSE(task.PostProcessing());
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testZeroMatrix) {
+  auto matrix = GenerateTestMatrix(0);
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+
+  EXPECT_FALSE(task.Validation());
+
+  EXPECT_FALSE(task.PreProcessing());
+  EXPECT_FALSE(task.Run());
+  EXPECT_FALSE(task.PostProcessing());
+}
+
 TEST(MoskaevVMaxValueElemMatrixMpi, testSmallMatrix) {
   int initialized = 0;
   MPI_Initialized(&initialized);

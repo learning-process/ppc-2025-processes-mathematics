@@ -183,7 +183,7 @@ TEST(MoskaevVMaxValueElemMatrixSeq, testSingleElement) {
 TEST(MoskaevVMaxValueElemMatrixMpi, testSingleElement) {
   int initialized = 0;
   MPI_Initialized(&initialized);
-  if (!initialized) {
+  if (initialized == 0) {
     MPI_Init(nullptr, nullptr);
   }
 
@@ -220,7 +220,7 @@ TEST(MoskaevVMaxValueElemMatrixSeq, testMultipleMaxElements) {
 TEST(MoskaevVMaxValueElemMatrixMpi, testUnevenRowDistribution) {
   int initialized = 0;
   MPI_Initialized(&initialized);
-  if (!initialized) {
+  if (initialized == 0) {
     MPI_Init(nullptr, nullptr);
   }
 

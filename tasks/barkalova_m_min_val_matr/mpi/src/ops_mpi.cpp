@@ -24,7 +24,7 @@ BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
 bool BarkalovaMMinValMatrMPI::ValidationImpl() {
   const auto &matrix = GetInput();
   if (matrix.empty()) {
-    return false;
+    return true;
   }
   size_t stolb = matrix[0].size();
   return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
@@ -43,6 +43,9 @@ bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
 bool BarkalovaMMinValMatrMPI::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
+  if (matrix.empty()) {
+    return true;
+  }
 
   int rank = 0;
   int size = 0;

@@ -21,7 +21,7 @@ BarkalovaMMinValMatrSEQ::BarkalovaMMinValMatrSEQ(const InType &in) {
 bool BarkalovaMMinValMatrSEQ::ValidationImpl() {
   const auto &matrix = GetInput();
   if (matrix.empty()) {
-    return false;
+    return true;
   }
   size_t stolb = matrix[0].size();
   // все строки должны иметь одинак разм
@@ -41,7 +41,9 @@ bool BarkalovaMMinValMatrSEQ::PreProcessingImpl() {
 bool BarkalovaMMinValMatrSEQ::RunImpl() {
   const auto &matrix = GetInput();
   auto &res = GetOutput();
-
+  if (matrix.empty()) {
+    return true;
+  }
   for (size_t j = 0; j < res.size(); ++j) {
     int min_val = INT_MAX;
     for (const auto &row : matrix) {

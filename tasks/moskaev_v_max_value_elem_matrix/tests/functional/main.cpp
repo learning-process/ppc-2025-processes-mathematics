@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <climits>
 #include <cstddef>
 #include <iostream>
 #include <random>

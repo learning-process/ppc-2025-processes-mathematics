@@ -54,7 +54,6 @@ class MoskaevVMaxValueElemMatrixFuncTests : public ppc::util::BaseRunFuncTests<I
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    // Всегда проверяем результат для всех типов задач
     bool result_correct = (output_data == reference_max_);
     if (!result_correct) {
       std::cout << "Expected " << reference_max_ << ", got " << output_data << "\n";
@@ -159,6 +158,115 @@ TEST(MoskaevVMaxValueElemMatrixSeq, testSmallMatrix) {
   EXPECT_TRUE(task.Run());
   EXPECT_TRUE(task.PostProcessing());
   EXPECT_GT(task.GetOutput(), 0);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testNegativeNumbers) {
+  InType matrix = {{-5, -2, -10}, {-1, -8, -3}, {-7, -4, -6}};
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), -1);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testSingleElement) {
+  InType matrix = {{42}};
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), 42);
+}
+
+TEST(MoskaevVMaxValueElemMatrixMpi, testSingleElement) {
+  int initialized = 0;
+  MPI_Initialized(&initialized);
+  if (!initialized) {
+    MPI_Init(nullptr, nullptr);
+  }
+
+  InType matrix = {{42}};
+  MoskaevVMaxValueElemMatrixMPI task(matrix);
+
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), 42);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testNonSquareMatrix) {
+  InType matrix = {{1, 2, 3, 4}, {5, 6, 7, 8}, {9, 10, 11, 12}};
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), 12);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testMultipleMaxElements) {
+  InType matrix = {{1, 2, 3}, {4, 5, 5}, {5, 1, 2}};
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), 5);
+}
+
+TEST(MoskaevVMaxValueElemMatrixMpi, testUnevenRowDistribution) {
+  int initialized = 0;
+  MPI_Initialized(&initialized);
+  if (!initialized) {
+    MPI_Init(nullptr, nullptr);
+  }
+
+  InType matrix(7, std::vector<int>(3, 1));
+  matrix[3][1] = 999;
+
+  MoskaevVMaxValueElemMatrixMPI task(matrix);
+
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+
+  EXPECT_EQ(task.GetOutput(), 999);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testExtremeValues) {
+  InType matrix = {{INT_MIN, 0, INT_MAX}, {-100, 100, 0}, {INT_MAX, INT_MIN, 500}};
+  MoskaevVMaxValueElemMatrixSEQ task(matrix);
+  EXPECT_TRUE(task.Validation());
+  EXPECT_TRUE(task.PreProcessing());
+  EXPECT_TRUE(task.Run());
+  EXPECT_TRUE(task.PostProcessing());
+  EXPECT_EQ(task.GetOutput(), INT_MAX);
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testIndividualMethodFailures) {
+  InType empty_matrix{};
+  MoskaevVMaxValueElemMatrixSEQ task(empty_matrix);
+
+  EXPECT_FALSE(task.Validation());
+  EXPECT_FALSE(task.PreProcessing());
+  EXPECT_FALSE(task.Run());
+  EXPECT_FALSE(task.PostProcessing());
+}
+
+TEST(MoskaevVMaxValueElemMatrixSeq, testStateAfterFailedOperations) {
+  InType empty_matrix{};
+  MoskaevVMaxValueElemMatrixSEQ task(empty_matrix);
+
+  EXPECT_FALSE(task.Validation());
+  EXPECT_FALSE(task.PreProcessing());
+  EXPECT_FALSE(task.Run());
+  EXPECT_FALSE(task.PostProcessing());
+
+  EXPECT_EQ(task.GetOutput(), 0);
 }
 
 }  // namespace

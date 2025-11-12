@@ -20,7 +20,7 @@
 
 namespace kulik_a_the_most_different_adjacent {
 
-class NesterovARunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
     return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
@@ -34,7 +34,7 @@ class NesterovARunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType
     std::vector<uint8_t> img;
     // Read image in RGB to ensure consistent channel count
     {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_example_processes, "pic.jpg");
+      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kulik_a_the_most_different_adjacent, "pic.jpg");
       auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
       if (data == nullptr) {
         throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
@@ -65,21 +65,21 @@ class NesterovARunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType
 
 namespace {
 
-TEST_P(NesterovARunFuncTestsProcesses, MatmulFromPic) {
+TEST_P(KulikATheMostDifferentAdjacentFuncTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
 const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(kTestParam, PPC_SETTINGS_example_processes),
-                   ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentSEQ, InType>(kTestParam, PPC_SETTINGS_example_processes));
+    std::tuple_cat(ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent),
+                   ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentSEQ, InType>(kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = NesterovARunFuncTestsProcesses::PrintFuncTestName<NesterovARunFuncTestsProcesses>;
+const auto kPerfTestName = KulikATheMostDifferentAdjacentFuncTests::PrintFuncTestName<KulikATheMostDifferentAdjacentFuncTests>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, NesterovARunFuncTestsProcesses, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(PicMatrixTests, KulikATheMostDifferentAdjacentFuncTests, kGtestValues, kPerfTestName);
 
 }  // namespace
 

@@ -29,7 +29,7 @@ TEST_P(ExampleRunPerfTestProcesses, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, KulikATheMostDifferentAdjacentMPI, KulikATheMostDifferentAdjacentSEQ>(PPC_SETTINGS_example_processes);
+    ppc::util::MakeAllPerfTasks<InType, KulikATheMostDifferentAdjacentMPI, KulikATheMostDifferentAdjacentSEQ>(PPC_SETTINGS_kulik_a_the_most_different_adjacent);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

@@ -11,7 +11,7 @@ class KulikATheMostDifferentAdjacentPerfTests : public ppc::util::BaseRunPerfTes
   InType input_data_{};
 
   void SetUp() override {
-    std::string filename = "vector1.bin";
+    std::string filename = "vector2.bin";
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kulik_a_the_most_different_adjacent, filename);
     std::ifstream filestream(abs_path, std::ios::binary | std::ios::in);
     if (!filestream.is_open()) {

@@ -46,8 +46,9 @@ class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTes
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     size_t n = input_data_.size();
     bool check = true;
+    double mx = std::abs(input_data_[output_data.first] - input_data_[output_data.second]);
     for (size_t i = 1; i < n; ++i) {
-      if (std::abs(input_data_[i - 1] - input_data_[i]) - output_data > 1e-12) {
+      if (std::abs(input_data_[i - 1] - input_data_[i]) - mx > 1e-12) {
         check = false;
       }
     }

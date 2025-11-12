@@ -15,7 +15,7 @@ KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {
 }
 
 bool KrymovaKLexSEQ::ValidationImpl() {
-  return GetInput().size() == 2 && !GetInput()[0].empty() && !GetInput()[1].empty();
+  return GetInput().size() == 2 ;
 }
 
 bool KrymovaKLexSEQ::PreProcessingImpl() {

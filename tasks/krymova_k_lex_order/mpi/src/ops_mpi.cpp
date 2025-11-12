@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <string>
 #include<vector>
-
+#include <climits>
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -17,7 +17,7 @@ KrymovaKLexOrderMPI::KrymovaKLexOrderMPI(const InType &in) {
 }
 
 bool KrymovaKLexOrderMPI::ValidationImpl() {
-  return GetInput().size() == 2 && !GetInput()[0].empty() && !GetInput()[1].empty();
+  return GetInput().size() == 2;
 }
 
 bool KrymovaKLexOrderMPI::PreProcessingImpl() {
@@ -39,34 +39,36 @@ bool KrymovaKLexOrderMPI::RunImpl() {
   size_t chunk_size = (min_len + size - 1) / size;
   size_t start = rank * chunk_size;
   size_t end = std::min(start + chunk_size, min_len);
-
-  int local_difference_pos = -1;
+  bool found_diff = false;
+  int local_diff_pos = -1;
+  
   for (size_t i = start; i < end; ++i) {
     if (str1[i] != str2[i]) {
-      local_difference_pos = static_cast<int>(i);
+      found_diff = true;
+      local_diff_pos = static_cast<int>(i);
       break;
     }
   }
+  int local_found = found_diff ? 1 : 0;
+  int global_found;
+  MPI_Allreduce(&local_found, &global_found, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
-  int global_difference_pos;
-  MPI_Allreduce(&local_difference_pos, &global_difference_pos, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-  if (global_difference_pos != -1) {
-    if (rank == 0) {
-      char char1 = str1[global_difference_pos];
-      char char2 = str2[global_difference_pos];
-      GetOutput() = (char1 < char2) ? -1 : 1;
-    }
-    MPI_Bcast(&GetOutput(), 1, MPI_INT, 0, MPI_COMM_WORLD);
+  int result = 0;
+  
+  if (global_found) {
+    int pos_to_send = found_diff ? local_diff_pos : INT_MAX;
+    int global_min_pos;
+    MPI_Allreduce(&pos_to_send, &global_min_pos, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+    result = (str1[global_min_pos] < str2[global_min_pos]) ? -1 : 1;
   } else {
     if (len1 < len2) {
-      GetOutput() = -1;
+      result = -1;
     } else if (len1 > len2) {
-      GetOutput() = 1;
-    } else {
-      GetOutput() = 0;
+      result = 1;
     }
   }
 
+  GetOutput() = result;
   return true;
 }
 

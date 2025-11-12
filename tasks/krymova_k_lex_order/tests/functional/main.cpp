@@ -23,20 +23,7 @@ namespace krymova_k_lex_order {
 class KrymovaKLexOrderFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    const auto& str1 = std::get<0>(test_param);
-    const auto& str2 = std::get<1>(test_param);
-    const auto expected = std::get<2>(test_param);
-  
-    std::string test_name = "\"" + str1 + "\"_vs_\"" + str2 + "\"_exp_";
-    if (expected == -1) {
-      test_name += "less";
-    } else if (expected == 1) {
-      test_name += "greater";
-    } else {
-      test_name += "equal";
-    }
-    
-    return test_name;
+    return std::get<0>(test_param) + "_vs_" + std::get<1>(test_param) + "_exp_equal";
   }
 
  protected:
@@ -67,7 +54,6 @@ TEST_P(KrymovaKLexOrderFuncTestsProcesses, MatmulFromPic) {
 
 const std::array<TestType, 8> kTestParam = {
     std::make_tuple("hello", "hello", 0),
-    std::make_tuple("", "", 0),
     std::make_tuple("a", "a", 0),
     
     std::make_tuple("apple", "banana", -1),

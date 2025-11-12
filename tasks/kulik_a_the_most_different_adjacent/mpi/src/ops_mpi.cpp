@@ -1,31 +1,31 @@
-#include "example_processes/mpi/include/ops_mpi.hpp"
+#include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
 
 #include <numeric>
 #include <vector>
 
-#include "example_processes/common/include/common.hpp"
+#include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "util/include/util.hpp"
 
-namespace nesterov_a_test_task_processes {
+namespace kulik_a_the_most_different_adjacent {
 
-NesterovATestTaskMPI::NesterovATestTaskMPI(const InType &in) {
+KulikATheMostDifferentAdjacentMPI::KulikATheMostDifferentAdjacentMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool NesterovATestTaskMPI::ValidationImpl() {
+bool KulikATheMostDifferentAdjacentMPI::ValidationImpl() {
   return (GetInput() > 0) && (GetOutput() == 0);
 }
 
-bool NesterovATestTaskMPI::PreProcessingImpl() {
+bool KulikATheMostDifferentAdjacentMPI::PreProcessingImpl() {
   GetOutput() = 2 * GetInput();
   return GetOutput() > 0;
 }
 
-bool NesterovATestTaskMPI::RunImpl() {
+bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   auto input = GetInput();
   if (input == 0) {
     return false;
@@ -64,9 +64,9 @@ bool NesterovATestTaskMPI::RunImpl() {
   return GetOutput() > 0;
 }
 
-bool NesterovATestTaskMPI::PostProcessingImpl() {
+bool KulikATheMostDifferentAdjacentMPI::PostProcessingImpl() {
   GetOutput() -= GetInput();
   return GetOutput() > 0;
 }
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace kulik_a_the_most_different_adjacent

@@ -1,29 +1,29 @@
-#include "example_processes/seq/include/ops_seq.hpp"
+#include "kulik_a_the_most_different_adjacent/seq/include/ops_seq.hpp"
 
 #include <numeric>
 #include <vector>
 
-#include "example_processes/common/include/common.hpp"
+#include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "util/include/util.hpp"
 
-namespace nesterov_a_test_task_processes {
+namespace kulik_a_the_most_different_adjacent {
 
-NesterovATestTaskSEQ::NesterovATestTaskSEQ(const InType &in) {
+KulikATheMostDifferentAdjacentSEQ::KulikATheMostDifferentAdjacentSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool NesterovATestTaskSEQ::ValidationImpl() {
+bool KulikATheMostDifferentAdjacentSEQ::ValidationImpl() {
   return (GetInput() > 0) && (GetOutput() == 0);
 }
 
-bool NesterovATestTaskSEQ::PreProcessingImpl() {
+bool KulikATheMostDifferentAdjacentSEQ::PreProcessingImpl() {
   GetOutput() = 2 * GetInput();
   return GetOutput() > 0;
 }
 
-bool NesterovATestTaskSEQ::RunImpl() {
+bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
   if (GetInput() == 0) {
     return false;
   }
@@ -52,9 +52,9 @@ bool NesterovATestTaskSEQ::RunImpl() {
   return GetOutput() > 0;
 }
 
-bool NesterovATestTaskSEQ::PostProcessingImpl() {
+bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() {
   GetOutput() -= GetInput();
   return GetOutput() > 0;
 }
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace kulik_a_the_most_different_adjacent

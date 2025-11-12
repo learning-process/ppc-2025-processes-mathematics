@@ -1,11 +1,11 @@
 #include <gtest/gtest.h>
 
-#include "example_processes/common/include/common.hpp"
-#include "example_processes/mpi/include/ops_mpi.hpp"
-#include "example_processes/seq/include/ops_seq.hpp"
+#include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
+#include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
+#include "kulik_a_the_most_different_adjacent/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
 
-namespace nesterov_a_test_task_processes {
+namespace kulik_a_the_most_different_adjacent {
 
 class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
   const int kCount_ = 100;
@@ -29,7 +29,7 @@ TEST_P(ExampleRunPerfTestProcesses, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, NesterovATestTaskMPI, NesterovATestTaskSEQ>(PPC_SETTINGS_example_processes);
+    ppc::util::MakeAllPerfTasks<InType, KulikATheMostDifferentAdjacentMPI, KulikATheMostDifferentAdjacentSEQ>(PPC_SETTINGS_example_processes);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
@@ -37,4 +37,4 @@ const auto kPerfTestName = ExampleRunPerfTestProcesses::CustomPerfTestName;
 
 INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses, kGtestValues, kPerfTestName);
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace kulik_a_the_most_different_adjacent

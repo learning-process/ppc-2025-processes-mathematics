@@ -12,13 +12,13 @@
 #include <utility>
 #include <vector>
 
-#include "example_processes/common/include/common.hpp"
-#include "example_processes/mpi/include/ops_mpi.hpp"
-#include "example_processes/seq/include/ops_seq.hpp"
+#include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
+#include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
+#include "kulik_a_the_most_different_adjacent/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
 
-namespace nesterov_a_test_task_processes {
+namespace kulik_a_the_most_different_adjacent {
 
 class NesterovARunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
@@ -72,8 +72,8 @@ TEST_P(NesterovARunFuncTestsProcesses, MatmulFromPic) {
 const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
 
 const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<NesterovATestTaskMPI, InType>(kTestParam, PPC_SETTINGS_example_processes),
-                   ppc::util::AddFuncTask<NesterovATestTaskSEQ, InType>(kTestParam, PPC_SETTINGS_example_processes));
+    std::tuple_cat(ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(kTestParam, PPC_SETTINGS_example_processes),
+                   ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentSEQ, InType>(kTestParam, PPC_SETTINGS_example_processes));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
@@ -83,4 +83,4 @@ INSTANTIATE_TEST_SUITE_P(PicMatrixTests, NesterovARunFuncTestsProcesses, kGtestV
 
 }  // namespace
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace kulik_a_the_most_different_adjacent

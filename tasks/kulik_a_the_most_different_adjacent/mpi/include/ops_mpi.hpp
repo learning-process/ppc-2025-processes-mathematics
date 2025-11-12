@@ -1,16 +1,16 @@
 #pragma once
 
-#include "example_processes/common/include/common.hpp"
+#include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "task/include/task.hpp"
 
-namespace nesterov_a_test_task_processes {
+namespace kulik_a_the_most_different_adjacent {
 
-class NesterovATestTaskMPI : public BaseTask {
+class KulikATheMostDifferentAdjacentMPI : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  explicit NesterovATestTaskMPI(const InType &in);
+  explicit KulikATheMostDifferentAdjacentMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;
@@ -19,4 +19,4 @@ class NesterovATestTaskMPI : public BaseTask {
   bool PostProcessingImpl() override;
 };
 
-}  // namespace nesterov_a_test_task_processes
+}  // namespace kulik_a_the_most_different_adjacent

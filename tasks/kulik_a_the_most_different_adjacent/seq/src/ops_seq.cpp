@@ -8,7 +8,8 @@
 
 namespace kulik_a_the_most_different_adjacent {
 
-KulikATheMostDifferentAdjacentSEQ::KulikATheMostDifferentAdjacentSEQ(const InType &in) {
+KulikATheMostDifferentAdjacentSEQ::KulikATheMostDifferentAdjacentSEQ(
+    const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
 }
@@ -17,9 +18,7 @@ bool KulikATheMostDifferentAdjacentSEQ::ValidationImpl() {
   return (GetInput().size() >= 2);
 }
 
-bool KulikATheMostDifferentAdjacentSEQ::PreProcessingImpl() {
-  return true;
-}
+bool KulikATheMostDifferentAdjacentSEQ::PreProcessingImpl() { return true; }
 
 bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
   const auto &input = GetInput();
@@ -28,18 +27,16 @@ bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
   double mx = 0.;
   int ind = 0;
   for (size_t i = 1; i < n; ++i) {
-		if (std::abs(input[i - 1] - input[i]) > mx) {
-			mx = std::abs(input[i - 1] - input[i]);
+    if (std::abs(input[i - 1] - input[i]) > mx) {
+      mx = std::abs(input[i - 1] - input[i]);
       ind = i - 1;
-		}
-	}
+    }
+  }
   ans.first = ind;
   ans.second = ind + 1;
   return true;
 }
 
-bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() {
-  return true;
-}
+bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() { return true; }
 
-}  // namespace kulik_a_the_most_different_adjacent
+} // namespace kulik_a_the_most_different_adjacent

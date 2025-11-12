@@ -20,32 +20,37 @@
 
 namespace kulik_a_the_most_different_adjacent {
 
-class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
- public:
+class KulikATheMostDifferentAdjacentFuncTests
+    : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+public:
   static std::string PrintTestParam(const TestType &test_param) {
     return test_param;
   }
 
- protected:
+protected:
   void SetUp() override {
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    TestType params = std::get<static_cast<std::size_t>(
+        ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::string filename = params + ".bin";
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kulik_a_the_most_different_adjacent, filename);
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(
+        PPC_ID_kulik_a_the_most_different_adjacent, filename);
     std::ifstream filestream(abs_path, std::ios::in | std::ios::binary);
     if (!filestream.is_open()) {
       throw std::runtime_error("Failed to open file: " + filename);
     }
     size_t vector_size;
-    filestream.read(reinterpret_cast<char*>(&vector_size), sizeof(size_t));
+    filestream.read(reinterpret_cast<char *>(&vector_size), sizeof(size_t));
     input_data_.resize(vector_size);
-    filestream.read(reinterpret_cast<char*>(input_data_.data()), vector_size * sizeof(double));
+    filestream.read(reinterpret_cast<char *>(input_data_.data()),
+                    vector_size * sizeof(double));
     filestream.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
     size_t n = input_data_.size();
     bool check = true;
-    double mx = std::abs(input_data_[output_data.first] - input_data_[output_data.second]);
+    double mx = std::abs(input_data_[output_data.first] -
+                         input_data_[output_data.second]);
     for (size_t i = 1; i < n; ++i) {
       if (std::abs(input_data_[i - 1] - input_data_[i]) - mx > 1e-12) {
         check = false;
@@ -54,11 +59,9 @@ class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTes
     return check;
   }
 
-  InType GetTestInputData() final {
-    return input_data_;
-  }
+  InType GetTestInputData() final { return input_data_; }
 
- private:
+private:
   InType input_data_;
 };
 
@@ -68,18 +71,25 @@ TEST_P(KulikATheMostDifferentAdjacentFuncTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 2> kTestParam = {std::string("vector1"), std::string("vector2")};
+const std::array<TestType, 2> kTestParam = {std::string("vector1"),
+                                            std::string("vector2")};
 
-const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent),
-                   ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentSEQ, InType>(kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent));
+const auto kTestTasksList = std::tuple_cat(
+    ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(
+        kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent),
+    ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentSEQ, InType>(
+        kTestParam, PPC_SETTINGS_kulik_a_the_most_different_adjacent));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = KulikATheMostDifferentAdjacentFuncTests::PrintFuncTestName<KulikATheMostDifferentAdjacentFuncTests>;
+const auto kPerfTestName =
+    KulikATheMostDifferentAdjacentFuncTests::PrintFuncTestName<
+        KulikATheMostDifferentAdjacentFuncTests>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, KulikATheMostDifferentAdjacentFuncTests, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(PicMatrixTests,
+                         KulikATheMostDifferentAdjacentFuncTests, kGtestValues,
+                         kPerfTestName);
 
-}  // namespace
+} // namespace
 
-}  // namespace kulik_a_the_most_different_adjacent
+} // namespace kulik_a_the_most_different_adjacent

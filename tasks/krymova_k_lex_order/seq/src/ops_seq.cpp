@@ -1,8 +1,8 @@
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"
 
-#include <numeric>
-#include <vector>
-
+#include <algorithm>
+#include<vector>
+#include<string>
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -15,46 +15,38 @@ KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {
 }
 
 bool KrymovaKLexSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  return GetInput().size() == 2 && !GetInput()[0].empty() && !GetInput()[1].empty();
 }
 
 bool KrymovaKLexSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KrymovaKLexSEQ::RunImpl() {
-  if (GetInput() == 0) {
-    return false;
-  }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
+  const std::string& str1 = GetInput()[0];
+  const std::string& str2 = GetInput()[1];
+  
+  size_t len1 = str1.length();
+  size_t len2 = str2.length();
+  size_t min_len = (len1 < len2) ? len1 : len2;
+  for (size_t i = 0; i < min_len; ++i) {
+    if (str1[i] != str2[i]) {
+      GetOutput() = (str1[i] < str2[i]) ? -1 : 1;
+      return true;
     }
   }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
+  if (len1 < len2) {
+    GetOutput() = -1;
+  } else if (len1 > len2) {
+    GetOutput() = 1;
+  } else {
+    GetOutput() = 0;
   }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KrymovaKLexSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace krymova_k_lex_order

@@ -23,36 +23,31 @@ namespace krymova_k_lex_order {
 class KrymovaKLexOrderFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    const auto& str1 = std::get<0>(test_param);
+    const auto& str2 = std::get<1>(test_param);
+    const auto expected = std::get<2>(test_param);
+  
+    std::string test_name = "\"" + str1 + "\"_vs_\"" + str2 + "\"_exp_";
+    if (expected == -1) {
+      test_name += "less";
+    } else if (expected == 1) {
+      test_name += "greater";
+    } else {
+      test_name += "equal";
+    }
+    
+    return test_name;
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image in RGB to ensure consistent channel count
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_krymova_k_lex_order, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
-      }
-      channels = STBI_rgb;
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
-      }
-    }
-
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    TestType test_params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    input_data_ = {std::get<0>(test_params), std::get<1>(test_params)};
+    expected_result_ = std::get<2>(test_params);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return (input_data_ == output_data);
+    return (expected_result_ == output_data);
   }
 
   InType GetTestInputData() final {
@@ -60,7 +55,8 @@ class KrymovaKLexOrderFuncTestsProcesses : public ppc::util::BaseRunFuncTests<In
   }
 
  private:
-  InType input_data_ = 0;
+  InType input_data_ ;
+  OutType expected_result_;
 };
 
 namespace {
@@ -69,7 +65,18 @@ TEST_P(KrymovaKLexOrderFuncTestsProcesses, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 8> kTestParam = {
+    std::make_tuple("hello", "hello", 0),
+    std::make_tuple("", "", 0),
+    std::make_tuple("a", "a", 0),
+    
+    std::make_tuple("apple", "banana", -1),
+    std::make_tuple("abc", "abd", -1),
+    std::make_tuple("a", "b", -1),
+      
+    std::make_tuple("banana", "apple", 1),
+    std::make_tuple("abd", "abc", 1),
+};
 
 const auto kTestTasksList =
     std::tuple_cat(ppc::util::AddFuncTask<KrymovaKLexOrderMPI, InType>(kTestParam, PPC_SETTINGS_krymova_k_lex_order),
@@ -79,7 +86,7 @@ const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
 const auto kPerfTestName = KrymovaKLexOrderFuncTestsProcesses::PrintFuncTestName<KrymovaKLexOrderFuncTestsProcesses>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, KrymovaKLexOrderFuncTestsProcesses, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(StringComparisonTests, KrymovaKLexOrderFuncTestsProcesses, kGtestValues, kPerfTestName);
 
 }  // namespace
 

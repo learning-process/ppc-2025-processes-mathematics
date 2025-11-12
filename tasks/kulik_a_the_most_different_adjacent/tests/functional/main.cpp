@@ -43,7 +43,6 @@ class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTes
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     size_t n = input_data_.size();
     bool check = true;
     double mx = std::abs(input_data_[output_data.first] - input_data_[output_data.second]);

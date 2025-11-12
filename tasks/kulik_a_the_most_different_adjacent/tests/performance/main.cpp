@@ -7,8 +7,7 @@
 
 namespace kulik_a_the_most_different_adjacent {
 
-class KulikATheMostDifferentAdjacentPerfTests
-    : public ppc::util::BaseRunPerfTests<InType, OutType> {
+class KulikATheMostDifferentAdjacentPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
   const int kCount_ = 100;
   InType input_data_{};
 

@@ -11,50 +11,35 @@ namespace kulik_a_the_most_different_adjacent {
 KulikATheMostDifferentAdjacentSEQ::KulikATheMostDifferentAdjacentSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0;
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  return (GetInput().size() >= 2);
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
-  if (GetInput() == 0) {
-    return false;
-  }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
-  }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
-  }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  const auto &input = GetInput();
+  const auto n = input.size();
+  OutType &ans = GetOutput();
+  double mx = 0.;
+  int ind = 0;
+  for (size_t i = 1; i < n; ++i) {
+		if (std::abs(input[i - 1] - input[i]) > mx) {
+			mx = std::abs(input[i - 1] - input[i]);
+      ind = i - 1;
+		}
+	}
+  ans.first = ind;
+  ans.second = ind + 1;
+  return true;
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace kulik_a_the_most_different_adjacent

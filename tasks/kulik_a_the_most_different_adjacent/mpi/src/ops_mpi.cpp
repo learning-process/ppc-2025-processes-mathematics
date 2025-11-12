@@ -2,8 +2,10 @@
 
 #include <mpi.h>
 
-#include <numeric>
 #include <vector>
+#include <cstddef>
+#include <utility>
+#include <cmath>
 
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -13,60 +15,77 @@ namespace kulik_a_the_most_different_adjacent {
 KulikATheMostDifferentAdjacentMPI::KulikATheMostDifferentAdjacentMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0;
 }
 
 bool KulikATheMostDifferentAdjacentMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  return (GetInput().size() >= 2);
 }
 
 bool KulikATheMostDifferentAdjacentMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
-    return false;
+  int ProcNum = 0;
+  int ProcRank = 0;
+  MPI_Comm_size(MPI_COMM_WORLD, &ProcNum);
+	MPI_Comm_rank(MPI_COMM_WORLD, &ProcRank);
+  const auto &input = GetInput();
+  const auto n = input.size();
+  MPI_Status status;
+  const int r = n % ProcNum;
+  int update_n = n;
+  if (r) {
+    update_n += (ProcNum - r);
   }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
+  int size = update_n / ProcNum;
+  std::vector<int> elemcnt(ProcNum, size);
+	elemcnt[ProcNum - 1] = n - size * (ProcNum - 1);
+  std::vector<int> startpos(ProcNum);
+	for (int i = 0; i < ProcNum; ++i) {
+		startpos[i] = i * size;
+	}
+  std::vector<double> buf(elemcnt[ProcRank]);
+  MPI_Scatterv(input.data(), elemcnt.data(), startpos.data(), MPI_DOUBLE, buf.data(), elemcnt[ProcRank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  if (ProcRank == ProcNum - 1 && r) {
+    for (int i = 0; i < ProcNum - r; ++i) {
+			buf.push_back(input.back());
+		}
   }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
-    }
-
-    if (counter != 0) {
-      GetOutput() /= counter;
-    }
-  }
-
+  struct {
+		double val;
+		int ind;
+	} max_diff, max_diffall;
+  max_diff.val = max_diffall.val = 0.;
+	max_diff.ind = max_diffall.ind = 0;
+	for (int i = 0; i < size - 1; ++i) {
+		if (std::abs(buf[i + 1] - buf[i]) > max_diff.val) {
+			max_diff.val = std::abs(buf[i + 1] - buf[i]);
+			max_diff.ind = ProcRank * size + i;
+		}
+	}
+  double temp = 0.;
+	if (ProcRank != ProcNum - 1) {
+		MPI_Send(&buf[size - 1], 1, MPI_DOUBLE, ProcRank + 1, 0, MPI_COMM_WORLD);
+	}
+	if (ProcRank != 0) {
+		MPI_Recv(&temp, 1, MPI_DOUBLE, ProcRank - 1, MPI_ANY_TAG, MPI_COMM_WORLD, &status); 
+	}
+	if (ProcRank != 0 && (std::abs(temp - buf[0]) > max_diff.val)) {
+		max_diff.val = std::abs(temp - buf[0]);
+		max_diff.ind = ProcRank * size - 1;
+	}
+	MPI_Allreduce(&max_diff, &max_diffall, 1, MPI_DOUBLE_INT, MPI_MAXLOC, MPI_COMM_WORLD);
+  OutType &ans = GetOutput();
+  ans.first = max_diffall.ind;
+  ans.second = max_diffall.ind + 1;
   MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+
+  return true;
 }
 
 bool KulikATheMostDifferentAdjacentMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return true;
 }
 
 }  // namespace kulik_a_the_most_different_adjacent

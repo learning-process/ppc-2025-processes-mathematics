@@ -1,8 +1,9 @@
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"
 
 #include <algorithm>
-#include<vector>
-#include<string>
+#include <string>
+#include <vector>
+
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -15,7 +16,7 @@ KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {
 }
 
 bool KrymovaKLexSEQ::ValidationImpl() {
-  return GetInput().size() == 2 ;
+  return GetInput().size() == 2;
 }
 
 bool KrymovaKLexSEQ::PreProcessingImpl() {
@@ -23,9 +24,9 @@ bool KrymovaKLexSEQ::PreProcessingImpl() {
 }
 
 bool KrymovaKLexSEQ::RunImpl() {
-  const std::string& str1 = GetInput()[0];
-  const std::string& str2 = GetInput()[1];
-  
+  const std::string &str1 = GetInput()[0];
+  const std::string &str2 = GetInput()[1];
+
   size_t len1 = str1.length();
   size_t len2 = str2.length();
   size_t min_len = (len1 < len2) ? len1 : len2;

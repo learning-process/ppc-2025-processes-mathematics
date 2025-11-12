@@ -1,10 +1,12 @@
 #include "krymova_k_lex_order/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
+
 #include <algorithm>
-#include <string>
-#include<vector>
 #include <climits>
+#include <string>
+#include <vector>
+
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -25,8 +27,8 @@ bool KrymovaKLexOrderMPI::PreProcessingImpl() {
 }
 
 bool KrymovaKLexOrderMPI::RunImpl() {
-  const std::string& str1 = GetInput()[0];
-  const std::string& str2 = GetInput()[1];
+  const std::string &str1 = GetInput()[0];
+  const std::string &str2 = GetInput()[1];
 
   int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -34,14 +36,14 @@ bool KrymovaKLexOrderMPI::RunImpl() {
 
   size_t len1 = str1.length();
   size_t len2 = str2.length();
-  size_t min_len = std::min(len1, len2);  
-  
+  size_t min_len = std::min(len1, len2);
+
   size_t chunk_size = (min_len + size - 1) / size;
   size_t start = rank * chunk_size;
   size_t end = std::min(start + chunk_size, min_len);
   bool found_diff = false;
   int local_diff_pos = -1;
-  
+
   for (size_t i = start; i < end; ++i) {
     if (str1[i] != str2[i]) {
       found_diff = true;
@@ -54,7 +56,7 @@ bool KrymovaKLexOrderMPI::RunImpl() {
   MPI_Allreduce(&local_found, &global_found, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
   int result = 0;
-  
+
   if (global_found) {
     int pos_to_send = found_diff ? local_diff_pos : INT_MAX;
     int global_min_pos;

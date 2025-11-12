@@ -42,7 +42,7 @@ class KrymovaKLexOrderFuncTestsProcesses : public ppc::util::BaseRunFuncTests<In
   }
 
  private:
-  InType input_data_ ;
+  InType input_data_;
   OutType expected_result_;
 };
 
@@ -53,15 +53,11 @@ TEST_P(KrymovaKLexOrderFuncTestsProcesses, MatmulFromPic) {
 }
 
 const std::array<TestType, 8> kTestParam = {
-    std::make_tuple("hello", "hello", 0),
-    std::make_tuple("a", "a", 0),
-    
-    std::make_tuple("apple", "banana", -1),
-    std::make_tuple("abc", "abd", -1),
-    std::make_tuple("a", "b", -1),
-      
-    std::make_tuple("banana", "apple", 1),
-    std::make_tuple("abd", "abc", 1),
+    std::make_tuple("hello", "hello", 0),   std::make_tuple("a", "a", 0),
+
+    std::make_tuple("apple", "banana", -1), std::make_tuple("abc", "abd", -1), std::make_tuple("a", "b", -1),
+
+    std::make_tuple("banana", "apple", 1),  std::make_tuple("abd", "abc", 1),
 };
 
 const auto kTestTasksList =

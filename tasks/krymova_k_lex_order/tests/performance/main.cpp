@@ -16,7 +16,7 @@ class KrymovaKLexOrderPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
     std::string str2(kStringLength_, 'a');
 
     str2[kStringLength_ / 2] = 'b';
-    
+
     input_data_ = {str1, str2};
   }
 

@@ -18,16 +18,17 @@ MoskaevVMaxValueElemMatrixMPI::MoskaevVMaxValueElemMatrixMPI(const InType &in) {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::ValidationImpl() {
-  return ((!GetInput().empty()) && (GetOutput() == 0));
+  return (GetOutput() == 0);
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PreProcessingImpl() {
-  return !GetInput().empty();
+  return true;
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   if (GetInput().empty()) {
-    return false;
+    GetOutput() = 0;
+    return true;
   }
   int rank = 0;
   int size = 0;
@@ -67,7 +68,7 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
 }
 
 bool MoskaevVMaxValueElemMatrixMPI::PostProcessingImpl() {
-  return !GetInput().empty();
+  return true;
 }
 
 }  // namespace moskaev_v_max_value_elem_matrix

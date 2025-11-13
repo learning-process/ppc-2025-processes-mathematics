@@ -38,10 +38,6 @@ bool MoskaevVMaxValueElemMatrixMPI::RunImpl() {
   const auto &matrix = GetInput();
   auto total_rows = matrix.size();
 
-  if (total_rows == 0) {
-    return false;
-  }
-
   auto rows_per_process = total_rows / size;
   auto remainder = total_rows % size;
 

@@ -91,7 +91,7 @@ TEST_P(MoskaevVMaxValueElemMatrixFuncTests, TestFindMaxElement) {
   ExecuteTest(GetParam());
 }
 
-// Тестовые случаи
+// Тестовые случаиs
 const std::array<TestType, 5> kTestParam = {std::make_tuple(7, "7x7"), std::make_tuple(20, "20x20"),
                                             std::make_tuple(50, "50x50"), std::make_tuple(100, "100x100"),
                                             std::make_tuple(11, "11x11")};

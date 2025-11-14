@@ -11,20 +11,11 @@ namespace chernykh_s_min_matrix_elements {
 ChernykhSMinMatrixElementsSEQ::ChernykhSMinMatrixElementsSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = 0.0;
+  GetOutput() = std::numeric_limits<double>::max();
 }
 
 bool ChernykhSMinMatrixElementsSEQ::ValidationImpl() {
-  const size_t stroki = std::get<0>(GetInput());
-  const size_t stolbci = std::get<1>(GetInput());
-  const std::vector<double> &matrica = std::get<2>(GetInput());
-  if (matrica.size() != stroki * stolbci) {
-    return false;
-  }
-  if (stroki > 0 && stolbci > 0 && matrica.empty()) {
-    return false;
-  }
-  return true;
+  return (GetOutput() == std::numeric_limits<double>::max());
 }
 
 bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
@@ -32,21 +23,16 @@ bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
 }
 
 bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
-  const size_t &stroki = std::get<0>(GetInput());
-  const size_t &stolbci = std::get<1>(GetInput());
-  const std::vector<double> &matrica = std::get<2>(GetInput());
-  double global_min = std::numeric_limits<double>::max();
-  if (matrica.empty() || stroki == 0 || stolbci == 0) {
-    GetOutput() = std::numeric_limits<double>::max();
-    return true;
-  }
+  const auto &matrix = GetInput();
 
-  for (size_t i = 0; i < stroki * stolbci; i++) {
-    if (matrica[i] < global_min) {
-      global_min = matrica[i];
+  double minimum = std::numeric_limits<double>::max();
+  for (const auto &row : matrix) {
+    for (double element : row) {
+      minimum = std::min(element, minimum);
     }
   }
-  GetOutput() = global_min;
+
+  GetOutput() = minimum;
   return true;
 }
 

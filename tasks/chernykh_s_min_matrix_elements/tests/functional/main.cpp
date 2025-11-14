@@ -29,33 +29,45 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
  protected:
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    std::string inFileName = params;
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
-    std::ifstream inFile(abs_path, std::ios::in | std::ios::binary);
 
+    std::string inFileName = params + ".txt";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
+
+    std::ifstream inFile(abs_path, std::ios::in);
     if (!inFile.is_open()) {
       throw std::runtime_error("Failed to open file: " + abs_path);
     }
 
-    size_t stroki = 0, stolbci = 0;
-    inFile.read(reinterpret_cast<char *>(&stroki), sizeof(size_t));
-    inFile.read(reinterpret_cast<char *>(&stolbci), sizeof(size_t));
+    input_data_.clear();
+    std::string line;
 
-    std::get<2>(input_data_).resize(stroki * stolbci);
-    inFile.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()), sizeof(double) * stroki * stolbci);
+    while (std::getline(inFile, line)) {
+      if (line.empty()) {
+        continue;
+      }
 
-    inFile.close();
+      std::istringstream iss(line);
+      std::vector<double> row;
+      double value;
 
-    std::get<0>(input_data_) = stroki;
-    std::get<1>(input_data_) = stolbci;
+      while (iss >> value) {
+        row.push_back(value);
+      }
+
+      if (!row.empty()) {
+        input_data_.push_back(row);
+      }
+    }
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    const auto &mat = std::get<2>(input_data_);
-    double expected_min = *std::min_element(mat.begin(), mat.end());
-
-    // std::cout<<"expected_min = " << expected_min <<std::endl;
-    // std::cout<<"output_data - expected_min = " << output_data - expected_min <<std::endl;
+    const auto &mat = input_data_;
+    double expected_min = std::numeric_limits<double>::max();
+    for (const auto &row : mat) {
+      for (double v : row) {
+        expected_min = std::min(expected_min, v);
+      }
+    }
     return std::fabs(output_data - expected_min) < 1e-6;
   }
 
@@ -73,7 +85,8 @@ TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 1> kTestParam = {"data"};
+const std::array<TestType, 5> kTestParam = {"create_data_8x8", "create_data_16x16", "create_data_32x32",
+                                            "create_data_64x64", "create_data_2048x2048"};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(
                                                kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),

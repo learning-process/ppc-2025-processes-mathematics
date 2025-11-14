@@ -10,7 +10,7 @@ namespace chernykh_s_min_matrix_elements {
 
 ChernykhSMinMatrixElementsSEQ::ChernykhSMinMatrixElementsSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
+  GetInput() = InType(in);
   GetOutput() = std::numeric_limits<double>::max();
 }
 

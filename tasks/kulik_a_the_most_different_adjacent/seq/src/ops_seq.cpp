@@ -39,7 +39,7 @@ bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() {
-  return true;
+  return (GetOutput().first >= 0 && GetOutput().second > GetOutput().first);
 }
 
 }  // namespace kulik_a_the_most_different_adjacent

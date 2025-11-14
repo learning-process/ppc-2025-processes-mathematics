@@ -19,12 +19,13 @@
 1. последовательную (**SEQ**) и параллельную (**MPI**) версию алгоритма.
 2. Покрытие кода тестами, проверяющими функционал и производительность. 
 
-## 3. Baseline Algorithm (Sequential)
-Describe the base algorithm with enough detail to reproduce.
+## 3. Описание последовательного алгоритма
+Формализируя задачу, необходимо найти следующую величину: 
+max(|A[ i ] - A[ i - 1 ]|) для i = 1, ..., (n-1); где n - это размер вектора.
+Алгоритм представляет собой одноразовый проход по вектору, где на каждой итерации мы сравниваем модуль разницы двух соседних элементов с текущим максимумом разности. Если эта разница превышает максимум, то сама становится максимумом, а индекс элементов, на которых она достигнута, - новым ответом. 
 
-## 4. Parallelization Scheme
+## 4. Схема распараллеливания
 - For MPI: data distribution, communication pattern/topology, rank roles.
-- For threads: decomposition, scheduling, synchronization.
 Diagrams or short pseudocode are welcome.
 
 ## 5. Implementation Details

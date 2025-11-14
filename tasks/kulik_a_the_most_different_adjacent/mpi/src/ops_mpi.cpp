@@ -55,7 +55,7 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   }
   struct {
     double val;
-    size_t ind;
+    int ind;
   } max_diff, max_diffall;
   max_diff.val = max_diffall.val = 0.;
   max_diff.ind = max_diffall.ind = 0;
@@ -86,7 +86,7 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
 }
 
 bool KulikATheMostDifferentAdjacentMPI::PostProcessingImpl() {
-  return true;
+  return (GetOutput().first >= 0 && GetOutput().second > GetOutput().first);
 }
 
 }  // namespace kulik_a_the_most_different_adjacent

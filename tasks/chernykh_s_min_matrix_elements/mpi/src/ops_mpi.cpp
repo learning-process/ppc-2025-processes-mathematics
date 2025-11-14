@@ -20,23 +20,7 @@ ChernykhSMinMatrixElementsMPI::ChernykhSMinMatrixElementsMPI(const InType &in) {
 }
 
 bool ChernykhSMinMatrixElementsMPI::ValidationImpl() {
-  const size_t stroki = std::get<0>(GetInput());
-  const size_t stolbci = std::get<1>(GetInput());
-
-  const std::vector<double> &matrica = std::get<2>(GetInput());
-
-  if (matrica.size() != stroki * stolbci) {
-    return false;
-  }
-
-  if (stroki == 0 || stolbci == 0) {
-    return false;
-  }
-
-  if (matrica.empty()) {
-    return false;
-  }
-  return true;
+  return (GetOutput() == std::numeric_limits<double>::max());
 }
 
 bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {
@@ -46,52 +30,38 @@ bool ChernykhSMinMatrixElementsMPI::PreProcessingImpl() {
 bool ChernykhSMinMatrixElementsMPI::RunImpl() {
   int rank = 0;
   int size = 0;
+
   std::vector<double> local_data;
+
   double local_min = std::numeric_limits<double>::max();
   double global_min = std::numeric_limits<double>::max();
 
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  std::cout << "rank = " << rank << std::endl << "size = " << size << std::endl;
-  fflush(stdout);
-  const size_t &stroki = std::get<0>(GetInput());
-  const size_t &stolbci = std::get<1>(GetInput());
-  const std::vector<double> &matrica = std::get<2>(GetInput());
-  const size_t total_elements = stroki * stolbci;
+  const std::vector<std::vector<double>> &matrix = GetInput();
+  size_t vsego_stolbcov = matrix.size();
 
-  size_t kolvo_na_process = total_elements / size;
-  size_t ostatok = total_elements % size;
+  size_t kolvo_na_process = vsego_stolbcov / size;
+  size_t ostatok = vsego_stolbcov % size;
   size_t count = kolvo_na_process;
-  if (rank == 0) {
+
+  if (rank == size - 1) {  // распределяем остаток на последний процесс
     count += ostatok;
   }
-
-  // std::cout<<"kolvo_na_process = "<<kolvo_na_process<<std::endl<<"ostatok = "<<ostatok<<std::endl;
-
-  size_t start = rank * kolvo_na_process;
-  if (rank > 0) {
-    start += ostatok;
-  }
+  size_t start = static_cast<size_t>(rank) * kolvo_na_process;
   size_t end = start + count;
 
-  for (size_t i = start; i < end; ++i) {
-    if (matrica[i] < local_min) {
-      local_min = matrica[i];
+  for (size_t i = start; i < end; i++) {
+    for (double element : matrix[i]) {
+      local_min = std::min(element, local_min);
     }
   }
 
-  MPI_Reduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, 0, MPI_COMM_WORLD);
-
-  printf("Process %d: MPI_Reduce finished, starting MPI_Bcast\n", rank);
-  fflush(stdout);
-
-  MPI_Bcast(&global_min, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-
-  printf("Process %d: MPI_Bcast finished, setting output and returning\n", rank);
-  fflush(stdout);
+  MPI_Allreduce(&local_min, &global_min, 1, MPI_DOUBLE, MPI_MIN, MPI_COMM_WORLD);
 
   GetOutput() = global_min;
+
   return true;
 }
 

@@ -55,7 +55,7 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   }
   struct {
     double val;
-    int ind;
+    size_t ind;
   } max_diff, max_diffall;
   max_diff.val = max_diffall.val = 0.;
   max_diff.ind = max_diffall.ind = 0;

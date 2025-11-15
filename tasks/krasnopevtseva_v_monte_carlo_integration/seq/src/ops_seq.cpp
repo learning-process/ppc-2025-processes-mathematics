@@ -1,11 +1,12 @@
 #include "krasnopevtseva_v_monte_carlo_integration/seq/include/ops_seq.hpp"
 
-#include <numeric>
-#include <vector>
-#include <random>
 #include <cmath>
 #include <cstddef>
+#include <numeric>
+#include <random>
 #include <tuple>
+#include <vector>
+
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -22,7 +23,7 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::ValidationImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
-  
+
   return (a <= b) && (num_points > 0);
 }
 
@@ -42,27 +43,27 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
   }
 
   double sum = 0.0;
-  
+
   // генератор вихрь Мерсенна
   std::random_device rd;
   std::mt19937 gen(rd());
   std::uniform_real_distribution<double> dis(a, b);
-  
+
   // cos(x)*x^3
   for (int i = 0; i < num_points; i++) {
-    double x = dis(gen); 
-    double fx = std::cos(x) * x * x * x;  
+    double x = dis(gen);
+    double fx = std::cos(x) * x * x * x;
     sum += fx;
   }
-  
+
   double integral = (b - a) * sum / num_points;
   GetOutput() = integral;
-  
+
   return true;
 }
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::PostProcessingImpl() {
-   return true;
+  return true;
 }
 
 }  // namespace krasnopevtseva_v_monte_carlo_integration

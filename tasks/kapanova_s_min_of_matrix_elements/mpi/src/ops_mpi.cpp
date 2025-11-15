@@ -1,8 +1,7 @@
 #include "kapanova_s_min_of_matrix_elements/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
-
-#include <numeric>
+#include <climits>
 #include <vector>
 
 #include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
@@ -17,56 +16,63 @@ KapanovaSMinOfMatrixElementsMPI::KapanovaSMinOfMatrixElementsMPI(const InType &i
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  const auto& matrix = GetInput();
+  return !matrix.empty() && !matrix[0].empty();
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  GetOutput() = INT_MAX;
+  return true;
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
+  const auto& matrix = GetInput();
+  
+  if (matrix.empty() || matrix[0].empty()) {
     return false;
   }
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
-  }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
+  int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  if (rank == 0) {
-    GetOutput() /= num_threads;
+  const int total_rows = matrix.size();
+  const int total_cols = matrix[0].size();
+  const int total_elements = total_rows * total_cols;
+  int elements_per_process = total_elements / size;
+  int remainder = total_elements % size;
+
+  int start_element, end_element;
+  
+  if (rank < remainder) {
+    start_element = rank * (elements_per_process + 1);
+    end_element = start_element + elements_per_process + 1;
   } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
-    }
-
-    if (counter != 0) {
-      GetOutput() /= counter;
+    start_element = rank * elements_per_process + remainder;
+    end_element = start_element + elements_per_process;
+  }
+  int local_min = INT_MAX;
+  
+  for (int elem_idx = start_element; elem_idx < end_element; elem_idx++) {
+    int row = elem_idx / total_cols;
+    int col = elem_idx % total_cols;
+    
+    if (matrix[row][col] < local_min) {
+      local_min = matrix[row][col];
     }
   }
 
-  MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+  int global_min;
+  MPI_Reduce(&local_min, &global_min, 1, MPI_INT, MPI_MIN, 0, MPI_COMM_WORLD);
+
+  MPI_Bcast(&global_min, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  GetOutput() = global_min;
+
+  return true;
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return GetOutput() != INT_MAX;
 }
 
 }  // namespace kapanova_s_min_of_matrix_elements

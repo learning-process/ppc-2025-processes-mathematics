@@ -2,6 +2,7 @@
 
 #include <numeric>
 #include <vector>
+#include <climits> 
 
 #include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -15,46 +16,36 @@ KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &i
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  const auto& matrix = GetInput();
+  return !matrix.empty() && !matrix[0].empty();
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  GetOutput() = INT_MAX;
+  return true;
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::RunImpl() {
-  if (GetInput() == 0) {
+  const auto& matrix = GetInput();
+  if (matrix.empty() || matrix[0].empty()) {
     return false;
   }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
+  int min_val = matrix[0][0];
+  
+  for (const auto& row : matrix) {
+    for (int value : row) {
+      if (value < min_val) {
+        min_val = value;
       }
     }
   }
 
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
-  }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  GetOutput() = min_val;
+  return true;
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+  return GetOutput() != INT_MAX;
 }
 
 }  // namespace kapanova_s_min_of_matrix_elements

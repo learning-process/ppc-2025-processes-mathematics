@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <numeric>
 #include <stdexcept>
+#include <random>
 #include <string>
 #include <tuple>
 #include <utility>
@@ -28,48 +29,67 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image in RGB to ensure consistent channel count
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_kapanova_s_min_of_matrix_elements, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
-      }
-      channels = STBI_rgb;
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
-      }
-    }
-
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    int matrix_size = std::get<0>(params);
+    
+    input_matrix_ = GenerateTestMatrix(matrix_size);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return (input_data_ == output_data);
+    int expected_min = FindExpectedMin(input_matrix_);
+    return (expected_min == output_data);
   }
 
   InType GetTestInputData() final {
-    return input_data_;
+    return input_matrix_;
   }
 
  private:
-  InType input_data_ = 0;
+  InType input_matrix_;
+  
+  std::vector<std::vector<int>> GenerateTestMatrix(int size) {
+    std::vector<std::vector<int>> matrix(size, std::vector<int>(size));
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> dist(1, 100);
+    
+    for (int i = 0; i < size; i++) {
+      for (int j = 0; j < size; j++) {
+        matrix[i][j] = dist(gen);
+      }
+    }
+    
+    int min_row = size / 2;
+    int min_col = size / 2;
+    matrix[min_row][min_col] = -10;  
+    
+    return matrix;
+  }
+  
+  int FindExpectedMin(const std::vector<std::vector<int>>& matrix) {
+    int min_val = matrix[0][0];
+    for (const auto& row : matrix) {
+      for (int val : row) {
+        if (val < min_val) {
+          min_val = val;
+        }
+      }
+    }
+    return min_val;
+  }
 };
 
 namespace {
 
-TEST_P(KapanovaSMinOfMatrixElementsFuncTests, MatmulFromPic) {
+TEST_P(KapanovaSMinOfMatrixElementsFuncTests, FindMinInMatrix) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 3> kTestParam = {
+  std::make_tuple(3, "3x3_matrix"),
+  std::make_tuple(5, "5x5_matrix"), 
+  std::make_tuple(10, "10x10_matrix")
+};
 
 const auto kTestTasksList =
     std::tuple_cat(ppc::util::AddFuncTask<KapanovaSMinOfMatrixElementsMPI, InType>(kTestParam, PPC_SETTINGS_kapanova_s_min_of_matrix_elements),
@@ -79,7 +99,7 @@ const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
 const auto kPerfTestName = KapanovaSMinOfMatrixElementsFuncTests::PrintFuncTestName<KapanovaSMinOfMatrixElementsFuncTests>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, KapanovaSMinOfMatrixElementsFuncTests, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(MatrixMinTests, KapanovaSMinOfMatrixElementsFuncTests, kGtestValues, kPerfTestName);
 
 }  // namespace
 

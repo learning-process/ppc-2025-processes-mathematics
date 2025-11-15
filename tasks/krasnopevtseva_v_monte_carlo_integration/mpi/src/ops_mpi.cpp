@@ -4,6 +4,9 @@
 
 #include <numeric>
 #include <vector>
+#include <tuple>
+#include <cmath>
+#include <random>
 
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -17,56 +20,70 @@ KrasnopevtsevaV_MCIntegrationMPI::KrasnopevtsevaV_MCIntegrationMPI(const InType 
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  const auto &input = GetInput();
+  // Проверяем корректность параметров
+  double a = std::get<0>(input);
+  double b = std::get<1>(input);
+  int num_points = std::get<2>(input);
+  
+  return (a < b) && (num_points > 0);
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  GetOutput() = 0.0;
+  return true;
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
-  auto input = GetInput();
-  if (input == 0) {
+  const auto &input = GetInput();
+  
+  // Извлекаем параметры из tuple
+  double a = std::get<0>(input);
+  double b = std::get<1>(input);
+  int num_points = std::get<2>(input);
+
+  if (a >= b || num_points <= 0) {
     return false;
   }
-
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
-  }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int rank = 0;
+  
+   int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  if (rank == 0) {
-    GetOutput() /= num_threads;
-  } else {
-    int counter = 0;
-    for (int i = 0; i < num_threads; i++) {
-      counter++;
+  // РАСПРЕДЕЛЕНИЕ РАБОТЫ: каждый процесс получает свою порцию точек
+    int local_points = num_points / size;
+    int remainder = num_points % size;
+    
+    // Первые remainder процессов получают на 1 точку больше
+    if (rank < remainder) {
+        local_points++;
+    }
+  // каждый процесс считает свою часть
+    double local_sum = 0.0;
+    std::mt19937 gen(std::random_device{}() + rank); // Разные seed для каждого процесса
+    std::uniform_real_distribution<double> dis(a, b);
+    
+    for (int i = 0; i < local_points; i++) {
+        double x = dis(gen);
+        double fx = std::cos(x) * x * x * x;
+        local_sum += fx;
     }
 
-    if (counter != 0) {
-      GetOutput() /= counter;
+    //процессы отправляют свои суммы процессу 0
+    double global_sum = 0.0;
+    MPI_Reduce(&local_sum, &global_sum, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    double integral = 0.0;
+    // процесс 0 вычисляет окончательный результат
+    if (rank == 0) {
+        integral = (b - a) * global_sum / num_points;
     }
-  }
-
-  MPI_Barrier(MPI_COMM_WORLD);
-  return GetOutput() > 0;
+    MPI_Bcast(&integral, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    GetOutput() = integral;
+    return true;
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+   return true;
 }
 
 }  // namespace krasnopevtseva_v_monte_carlo_integration

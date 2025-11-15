@@ -2,7 +2,10 @@
 
 #include <numeric>
 #include <vector>
-
+#include <random>
+#include <cmath>
+#include <cstddef>
+#include <tuple>
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
 #include "util/include/util.hpp"
 
@@ -15,46 +18,53 @@ KrasnopevtsevaV_MCIntegrationSEQ::KrasnopevtsevaV_MCIntegrationSEQ(const InType 
 }
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::ValidationImpl() {
-  return (GetInput() > 0) && (GetOutput() == 0);
+  const auto &input = GetInput();
+  // Проверяем корректность параметров
+  double a = std::get<0>(input);
+  double b = std::get<1>(input);
+  int num_points = std::get<2>(input);
+  
+  return (a <= b) && (num_points > 0);
 }
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::PreProcessingImpl() {
-  GetOutput() = 2 * GetInput();
-  return GetOutput() > 0;
+  GetOutput() = 0.0;
+  return true;
 }
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
-  if (GetInput() == 0) {
+  const auto &input = GetInput();
+  double a = std::get<0>(input);
+  double b = std::get<1>(input);
+  int num_points = std::get<2>(input);
+
+  if (a >= b || num_points <= 0) {
     return false;
   }
 
-  for (InType i = 0; i < GetInput(); i++) {
-    for (InType j = 0; j < GetInput(); j++) {
-      for (InType k = 0; k < GetInput(); k++) {
-        std::vector<InType> tmp(i + j + k, 1);
-        GetOutput() += std::accumulate(tmp.begin(), tmp.end(), 0);
-        GetOutput() -= i + j + k;
-      }
-    }
+  double sum = 0.0;
+  
+  // генератор вихрь Мерсенна
+  std::random_device rd;
+  std::mt19937 gen(rd());
+  std::uniform_real_distribution<double> dis(a, b);
+  
+  // Метод Монте-Карло для интегрирования функции cos(x)*x^3
+  for (int i = 0; i < num_points; i++) {
+    double x = dis(gen);  // случайная точка в интервале [a, b]
+    double fx = std::cos(x) * x * x * x;  // вычисляем значение функции cos(x)*x³
+    sum += fx;
   }
-
-  const int num_threads = ppc::util::GetNumThreads();
-  GetOutput() *= num_threads;
-
-  int counter = 0;
-  for (int i = 0; i < num_threads; i++) {
-    counter++;
-  }
-
-  if (counter != 0) {
-    GetOutput() /= counter;
-  }
-  return GetOutput() > 0;
+  
+  // Вычисляем приближенное значение интеграла
+  double integral = (b - a) * sum / num_points;
+  GetOutput() = integral;
+  
+  return true;
 }
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::PostProcessingImpl() {
-  GetOutput() -= GetInput();
-  return GetOutput() > 0;
+   return true;
 }
 
 }  // namespace krasnopevtseva_v_monte_carlo_integration

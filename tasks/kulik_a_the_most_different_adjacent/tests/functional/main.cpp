@@ -1,10 +1,13 @@
 #include <gtest/gtest.h>
 
+#include <array>
 #include <cmath>
 #include <cstddef>
 #include <fstream>
+#include <ios>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"

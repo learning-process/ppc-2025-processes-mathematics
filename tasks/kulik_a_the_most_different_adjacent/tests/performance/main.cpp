@@ -5,11 +5,13 @@
 #include <fstream>
 #include <stdexcept>
 #include <string>
+#include <ios>
 
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
 #include "kulik_a_the_most_different_adjacent/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace kulik_a_the_most_different_adjacent {
 

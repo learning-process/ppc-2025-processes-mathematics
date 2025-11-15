@@ -38,7 +38,7 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   }
   int size = update_n / proc_num;
   std::vector<int> elemcnt(proc_num, size);
-  elemcnt[proc_num - 1] = static_cast<int>(n) - size * (proc_num - 1);
+  elemcnt[proc_num - 1] = static_cast<int>(n) - (size * (proc_num - 1));
   std::vector<int> startpos(proc_num);
   for (int i = 0; i < proc_num; ++i) {
     startpos[i] = i * size;

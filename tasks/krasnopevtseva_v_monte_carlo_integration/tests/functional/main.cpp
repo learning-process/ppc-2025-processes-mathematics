@@ -45,18 +45,14 @@ class KrasnopevtsevaV_MCIntegrationFuncTests : public ppc::util::BaseRunFuncTest
     auto test_param = std::get<static_cast<size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     input_data_ = std::get<0>(test_param);
     
-    // Вычисляем ожидаемое значение интеграла аналитически для проверки
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
-    //int points = std::get<2>(input_data_);
     
-    // Простое приближение для проверки (можно заменить на более точное)
     expected_integral = (b*b*b - 6*b)*std::sin(b) + (3*b*b - 6)*std::cos(b) - (a*a*a - 6*a)*std::sin(a) - (3*a*a - 6)*std::cos(a);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    // Проверяем, что результат близок к ожидаемому значению
-    // с учетом погрешности метода Монте-Карло
+
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
     int points = std::get<2>(input_data_);

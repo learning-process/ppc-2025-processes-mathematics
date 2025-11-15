@@ -19,7 +19,6 @@ KrasnopevtsevaV_MCIntegrationSEQ::KrasnopevtsevaV_MCIntegrationSEQ(const InType 
 
 bool KrasnopevtsevaV_MCIntegrationSEQ::ValidationImpl() {
   const auto &input = GetInput();
-  // Проверяем корректность параметров
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
@@ -49,14 +48,13 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
   std::mt19937 gen(rd());
   std::uniform_real_distribution<double> dis(a, b);
   
-  // Метод Монте-Карло для интегрирования функции cos(x)*x^3
+  // cos(x)*x^3
   for (int i = 0; i < num_points; i++) {
-    double x = dis(gen);  // случайная точка в интервале [a, b]
-    double fx = std::cos(x) * x * x * x;  // вычисляем значение функции cos(x)*x³
+    double x = dis(gen); 
+    double fx = std::cos(x) * x * x * x;  
     sum += fx;
   }
   
-  // Вычисляем приближенное значение интеграла
   double integral = (b - a) * sum / num_points;
   GetOutput() = integral;
   

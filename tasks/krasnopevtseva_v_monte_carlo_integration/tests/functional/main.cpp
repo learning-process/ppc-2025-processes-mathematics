@@ -82,7 +82,7 @@ const std::array<TestType, 6> kTestParam = {
     std::make_tuple(std::make_tuple(0.0, 3.0, 100000), "large_interval_many_points"),
     std::make_tuple(std::make_tuple(-1.0, 2.0, 50000), "negative_interval"),
     std::make_tuple(std::make_tuple(0.0, 1.0, 20000), "small_range_high_precision"),
-    std::make_tuple(std::make_tuple(0.0, 3.14159, 15000), "pi_interval")
+    std::make_tuple(std::make_tuple(0.0, 3.14159, 1500000), "pi_interval")
 
 };
 

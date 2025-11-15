@@ -3,6 +3,7 @@
 #include <string>
 #include <tuple>
 #include <vector>
+
 #include "task/include/task.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {

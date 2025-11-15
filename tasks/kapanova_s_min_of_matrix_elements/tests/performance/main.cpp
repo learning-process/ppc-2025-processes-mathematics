@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -28,67 +29,65 @@ class KapanovaSMinOfMatrixElementsPerfTests : public ppc::util::BaseRunPerfTests
 
  private:
   InType input_matrix_;
-  
+
   std::vector<std::vector<int>> LoadMatrixFromFile() {
-    std::string file_path = ppc::util::GetAbsoluteTaskPath(
-        PPC_ID_kapanova_s_min_of_matrix_elements, 
-        "data/matrix_3x3.txt"  
-    );
-    
+    std::string file_path =
+        ppc::util::GetAbsoluteTaskPath(PPC_ID_kapanova_s_min_of_matrix_elements, "data/matrix_3x3.txt");
+
     std::ifstream file(file_path);
     if (!file.is_open()) {
       return CreateTestMatrix();
     }
-    
+
     std::vector<std::vector<int>> matrix;
     std::string line;
-    
+
     while (std::getline(file, line)) {
       std::vector<int> row;
       std::istringstream iss(line);
       int value;
-      
+
       while (iss >> value) {
         row.push_back(value);
       }
-      
+
       if (!row.empty()) {
         matrix.push_back(row);
       }
     }
-    
+
     file.close();
-    
+
     if (matrix.empty()) {
       return CreateTestMatrix();
     }
-    
+
     return matrix;
   }
-  
+
   std::vector<std::vector<int>> CreateTestMatrix() {
-    const int size = 1000;  
+    const int size = 1000;
     std::vector<std::vector<int>> matrix(size, std::vector<int>(size));
-    
+
     int counter = 1;
     for (int i = 0; i < size; i++) {
       for (int j = 0; j < size; j++) {
         matrix[i][j] = counter++;
       }
     }
-    
-    matrix[size/2][size/2] = -100;
-    
+
+    matrix[size / 2][size / 2] = -100;
+
     return matrix;
   }
-  
-  int FindExpectedMin(const std::vector<std::vector<int>>& matrix) {
+
+  int FindExpectedMin(const std::vector<std::vector<int>> &matrix) {
     if (matrix.empty() || matrix[0].empty()) {
       return 0;
     }
-    
+
     int min_val = matrix[0][0];
-    for (const auto& row : matrix) {
+    for (const auto &row : matrix) {
       for (int val : row) {
         if (val < min_val) {
           min_val = val;
@@ -104,7 +103,8 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, KapanovaSMinOfMatrixElementsMPI, KapanovaSMinOfMatrixElementsSEQ>(PPC_SETTINGS_kapanova_s_min_of_matrix_elements);
+    ppc::util::MakeAllPerfTasks<InType, KapanovaSMinOfMatrixElementsMPI, KapanovaSMinOfMatrixElementsSEQ>(
+        PPC_SETTINGS_kapanova_s_min_of_matrix_elements);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

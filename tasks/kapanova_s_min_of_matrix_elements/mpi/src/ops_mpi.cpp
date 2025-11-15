@@ -1,6 +1,7 @@
 #include "kapanova_s_min_of_matrix_elements/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
+
 #include <climits>
 #include <vector>
 
@@ -16,7 +17,7 @@ KapanovaSMinOfMatrixElementsMPI::KapanovaSMinOfMatrixElementsMPI(const InType &i
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
-  const auto& matrix = GetInput();
+  const auto &matrix = GetInput();
   return !matrix.empty() && !matrix[0].empty();
 }
 
@@ -26,8 +27,8 @@ bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
-  const auto& matrix = GetInput();
-  
+  const auto &matrix = GetInput();
+
   if (matrix.empty() || matrix[0].empty()) {
     return false;
   }
@@ -43,7 +44,7 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
   int remainder = total_elements % size;
 
   int start_element, end_element;
-  
+
   if (rank < remainder) {
     start_element = rank * (elements_per_process + 1);
     end_element = start_element + elements_per_process + 1;
@@ -52,11 +53,11 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
     end_element = start_element + elements_per_process;
   }
   int local_min = INT_MAX;
-  
+
   for (int elem_idx = start_element; elem_idx < end_element; elem_idx++) {
     int row = elem_idx / total_cols;
     int col = elem_idx % total_cols;
-    
+
     if (matrix[row][col] < local_min) {
       local_min = matrix[row][col];
     }

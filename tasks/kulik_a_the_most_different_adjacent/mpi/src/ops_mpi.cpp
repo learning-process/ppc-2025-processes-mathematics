@@ -55,7 +55,7 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
     double val = 0.0;
     int ind = 0;
   } max_diff, max_diffall;
-  
+
   for (int i = 0; i < size - 1; ++i) {
     if (std::abs(buf[i + 1] - buf[i]) > max_diff.val) {
       max_diff.val = std::abs(buf[i + 1] - buf[i]);

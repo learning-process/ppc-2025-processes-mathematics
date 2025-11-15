@@ -26,8 +26,8 @@ class KulikATheMostDifferentAdjacentPerfTests : public ppc::util::BaseRunPerfTes
     size_t vector_size = 0;
     filestream.read(reinterpret_cast<char *>(&vector_size), sizeof(size_t));
     input_data_.resize(vector_size);
-    filestream.read(reinterpret_cast<char *>(input_data_.data()), 
-                   static_cast<std::streamsize>(vector_size * sizeof(double)));
+    filestream.read(reinterpret_cast<char *>(input_data_.data()),
+                    static_cast<std::streamsize>(vector_size * sizeof(double)));
     filestream.close();
   }
 

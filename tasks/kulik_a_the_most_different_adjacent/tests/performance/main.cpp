@@ -1,5 +1,11 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <cstddef>
+#include <fstream>
+#include <stdexcept>
+#include <string>
+
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
 #include "kulik_a_the_most_different_adjacent/seq/include/ops_seq.hpp"
@@ -8,7 +14,7 @@
 namespace kulik_a_the_most_different_adjacent {
 
 class KulikATheMostDifferentAdjacentPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
 
   void SetUp() override {
     std::string filename = "vector2.bin";
@@ -17,10 +23,11 @@ class KulikATheMostDifferentAdjacentPerfTests : public ppc::util::BaseRunPerfTes
     if (!filestream.is_open()) {
       throw std::runtime_error("Failed to open file: " + filename);
     }
-    size_t vector_size;
+    size_t vector_size = 0;
     filestream.read(reinterpret_cast<char *>(&vector_size), sizeof(size_t));
     input_data_.resize(vector_size);
-    filestream.read(reinterpret_cast<char *>(input_data_.data()), vector_size * sizeof(double));
+    filestream.read(reinterpret_cast<char *>(input_data_.data()), 
+                   static_cast<std::streamsize>(vector_size * sizeof(double)));
     filestream.close();
   }
 

@@ -1,16 +1,10 @@
 #include <gtest/gtest.h>
-#include <stb/stb_image.h>
 
-#include <algorithm>
-#include <array>
+#include <cmath>
 #include <cstddef>
-#include <cstdint>
-#include <numeric>
+#include <fstream>
 #include <stdexcept>
 #include <string>
-#include <tuple>
-#include <utility>
-#include <vector>
 
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 #include "kulik_a_the_most_different_adjacent/mpi/include/ops_mpi.hpp"
@@ -35,10 +29,11 @@ class KulikATheMostDifferentAdjacentFuncTests : public ppc::util::BaseRunFuncTes
     if (!filestream.is_open()) {
       throw std::runtime_error("Failed to open file: " + filename);
     }
-    size_t vector_size;
+    size_t vector_size = 0;
     filestream.read(reinterpret_cast<char *>(&vector_size), sizeof(size_t));
     input_data_.resize(vector_size);
-    filestream.read(reinterpret_cast<char *>(input_data_.data()), vector_size * sizeof(double));
+    filestream.read(reinterpret_cast<char *>(input_data_.data()), 
+                   static_cast<std::streamsize>(vector_size * sizeof(double)));
     filestream.close();
   }
 

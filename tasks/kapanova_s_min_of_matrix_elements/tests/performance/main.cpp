@@ -22,17 +22,17 @@ struct PerfTestData {
   std::string test_name;
   std::string description;
 
-  PerfTestData(std::string name, std::string desc)
-      : test_name(std::move(name)), description(std::move(desc)) {}
+  PerfTestData(std::string name, std::string desc) : test_name(std::move(name)), description(std::move(desc)) {}
 };
 
-class KapanovaSMinOfMatrixElementsPerfTests
-    : public testing::TestWithParam<PerfTestData> {
+class KapanovaSMinOfMatrixElementsPerfTests : public testing::TestWithParam<PerfTestData> {
  private:
   std::vector<std::vector<int>> input_matrix_;
 
  public:
-  void SetUp() override { input_matrix_ = CreateTestMatrix(); }
+  void SetUp() override {
+    input_matrix_ = CreateTestMatrix();
+  }
 
   static bool CheckTestOutputData(OutType output_data) {
     return output_data >= 0;
@@ -40,8 +40,7 @@ class KapanovaSMinOfMatrixElementsPerfTests
 
   static std::vector<std::vector<int>> LoadMatrixFromFile() {
     std::vector<std::vector<int>> matrix;
-    std::string abs_path =
-        "tasks/kapanova_s_min_of_matrix_elements/data/matrix_3x3.txt";
+    std::string abs_path = "tasks/kapanova_s_min_of_matrix_elements/data/matrix_3x3.txt";
     std::ifstream file(abs_path);
 
     if (file.is_open()) {
@@ -88,7 +87,9 @@ class KapanovaSMinOfMatrixElementsPerfTests
     return min_val;
   }
 
-  std::vector<std::vector<int>> GetTestInputData() { return input_matrix_; }
+  std::vector<std::vector<int>> GetTestInputData() {
+    return input_matrix_;
+  }
 };
 
 TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
@@ -97,8 +98,7 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
   EXPECT_FALSE(test_input_data.empty());
   EXPECT_FALSE(test_input_data[0].empty());
 
-  auto task =
-      std::make_shared<KapanovaSMinOfMatrixElementsSEQ>(test_input_data);
+  auto task = std::make_shared<KapanovaSMinOfMatrixElementsSEQ>(test_input_data);
   bool success = task->Run();
   EXPECT_TRUE(success);
 
@@ -114,22 +114,17 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
 
 TEST_P(KapanovaSMinOfMatrixElementsPerfTests, TestDescription) {
   const auto &test_param = GetParam();
-  std::cout << "Running test: " << test_param.test_name << " - "
-            << test_param.description << '\n';
+  std::cout << "Running test: " << test_param.test_name << " - " << test_param.description << '\n';
 
   const auto test_input_data = GetTestInputData();
   EXPECT_FALSE(test_input_data.empty());
 }
 
-const auto kGtestValues = testing::Values(
-    PerfTestData("small_matrix", "Small matrix test"),
-    PerfTestData("medium_matrix", "Medium matrix test"),
-    PerfTestData("large_matrix", "Large matrix test"));
+const auto kGtestValues = testing::Values(PerfTestData("small_matrix", "Small matrix test"),
+                                          PerfTestData("medium_matrix", "Medium matrix test"),
+                                          PerfTestData("large_matrix", "Large matrix test"));
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, KapanovaSMinOfMatrixElementsPerfTests,
-                         kGtestValues,
-                         [](const testing::TestParamInfo<PerfTestData> &info) {
-                           return info.param.test_name;
-                         });
+INSTANTIATE_TEST_SUITE_P(RunModeTests, KapanovaSMinOfMatrixElementsPerfTests, kGtestValues,
+                         [](const testing::TestParamInfo<PerfTestData> &info) { return info.param.test_name; });
 
 }  // namespace

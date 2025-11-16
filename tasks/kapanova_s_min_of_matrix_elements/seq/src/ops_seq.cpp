@@ -21,14 +21,14 @@ bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
   if (matrix.empty()) {
     return false;
   }
-  
+
   const std::size_t cols = matrix[0].size();
   for (const auto &row : matrix) {
     if (row.size() != cols) {
       return false;
     }
   }
-  
+
   return true;
 }
 

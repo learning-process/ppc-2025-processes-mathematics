@@ -30,8 +30,10 @@ TEST_F(MatrixMinTest, BasicTest) {
   int expected_min = 1;
 
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool success = task_seq.Run();
-  EXPECT_TRUE(success);
+  task_seq.Validation();
+  task_seq.PreProcessing();
+  task_seq.Run();
+  task_seq.PostProcessing();
   EXPECT_EQ(expected_min, task_seq.GetOutput());
 
   int actual_min = FindMinSequential(matrix);
@@ -43,8 +45,10 @@ TEST_F(MatrixMinTest, NegativeNumbers) {
   int expected_min = -1;
 
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool success = task_seq.Run();
-  EXPECT_TRUE(success);
+  task_seq.Validation();
+  task_seq.PreProcessing();
+  task_seq.Run();
+  task_seq.PostProcessing();
   EXPECT_EQ(expected_min, task_seq.GetOutput());
 
   int actual_min = FindMinSequential(matrix);
@@ -56,8 +60,10 @@ TEST_F(MatrixMinTest, SingleElement) {
   int expected_min = 5;
 
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool success = task_seq.Run();
-  EXPECT_TRUE(success);
+  task_seq.Validation();
+  task_seq.PreProcessing();
+  task_seq.Run();
+  task_seq.PostProcessing();
   EXPECT_EQ(expected_min, task_seq.GetOutput());
 }
 
@@ -65,16 +71,16 @@ TEST_F(MatrixMinTest, EmptyMatrix) {
   std::vector<std::vector<int>> matrix = {};
 
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool success = task_seq.Run();
-  EXPECT_FALSE(success);
+  bool validation = task_seq.Validation();
+  EXPECT_FALSE(validation);
 }
 
 TEST_F(MatrixMinTest, DifferentRowSizes) {
   std::vector<std::vector<int>> matrix = {{1, 2}, {3}};
 
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool success = task_seq.Run();
-  EXPECT_FALSE(success);
+  bool validation = task_seq.Validation();
+  EXPECT_FALSE(validation);
 }
 
 }  // namespace

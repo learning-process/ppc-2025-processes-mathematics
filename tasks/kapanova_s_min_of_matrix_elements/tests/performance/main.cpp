@@ -99,17 +99,18 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
   EXPECT_FALSE(test_input_data[0].empty());
 
   auto task = std::make_shared<KapanovaSMinOfMatrixElementsSEQ>(test_input_data);
-  bool success = task->Run();
-  EXPECT_TRUE(success);
 
-  if (success) {
-    OutType output_data = task->GetOutput();
-    bool result_correct = CheckTestOutputData(output_data);
-    EXPECT_TRUE(result_correct);
+  task->Validation();
+  task->PreProcessing();
+  task->Run();
+  task->PostProcessing();
 
-    int expected_min = FindExpectedMin(test_input_data);
-    EXPECT_EQ(expected_min, output_data);
-  }
+  OutType output_data = task->GetOutput();
+  bool result_correct = CheckTestOutputData(output_data);
+  EXPECT_TRUE(result_correct);
+
+  int expected_min = FindExpectedMin(test_input_data);
+  EXPECT_EQ(expected_min, output_data);
 }
 
 TEST_P(KapanovaSMinOfMatrixElementsPerfTests, TestDescription) {
@@ -118,6 +119,12 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, TestDescription) {
 
   const auto test_input_data = GetTestInputData();
   EXPECT_FALSE(test_input_data.empty());
+
+  auto task = std::make_shared<KapanovaSMinOfMatrixElementsSEQ>(test_input_data);
+  task->Validation();
+  task->PreProcessing();
+  task->Run();
+  task->PostProcessing();
 }
 
 const auto kGtestValues = testing::Values(PerfTestData("small_matrix", "Small matrix test"),

@@ -25,7 +25,7 @@ bool KrasnopevtsevaV_MCIntegrationMPI::ValidationImpl() {
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
 
-  return (a < b) && (num_points > 0);
+  return (a <= b) && (num_points > 0);
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::PreProcessingImpl() {
@@ -39,7 +39,7 @@ bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
 
-  if (a >= b || num_points <= 0) {
+  if (a > b || num_points <= 0) {
     return false;
   }
 

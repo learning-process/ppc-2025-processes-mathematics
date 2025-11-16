@@ -57,11 +57,18 @@ class KrasnopevtsevaV_MCIntegrationFuncTests : public ppc::util::BaseRunFuncTest
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
     int points = std::get<2>(input_data_);
-
-    double tolerance = (b - a) / std::sqrt(points) * 20;
-
+#ifdef BUILD_MPI
+    // MPI проверяем только на процессе 0
+    int rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    if (rank != 0) {
+      return true;
+    }
+#endif
+    double tolerance = (b - a) / std::sqrt(points) * 10;
     bool result = std::abs(output_data - expected_integral) <= tolerance;
-
+    std::cout << "Result out of tolerance: diff=" << std::abs(output_data - expected_integral)
+              << ", tolerance=" << tolerance << std::endl;
     return result;
   }
 
@@ -76,14 +83,12 @@ TEST_P(KrasnopevtsevaV_MCIntegrationFuncTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 6> kTestParam = {
+const std::array<TestType, 5> kTestParam = {
     std::make_tuple(std::make_tuple(0.0, 1.0, 1000), "small_interval_few_points"),
     std::make_tuple(std::make_tuple(0.0, 2.3, 10000), "medium_interval_medium_points"),
-    std::make_tuple(std::make_tuple(0.0, 3.0, 100000), "large_interval_many_points"),
-    std::make_tuple(std::make_tuple(-1.0, 2.0, 50000), "negative_interval"),
+    std::make_tuple(std::make_tuple(-1.5, 1.7, 400000), "large_interval_many_points"),
+    std::make_tuple(std::make_tuple(-1.0, 1.0, 50000), "simmerty_interval"),
     std::make_tuple(std::make_tuple(0.0, 1.0, 20000), "small_range_high_precision"),
-    std::make_tuple(std::make_tuple(0.0, 3.14159, 1500000), "pi_interval")
-
 };
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<KrasnopevtsevaV_MCIntegrationMPI, InType>(

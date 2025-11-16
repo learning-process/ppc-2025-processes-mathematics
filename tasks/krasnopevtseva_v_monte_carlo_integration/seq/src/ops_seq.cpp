@@ -38,7 +38,7 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
 
-  if (a >= b || num_points <= 0) {
+  if (a > b || num_points <= 0) {
     return false;
   }
 

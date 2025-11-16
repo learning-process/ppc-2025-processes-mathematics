@@ -1,23 +1,35 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
+#include <algorithm>
 #include <climits>
-#include <numeric>
 #include <vector>
-
-#include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {
 
-KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &in) {
+KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &in) : BaseTask() {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
+ppc::task::TypeOfTask KapanovaSMinOfMatrixElementsSEQ::GetStaticTypeOfTask() {
+  return ppc::task::TypeOfTask::kSEQ;
+}
+
 bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
   const auto &matrix = GetInput();
-  return !matrix.empty() && !matrix[0].empty();
+  if (matrix.empty()) {
+    return false;
+  }
+  
+  const size_t cols = matrix[0].size();
+  for (const auto &row : matrix) {
+    if (row.size() != cols) {
+      return false;
+    }
+  }
+  
+  return true;
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {
@@ -27,13 +39,10 @@ bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {
 
 bool KapanovaSMinOfMatrixElementsSEQ::RunImpl() {
   const auto &matrix = GetInput();
-  if (matrix.empty() || matrix[0].empty()) {
-    return false;
-  }
-  int min_val = matrix[0][0];
+  int min_val = INT_MAX;
 
   for (const auto &row : matrix) {
-    for (int value : row) {
+    for (const int value : row) {
       if (value < min_val) {
         min_val = value;
       }

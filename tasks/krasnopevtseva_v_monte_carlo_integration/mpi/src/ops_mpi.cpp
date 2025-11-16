@@ -2,11 +2,11 @@
 
 #include <mpi.h>
 
-#include <numeric>
-#include <vector>
-#include <tuple>
 #include <cmath>
+#include <numeric>
 #include <random>
+#include <tuple>
+#include <vector>
 
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
 #include "util/include/util.hpp"
@@ -50,8 +50,8 @@ bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
   int remainder = num_points % size;
 
   if (rank < remainder) {
-       local_points++;
-    }
+    local_points++;
+  }
   double local_sum = 0.0;
   std::mt19937 gen(std::random_device{}() + rank);
   std::uniform_real_distribution<double> dis(a, b);
@@ -73,7 +73,7 @@ bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
 }
 
 bool KrasnopevtsevaV_MCIntegrationMPI::PostProcessingImpl() {
-   return true;
+  return true;
 }
 
 }  // namespace krasnopevtseva_v_monte_carlo_integration

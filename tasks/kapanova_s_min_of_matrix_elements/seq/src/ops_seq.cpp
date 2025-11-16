@@ -26,7 +26,7 @@ bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
   }
 
   const std::size_t cols = matrix[0].size();
-  return std::all_of(matrix.begin(), matrix.end(), [cols](const auto &row) { return row.size() == cols; });
+  return std::ranges::all_of(matrix, [cols](const auto &row) { return row.size() == cols; });
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {

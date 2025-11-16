@@ -1,9 +1,11 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
-#include <algorithm>  // Добавлено для std::min и std::ranges::all_of
+#include <algorithm>
 #include <climits>
 #include <cstddef>
 #include <vector>
+
+#include "task/include/task.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {
 
@@ -24,13 +26,7 @@ bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
   }
 
   const std::size_t cols = matrix[0].size();
-  for (const auto &row : matrix) {
-    if (row.size() != cols) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::all_of(matrix.begin(), matrix.end(), [cols](const auto &row) { return row.size() == cols; });
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {

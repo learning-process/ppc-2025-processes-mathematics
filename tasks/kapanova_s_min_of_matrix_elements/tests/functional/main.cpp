@@ -1,26 +1,23 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <vector>
 
-#include "kapanova_s_min_of_matrix_elements/mpi/include/ops_mpi.hpp"
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
 namespace {
 
-using namespace kapanova_s_min_of_matrix_elements;
+using kapanova_s_min_of_matrix_elements::InType;
+using kapanova_s_min_of_matrix_elements::KapanovaSMinOfMatrixElementsSEQ;
 
 class MatrixMinTest : public ::testing::Test {
  protected:
   void SetUp() override {}
 
-  int FindMinSequential(const std::vector<std::vector<int>> &matrix) {
+  static int FindMinSequential(const std::vector<std::vector<int>> &matrix) {
     int min_val = matrix[0][0];
     for (const auto &row : matrix) {
       for (const int value : row) {
-        if (value < min_val) {
-          min_val = value;
-        }
+        min_val = std::min(value, min_val);
       }
     }
     return min_val;

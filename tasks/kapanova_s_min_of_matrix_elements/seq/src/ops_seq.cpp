@@ -1,12 +1,12 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
-#include <algorithm>
 #include <climits>
+#include <cstddef>
 #include <vector>
 
 namespace kapanova_s_min_of_matrix_elements {
 
-KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &in) : BaseTask() {
+KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
@@ -21,14 +21,14 @@ bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
   if (matrix.empty()) {
     return false;
   }
-
-  const size_t cols = matrix[0].size();
+  
+  const std::size_t cols = matrix[0].size();
   for (const auto &row : matrix) {
     if (row.size() != cols) {
       return false;
     }
   }
-
+  
   return true;
 }
 
@@ -43,9 +43,7 @@ bool KapanovaSMinOfMatrixElementsSEQ::RunImpl() {
 
   for (const auto &row : matrix) {
     for (const int value : row) {
-      if (value < min_val) {
-        min_val = value;
-      }
+      min_val = std::min(value, min_val);
     }
   }
 

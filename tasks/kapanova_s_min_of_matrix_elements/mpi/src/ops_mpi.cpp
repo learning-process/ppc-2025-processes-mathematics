@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstddef>  // Добавлено для size_t
 #include <vector>
 
 namespace kapanova_s_min_of_matrix_elements {
@@ -24,7 +25,7 @@ bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
     return false;
   }
 
-  const size_t cols = matrix[0].size();
+  const std::size_t cols = matrix[0].size();
   for (const auto &row : matrix) {
     if (row.size() != cols) {
       return false;
@@ -40,36 +41,30 @@ bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
-  int mpi_initialized;
-  MPI_Initialized(&mpi_initialized);
-  if (!mpi_initialized) {
-    return false;
-  }
-
   const auto &matrix = GetInput();
 
-  int rank = 0, size = 0;
+  int mpi_initialized = 0;
+  MPI_Initialized(&mpi_initialized);
+  if (mpi_initialized == 0) {
+    MPI_Init(nullptr, nullptr);
+  }
+
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  // Если матрица пустая
   if (matrix.empty() || matrix[0].empty()) {
-    int local_min = INT_MAX;
-    int global_min = INT_MAX;
     if (size > 1) {
-      MPI_Allreduce(&local_min, &global_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-    } else {
-      global_min = local_min;
+      MPI_Finalize();
     }
-    GetOutput() = global_min;
-    return true;
+    return false;
   }
 
   const int total_rows = static_cast<int>(matrix.size());
   const int total_cols = static_cast<int>(matrix[0].size());
   const int total_elements = total_rows * total_cols;
 
-  // Распределение элементов
   int elements_per_process = total_elements / size;
   int remainder = total_elements % size;
 
@@ -78,24 +73,18 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
 
   int local_min = INT_MAX;
 
-  // Поиск локального минимума
   for (int elem_idx = start_element; elem_idx < end_element; ++elem_idx) {
     int row = elem_idx / total_cols;
     int col = elem_idx % total_cols;
 
     if (row < total_rows && col < total_cols) {
-      if (matrix[row][col] < local_min) {
-        local_min = matrix[row][col];
-      }
+      local_min = std::min(matrix[row][col], local_min);
     }
   }
 
-  // Сбор всех минимумов
-  int global_min = INT_MAX;
+  int global_min = local_min;
   if (size > 1) {
     MPI_Allreduce(&local_min, &global_min, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
-  } else {
-    global_min = local_min;
   }
 
   GetOutput() = global_min;
@@ -103,7 +92,7 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PostProcessingImpl() {
-  return true;
+  return GetOutput() != INT_MAX;
 }
 
 }  // namespace kapanova_s_min_of_matrix_elements

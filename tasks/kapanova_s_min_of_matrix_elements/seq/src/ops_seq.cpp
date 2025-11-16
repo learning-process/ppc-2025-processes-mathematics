@@ -1,5 +1,6 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
+#include <algorithm>
 #include <climits>
 #include <cstddef>
 #include <vector>

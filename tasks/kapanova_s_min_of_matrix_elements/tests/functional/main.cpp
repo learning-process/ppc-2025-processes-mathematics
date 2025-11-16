@@ -1,5 +1,6 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <vector>
 
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"

@@ -4,8 +4,10 @@
 
 #include <algorithm>
 #include <climits>
-#include <cstddef>  // Добавлено для size_t
+#include <cstddef>
 #include <vector>
+
+#include "task/include/task.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {
 
@@ -26,13 +28,7 @@ bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
   }
 
   const std::size_t cols = matrix[0].size();
-  for (const auto &row : matrix) {
-    if (row.size() != cols) {
-      return false;
-    }
-  }
-
-  return true;
+  return std::ranges::all_of(matrix, [cols](const auto &row) { return row.size() == cols; });
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
@@ -68,7 +64,7 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
   int elements_per_process = total_elements / size;
   int remainder = total_elements % size;
 
-  int start_element = rank * elements_per_process + std::min(rank, remainder);
+  int start_element = (rank * elements_per_process) + std::min(rank, remainder);
   int end_element = start_element + elements_per_process + (rank < remainder ? 1 : 0);
 
   int local_min = INT_MAX;

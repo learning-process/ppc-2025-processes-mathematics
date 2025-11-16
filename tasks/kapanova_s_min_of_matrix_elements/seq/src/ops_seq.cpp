@@ -11,7 +11,7 @@ namespace kapanova_s_min_of_matrix_elements {
 
 KapanovaSMinOfMatrixElementsSEQ::KapanovaSMinOfMatrixElementsSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput().assign(in.begin(), in.end());
+  GetInput() = InType(in.begin(), in.end());
   GetOutput() = 0;
 }
 

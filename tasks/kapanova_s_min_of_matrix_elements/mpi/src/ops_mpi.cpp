@@ -8,7 +8,7 @@ class KapanovaSMinOfMatrixElementsMPI : public BaseTask {
   static ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  
+
   explicit KapanovaSMinOfMatrixElementsMPI(const InType &in);
 
  private:

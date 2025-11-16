@@ -17,17 +17,17 @@ struct PerfTestData {
   std::string test_name;
   std::string description;
 
-  PerfTestData(std::string name, std::string desc)
-      : test_name(std::move(name)), description(std::move(desc)) {}
+  PerfTestData(std::string name, std::string desc) : test_name(std::move(name)), description(std::move(desc)) {}
 };
 
-class KapanovaSMinOfMatrixElementsPerfTests
-    : public testing::TestWithParam<PerfTestData> {
+class KapanovaSMinOfMatrixElementsPerfTests : public testing::TestWithParam<PerfTestData> {
  private:
   std::vector<std::vector<int>> input_matrix_{};
 
  public:
-  void SetUp() override { input_matrix_ = CreateTestMatrix(); }
+  void SetUp() override {
+    input_matrix_ = CreateTestMatrix();
+  }
 
   static bool CheckTestOutputData(OutType output_data) {
     return output_data >= 0;
@@ -84,7 +84,9 @@ class KapanovaSMinOfMatrixElementsPerfTests
     return min_val;
   }
 
-  std::vector<std::vector<int>> GetTestInputData() { return input_matrix_; }
+  std::vector<std::vector<int>> GetTestInputData() {
+    return input_matrix_;
+  }
 };
 
 TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
@@ -110,23 +112,18 @@ TEST_P(KapanovaSMinOfMatrixElementsPerfTests, RunPerfModes) {
 
 // Добавим тест, который использует параметр для вывода информации
 TEST_P(KapanovaSMinOfMatrixElementsPerfTests, TestDescription) {
-  const auto &test_param = GetParam(); // Теперь переменная используется
-  std::cout << "Running test: " << test_param.test_name 
-            << " - " << test_param.description << std::endl;
-  
+  const auto &test_param = GetParam();  // Теперь переменная используется
+  std::cout << "Running test: " << test_param.test_name << " - " << test_param.description << std::endl;
+
   const auto test_input_data = GetTestInputData();
   EXPECT_FALSE(test_input_data.empty());
 }
 
-const auto kGtestValues = testing::Values(
-    PerfTestData("small_matrix", "Small matrix test"),
-    PerfTestData("medium_matrix", "Medium matrix test"),
-    PerfTestData("large_matrix", "Large matrix test"));
+const auto kGtestValues = testing::Values(PerfTestData("small_matrix", "Small matrix test"),
+                                          PerfTestData("medium_matrix", "Medium matrix test"),
+                                          PerfTestData("large_matrix", "Large matrix test"));
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, KapanovaSMinOfMatrixElementsPerfTests,
-                         kGtestValues,
-                         [](const testing::TestParamInfo<PerfTestData> &info) {
-                           return info.param.test_name;
-                         });
+INSTANTIATE_TEST_SUITE_P(RunModeTests, KapanovaSMinOfMatrixElementsPerfTests, kGtestValues,
+                         [](const testing::TestParamInfo<PerfTestData> &info) { return info.param.test_name; });
 
 }  // namespace

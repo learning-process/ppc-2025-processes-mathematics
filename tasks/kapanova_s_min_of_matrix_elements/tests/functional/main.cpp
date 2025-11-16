@@ -65,7 +65,7 @@ TEST_F(MatrixMinTest, SingleElement) {
 
 TEST_F(MatrixMinTest, EmptyMatrix) {
   std::vector<std::vector<int>> matrix = {};
-  
+
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
   bool success = task_seq.Run();
   EXPECT_FALSE(success);
@@ -73,7 +73,7 @@ TEST_F(MatrixMinTest, EmptyMatrix) {
 
 TEST_F(MatrixMinTest, DifferentRowSizes) {
   std::vector<std::vector<int>> matrix = {{1, 2}, {3}};
-  
+
   KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
   bool success = task_seq.Run();
   EXPECT_FALSE(success);

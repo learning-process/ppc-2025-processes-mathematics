@@ -1,10 +1,7 @@
 #include <gtest/gtest.h>
 
-#include <algorithm>
 #include <array>
 #include <climits>
-#include <cstddef>
-#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -23,12 +20,10 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
     const auto &matrix = std::get<0>(test_param);
     const auto &expected = std::get<1>(test_param);
 
-    // Создаем уникальное имя на основе размера матрицы и ожидаемого значения
     std::string name = "matrix_" + std::to_string(matrix.size()) + "x" +
                        (matrix.empty() ? "0" : std::to_string(matrix[0].size())) + "_min_" + std::to_string(expected);
 
-    // Заменяем возможные проблемные символы
-    std::replace(name.begin(), name.end(), '-', 'n');  // заменяем минус на 'n'
+    std::ranges::replace(name, '-', 'n');
     return name;
   }
 
@@ -40,7 +35,6 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    // Для пустой матрицы ожидаем INT_MAX
     if (input_matrix_.empty()) {
       return output_data == INT_MAX;
     }
@@ -52,13 +46,13 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
   }
 
  private:
-  TestType test_params_;
-  InType input_matrix_;
-  OutType expected_output_;
+  TestType test_params_{};
+  InType input_matrix_{};
+  OutType expected_output_{};
 };
 
 namespace {
-// Тестовые данные - убедитесь, что все матрицы уникальны по размеру или ожидаемому значению
+
 const std::vector<std::vector<int>> kMatrix1 = {{3, 1, 4}, {2, 5, 9}, {6, 7, 8}};
 const int kExpected1 = 1;
 
@@ -93,7 +87,6 @@ TEST_P(KapanovaSMinOfMatrixElementsFuncTests, FindMatrixMinimum) {
   ExecuteTest(GetParam());
 }
 
-// Тестовые параметры: (input_matrix, expected_min_value)
 const std::array<TestType, 10> kTestParam = {
     std::make_tuple(kMatrix1, kExpected1),           std::make_tuple(kMatrix2, kExpected2),
     std::make_tuple(kMatrix3, kExpected3),           std::make_tuple(kMatrix4, kExpected4),

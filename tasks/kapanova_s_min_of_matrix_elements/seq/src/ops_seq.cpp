@@ -1,7 +1,7 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
-#include <algorithm>
 #include <climits>
+#include <cstddef>
 #include <vector>
 
 namespace kapanova_s_min_of_matrix_elements {
@@ -21,18 +21,11 @@ bool KapanovaSMinOfMatrixElementsSEQ::ValidationImpl() {
     return true;
   }
 
-  const size_t first_row_size = matrix[0].size();
-  for (const auto &row : matrix) {
-    if (row.size() != first_row_size) {
-      return false;
-    }
-  }
-
-  return true;
+  const size_t cols = matrix[0].size();
+  return std::ranges::all_of(matrix, [cols](const auto &row) { return row.size() == cols; });
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PreProcessingImpl() {
-  // ВСЕГДА устанавливаем INT_MAX, даже для пустой матрицы
   GetOutput() = INT_MAX;
   return true;
 }
@@ -48,9 +41,7 @@ bool KapanovaSMinOfMatrixElementsSEQ::RunImpl() {
   int min_value = INT_MAX;
   for (const auto &row : matrix) {
     for (const int value : row) {
-      if (value < min_value) {
-        min_value = value;
-      }
+      min_value = std::min(value, min_value);
     }
   }
 
@@ -59,7 +50,6 @@ bool KapanovaSMinOfMatrixElementsSEQ::RunImpl() {
 }
 
 bool KapanovaSMinOfMatrixElementsSEQ::PostProcessingImpl() {
-  // ВСЕГДА возвращаем true
   return true;
 }
 

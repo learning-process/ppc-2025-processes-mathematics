@@ -4,7 +4,6 @@
 #include <array>
 #include <climits>
 #include <cstddef>
-#include <memory>
 #include <string>
 #include <tuple>
 #include <vector>
@@ -28,7 +27,7 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
                        (matrix.empty() ? "0" : std::to_string(matrix[0].size())) + "_min_" + std::to_string(expected);
 
     // Заменяем возможные проблемные символы
-    std::replace(name.begin(), name.end(), '-', 'n');  // заменяем минус на 'n'
+    std::ranges::replace(name, '-', 'n');
     return name;
   }
 

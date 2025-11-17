@@ -14,30 +14,18 @@ namespace kapanova_s_min_of_matrix_elements {
 
 KapanovaSMinOfMatrixElementsMPI::KapanovaSMinOfMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput().resize(in.size());
-  for (size_t i = 0; i < in.size(); ++i) {
-    GetInput()[i] = in[i];
-  }
+  GetInput() = in;  // Используем оператор присваивания вместо ручного копирования
   GetOutput() = 0;
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
   const auto &matrix = GetInput();
-
-  // Пустая матрица - валидный случай
   if (matrix.empty()) {
     return true;
   }
 
-  // Проверяем что все строки имеют одинаковый размер
-  const size_t first_row_size = matrix[0].size();
-  for (const auto &row : matrix) {
-    if (row.size() != first_row_size) {
-      return false;
-    }
-  }
-
-  return true;
+  const std::size_t cols = matrix[0].size();
+  return std::ranges::all_of(matrix, [cols](const auto &row) { return row.size() == cols; });
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
@@ -72,15 +60,15 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
     start_element = rank * (elements_per_process + 1);
     end_element = start_element + elements_per_process + 1;
   } else {
-    start_element = rank * elements_per_process + remainder;
+    start_element = (rank * elements_per_process) + remainder;
     end_element = start_element + elements_per_process;
   }
 
   // Поиск локального минимума
   int local_min = INT_MAX;
   for (int elem_idx = start_element; elem_idx < end_element; ++elem_idx) {
-    int row = elem_idx / total_cols;
-    int col = elem_idx % total_cols;
+    const int row = elem_idx / total_cols;
+    const int col = elem_idx % total_cols;
 
     if (row < total_rows && col < total_cols) {
       local_min = std::min(matrix[row][col], local_min);

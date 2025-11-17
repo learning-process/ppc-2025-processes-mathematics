@@ -7,9 +7,10 @@ namespace kapanova_s_min_of_matrix_elements {
 
 class KapanovaSMinOfMatrixElementsMPI : public BaseTask {
  public:
+  static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
+    return ppc::task::TypeOfTask::kMPI;
+  }
   explicit KapanovaSMinOfMatrixElementsMPI(const InType &in);
-
-  static ppc::task::TypeOfTask GetStaticTypeOfTask();
 
  private:
   bool ValidationImpl() override;

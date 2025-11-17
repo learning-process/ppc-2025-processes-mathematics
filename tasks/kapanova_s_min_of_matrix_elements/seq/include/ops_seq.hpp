@@ -7,9 +7,8 @@ namespace kapanova_s_min_of_matrix_elements {
 
 class KapanovaSMinOfMatrixElementsSEQ : public BaseTask {
  public:
-  explicit KapanovaSMinOfMatrixElementsSEQ(const InType &in);
-
   static ppc::task::TypeOfTask GetStaticTypeOfTask();
+  explicit KapanovaSMinOfMatrixElementsSEQ(const InType &in);
 
  private:
   bool ValidationImpl() override;

@@ -1,5 +1,10 @@
 #include <gtest/gtest.h>
 #include "string"
+#include <cstddef>
+#include <fstream>
+#include <ios>
+#include <stdexcept>
+#include <cmath>
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 #include "chetverikova_e_sum_matrix_elem/seq/include/ops_seq.hpp"

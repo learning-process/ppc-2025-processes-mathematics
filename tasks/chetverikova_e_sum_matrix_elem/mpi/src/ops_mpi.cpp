@@ -1,11 +1,8 @@
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
-#include <numeric>
 #include <vector>
-
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace chetverikova_e_sum_matrix_elem {
 
@@ -37,7 +34,7 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
   OutType &res = GetOutput();
   const auto &matrix = std::get<2>(GetInput());
   
-  size_t size = rows * columns;
+  size_t size = static_cast<size_t>(rows) * static_cast<size_t>(columns);
   size_t elem_on_proc = size / size_proc;
   size_t tail_ind = size - (size % size_proc);
 

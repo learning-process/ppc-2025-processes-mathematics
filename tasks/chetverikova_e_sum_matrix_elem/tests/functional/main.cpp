@@ -21,10 +21,11 @@
 namespace chetverikova_e_sum_matrix_elem {
 
 class ChetverikovaERunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
-  private:
-    InType input_data_;
-    OutType expected_data_;
-  public:
+ private:
+  InType input_data_;
+  OutType expected_data_;
+
+ public:
   static std::string PrintTestParam(const TestType &test_param) {
     return test_param;
   }
@@ -72,9 +73,10 @@ TEST_P(ChetverikovaERunFuncTestsProcesses, SummOfMatrixElements) {
 
 const std::array<TestType, 2> kTestParam = {std::string("test1"), std::string("test2")};
 
-const auto kTestTasksList =
-    std::tuple_cat(ppc::util::AddFuncTask<ChetverikovaESumMatrixElemMPI, InType>(kTestParam, PPC_SETTINGS_chetverikova_e_sum_matrix_elem),
-                   ppc::util::AddFuncTask<ChetverikovaESumMatrixElemSEQ, InType>(kTestParam, PPC_SETTINGS_chetverikova_e_sum_matrix_elem));
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChetverikovaESumMatrixElemMPI, InType>(
+                                               kTestParam, PPC_SETTINGS_chetverikova_e_sum_matrix_elem),
+                                           ppc::util::AddFuncTask<ChetverikovaESumMatrixElemSEQ, InType>(
+                                               kTestParam, PPC_SETTINGS_chetverikova_e_sum_matrix_elem));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 

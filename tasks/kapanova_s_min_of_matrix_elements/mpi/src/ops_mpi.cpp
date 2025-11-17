@@ -14,20 +14,25 @@ namespace kapanova_s_min_of_matrix_elements {
 
 KapanovaSMinOfMatrixElementsMPI::KapanovaSMinOfMatrixElementsMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
+  GetInput().resize(in.size());
+  for (size_t i = 0; i < in.size(); ++i) {
+    GetInput()[i] = in[i];
+  }
   GetOutput() = 0;
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
   const auto &matrix = GetInput();
+
+  // Пустая матрица - валидный случай
   if (matrix.empty()) {
-    return false;
+    return true;
   }
 
-  // Проверяем, что все строки имеют одинаковый размер
-  const size_t cols = matrix[0].size();
+  // Проверяем что все строки имеют одинаковый размер
+  const size_t first_row_size = matrix[0].size();
   for (const auto &row : matrix) {
-    if (row.size() != cols) {
+    if (row.size() != first_row_size) {
       return false;
     }
   }
@@ -36,6 +41,7 @@ bool KapanovaSMinOfMatrixElementsMPI::ValidationImpl() {
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
+  // Всегда устанавливаем INT_MAX, даже для пустой матрицы
   GetOutput() = INT_MAX;
   return true;
 }
@@ -43,23 +49,15 @@ bool KapanovaSMinOfMatrixElementsMPI::PreProcessingImpl() {
 bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
   const auto &matrix = GetInput();
 
-  // Инициализация MPI
-  int mpi_initialized = 0;
-  MPI_Initialized(&mpi_initialized);
-  if (!mpi_initialized) {
-    MPI_Init(nullptr, nullptr);
+  // Обработка пустой матрицы
+  if (matrix.empty()) {
+    GetOutput() = INT_MAX;
+    return true;
   }
 
   int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-  if (matrix.empty() || matrix[0].empty()) {
-    if (!mpi_initialized) {
-      MPI_Finalize();
-    }
-    return false;
-  }
 
   const int total_rows = static_cast<int>(matrix.size());
   const int total_cols = static_cast<int>(matrix[0].size());
@@ -96,17 +94,11 @@ bool KapanovaSMinOfMatrixElementsMPI::RunImpl() {
   }
 
   GetOutput() = global_min;
-
-  // Финализируем MPI если мы ее инициализировали
-  if (!mpi_initialized) {
-    MPI_Finalize();
-  }
-
   return true;
 }
 
 bool KapanovaSMinOfMatrixElementsMPI::PostProcessingImpl() {
-  return GetOutput() != INT_MAX;
+  return true;
 }
 
 }  // namespace kapanova_s_min_of_matrix_elements

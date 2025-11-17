@@ -1,86 +1,119 @@
 #include <gtest/gtest.h>
 
 #include <algorithm>
+#include <array>
+#include <climits>
+#include <cstddef>
+#include <memory>
+#include <string>
+#include <tuple>
 #include <vector>
 
+#include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
+#include "kapanova_s_min_of_matrix_elements/mpi/include/ops_mpi.hpp"
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
+#include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
-namespace {
+namespace kapanova_s_min_of_matrix_elements {
 
-using kapanova_s_min_of_matrix_elements::InType;
-using kapanova_s_min_of_matrix_elements::KapanovaSMinOfMatrixElementsSEQ;
+class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+ public:
+  static std::string PrintTestParam(const TestType &test_param) {
+    const auto &matrix = std::get<0>(test_param);
+    const auto &expected = std::get<1>(test_param);
 
-class MatrixMinTest : public ::testing::Test {
- protected:
-  void SetUp() override {}
+    // Создаем уникальное имя на основе размера матрицы и ожидаемого значения
+    std::string name = "matrix_" + std::to_string(matrix.size()) + "x" +
+                       (matrix.empty() ? "0" : std::to_string(matrix[0].size())) + "_min_" + std::to_string(expected);
 
-  static int FindMinSequential(const std::vector<std::vector<int>> &matrix) {
-    int min_val = matrix[0][0];
-    for (const auto &row : matrix) {
-      for (const int value : row) {
-        min_val = std::min(value, min_val);
-      }
-    }
-    return min_val;
+    // Заменяем возможные проблемные символы
+    std::replace(name.begin(), name.end(), '-', 'n');  // заменяем минус на 'n'
+    return name;
   }
+
+ protected:
+  void SetUp() override {
+    test_params_ = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    input_matrix_ = std::get<0>(test_params_);
+    expected_output_ = std::get<1>(test_params_);
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    // Для пустой матрицы ожидаем INT_MAX
+    if (input_matrix_.empty()) {
+      return output_data == INT_MAX;
+    }
+    return output_data == expected_output_;
+  }
+
+  InType GetTestInputData() final {
+    return input_matrix_;
+  }
+
+ private:
+  TestType test_params_;
+  InType input_matrix_;
+  OutType expected_output_;
 };
 
-TEST_F(MatrixMinTest, BasicTest) {
-  std::vector<std::vector<int>> matrix = {{3, 1, 4}, {2, 5, 9}, {6, 7, 8}};
-  int expected_min = 1;
+namespace {
+// Тестовые данные - убедитесь, что все матрицы уникальны по размеру или ожидаемому значению
+const std::vector<std::vector<int>> kMatrix1 = {{3, 1, 4}, {2, 5, 9}, {6, 7, 8}};
+const int kExpected1 = 1;
 
-  KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  task_seq.Validation();
-  task_seq.PreProcessing();
-  task_seq.Run();
-  task_seq.PostProcessing();
-  EXPECT_EQ(expected_min, task_seq.GetOutput());
+const std::vector<std::vector<int>> kMatrix2 = {{3, -1, 4}, {2, 5, 9}, {6, 7, 8}};
+const int kExpected2 = -1;
 
-  int actual_min = FindMinSequential(matrix);
-  EXPECT_EQ(expected_min, actual_min);
+const std::vector<std::vector<int>> kMatrix3 = {{5}};
+const int kExpected3 = 5;
+
+const std::vector<std::vector<int>> kMatrix4 = {{10, 20}, {15, 5}, {8, 12}};
+const int kExpected4 = 5;
+
+const std::vector<std::vector<int>> kMatrix5 = {{-5, -2, -8}, {-1, -3, -7}};
+const int kExpected5 = -8;
+
+const std::vector<std::vector<int>> kMatrix6 = {{INT_MAX, 1}, {2, INT_MAX}};
+const int kExpected6 = 1;
+
+const std::vector<std::vector<int>> kMatrix7 = {{5, 5, 5}, {5, 5, 5}};
+const int kExpected7 = 5;
+
+const std::vector<std::vector<int>> kEmptyMatrix = {};
+const int kExpectedEmpty = INT_MAX;
+
+const std::vector<std::vector<int>> kSingleRow = {{1, 2, 3, 4, 0}};
+const int kExpectedSingleRow = 0;
+
+const std::vector<std::vector<int>> kSingleColumn = {{1}, {2}, {0}, {4}};
+const int kExpectedSingleColumn = 0;
+
+TEST_P(KapanovaSMinOfMatrixElementsFuncTests, FindMatrixMinimum) {
+  ExecuteTest(GetParam());
 }
 
-TEST_F(MatrixMinTest, NegativeNumbers) {
-  std::vector<std::vector<int>> matrix = {{3, -1, 4}, {2, 5, 9}, {6, 7, 8}};
-  int expected_min = -1;
+// Тестовые параметры: (input_matrix, expected_min_value)
+const std::array<TestType, 10> kTestParam = {
+    std::make_tuple(kMatrix1, kExpected1),           std::make_tuple(kMatrix2, kExpected2),
+    std::make_tuple(kMatrix3, kExpected3),           std::make_tuple(kMatrix4, kExpected4),
+    std::make_tuple(kMatrix5, kExpected5),           std::make_tuple(kMatrix6, kExpected6),
+    std::make_tuple(kMatrix7, kExpected7),           std::make_tuple(kEmptyMatrix, kExpectedEmpty),
+    std::make_tuple(kSingleRow, kExpectedSingleRow), std::make_tuple(kSingleColumn, kExpectedSingleColumn),
+};
 
-  KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  task_seq.Validation();
-  task_seq.PreProcessing();
-  task_seq.Run();
-  task_seq.PostProcessing();
-  EXPECT_EQ(expected_min, task_seq.GetOutput());
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<KapanovaSMinOfMatrixElementsMPI, InType>(
+                                               kTestParam, PPC_SETTINGS_kapanova_s_min_of_matrix_elements),
+                                           ppc::util::AddFuncTask<KapanovaSMinOfMatrixElementsSEQ, InType>(
+                                               kTestParam, PPC_SETTINGS_kapanova_s_min_of_matrix_elements));
 
-  int actual_min = FindMinSequential(matrix);
-  EXPECT_EQ(expected_min, actual_min);
-}
+const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-TEST_F(MatrixMinTest, SingleElement) {
-  std::vector<std::vector<int>> matrix = {{5}};
-  int expected_min = 5;
+const auto kPerfTestName =
+    KapanovaSMinOfMatrixElementsFuncTests::PrintFuncTestName<KapanovaSMinOfMatrixElementsFuncTests>;
 
-  KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  task_seq.Validation();
-  task_seq.PreProcessing();
-  task_seq.Run();
-  task_seq.PostProcessing();
-  EXPECT_EQ(expected_min, task_seq.GetOutput());
-}
-
-TEST_F(MatrixMinTest, EmptyMatrix) {
-  std::vector<std::vector<int>> matrix = {};
-
-  KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool validation = task_seq.Validation();
-  EXPECT_FALSE(validation);
-}
-
-TEST_F(MatrixMinTest, DifferentRowSizes) {
-  std::vector<std::vector<int>> matrix = {{1, 2}, {3}};
-
-  KapanovaSMinOfMatrixElementsSEQ task_seq(matrix);
-  bool validation = task_seq.Validation();
-  EXPECT_FALSE(validation);
-}
+INSTANTIATE_TEST_SUITE_P(MatrixMinTests, KapanovaSMinOfMatrixElementsFuncTests, kGtestValues, kPerfTestName);
 
 }  // namespace
+
+}  // namespace kapanova_s_min_of_matrix_elements

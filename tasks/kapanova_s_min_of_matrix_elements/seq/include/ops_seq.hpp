@@ -7,7 +7,9 @@ namespace kapanova_s_min_of_matrix_elements {
 
 class KapanovaSMinOfMatrixElementsSEQ : public BaseTask {
  public:
-  static ppc::task::TypeOfTask GetStaticTypeOfTask();
+  static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
+    return ppc::task::TypeOfTask::kSEQ;
+  }
   explicit KapanovaSMinOfMatrixElementsSEQ(const InType &in);
 
  private:

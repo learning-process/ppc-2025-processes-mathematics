@@ -12,12 +12,39 @@ class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, O
   InType input_data_{};
 
   void SetUp() override {
-    //input_data_ = kCount_;
+    TestType params = "matrix2";
+    std::string file_name = params + ".bin";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
+    std::ifstream file_stream(abs_path, std::ios::in | std::ios::binary);
+    if (!file_stream.is_open())
+    {
+      throw std::runtime_error("Error opening file!\n");
+    }
+    int m = -1, n = -1;
+    file_stream.read(reinterpret_cast<char*>(&m), sizeof(int));
+    file_stream.read(reinterpret_cast<char*>(&n), sizeof(int));
+    if (m <= 0 || n <= 0)
+    {
+      throw std::runtime_error("invalid input data!\n");
+    }
+    std::get<0>(input_data_) = n;
+    std::vector<double>& v = std::get<1>(input_data_);
+    v.resize(m * n);
+    file_stream.read(reinterpret_cast<char*>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
+    file_stream.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    output_data = 0.0;
-    return false;
+    int n = std::get<1>(input_data_).size();
+    std::vector<double>& v = std::get<1>(input_data_);
+    for (int i = 0; i < n; ++i)
+    {
+      if (v[i] > output_data)
+      {
+        return false;
+      }
+    }
+    return true;
   }
 
   InType GetTestInputData() final {

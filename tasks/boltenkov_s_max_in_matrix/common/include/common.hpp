@@ -10,7 +10,7 @@ namespace boltenkov_s_max_in_matrix {
 
 using InType = std::tuple<int, std::vector<double>>;
 using OutType = double;
-using TestType = std::tuple<int, std::string>;
+using TestType = std::string;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
 }  // namespace boltenkov_s_max_in_matrix

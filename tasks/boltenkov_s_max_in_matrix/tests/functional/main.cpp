@@ -23,37 +23,45 @@ namespace boltenkov_s_max_in_matrix {
 class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
-    return std::to_string(std::get<0>(test_param)) + "_" + std::get<1>(test_param);
+    return test_param;
   }
 
  protected:
   void SetUp() override {
-    int width = -1;
-    int height = -1;
-    int channels = -1;
-    std::vector<uint8_t> img;
-    // Read image in RGB to ensure consistent channel count
-    {
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, "pic.jpg");
-      auto *data = stbi_load(abs_path.c_str(), &width, &height, &channels, STBI_rgb);
-      if (data == nullptr) {
-        throw std::runtime_error("Failed to load image: " + std::string(stbi_failure_reason()));
-      }
-      channels = STBI_rgb;
-      img = std::vector<uint8_t>(data, data + (static_cast<ptrdiff_t>(width * height * channels)));
-      stbi_image_free(data);
-      if (std::cmp_not_equal(width, height)) {
-        throw std::runtime_error("width != height: ");
-      }
-    }
-
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    //input_data_ = width - height + std::min(std::accumulate(img.begin(), img.end(), 0), channels);
+    std::string file_name = params + ".bin";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
+    std::ifstream file_stream(abs_path, std::ios::in | std::ios::binary);
+    if (!file_stream.is_open())
+    {
+      throw std::runtime_error("Error opening file!\n");
+    }
+    int m = -1, n = -1;
+    file_stream.read(reinterpret_cast<char*>(&m), sizeof(int));
+    file_stream.read(reinterpret_cast<char*>(&n), sizeof(int));
+    if (m <= 0 || n <= 0)
+    {
+      throw std::runtime_error("invalid input data!\n");
+    }
+    std::get<0>(input_data_) = n;
+    std::vector<double>& v = std::get<1>(input_data_);
+    v.resize(m * n);
+    file_stream.read(reinterpret_cast<char*>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
+    file_stream.close();
+   return;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    output_data = 0.0;
-    return false;
+    int n = std::get<1>(input_data_).size();
+    std::vector<double>& v = std::get<1>(input_data_);
+    for (int i = 0; i < n; ++i)
+    {
+      if (v[i] > output_data)
+      {
+        return false;
+      }
+    }
+    return true;
   }
 
   InType GetTestInputData() final {
@@ -61,7 +69,7 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
   }
 
  private:
-  InType input_data_ = {1, std::vector<double>(1)};
+  InType input_data_;
 };
 
 namespace {
@@ -70,7 +78,7 @@ TEST_P(BoltenkovSRunFuncTestsProcesses, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {std::make_tuple(3, "3"), std::make_tuple(5, "5"), std::make_tuple(7, "7")};
+const std::array<TestType, 2> kTestParam = {"matrix1", "matrix2"};
 
 const auto kTestTasksList = std::tuple_cat(
                    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(kTestParam, PPC_ID_boltenkov_s_max_in_matrix),

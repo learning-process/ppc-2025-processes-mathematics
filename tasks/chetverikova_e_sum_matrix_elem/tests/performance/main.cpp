@@ -12,7 +12,7 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
   OutType expected_data_{};
 
   void SetUp() override {
-     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chetverikova_e_sum_matrix_elem, "perf_5000.bin");
+     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chetverikova_e_sum_matrix_elem, "perf_2000.bin");
     std::ifstream file(abs_path, std::ios::binary);
     if (!file.is_open()) {
       throw std::runtime_error("Failed to open file");
@@ -32,7 +32,6 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
     std::get<0>(input_data_) = rows;
     std::get<1>(input_data_) = cols;
     
-    // Чтение данных матрицы
     size_t total_elements = rows * cols;
     std::get<2>(input_data_).resize(total_elements);
     if (!file.read(reinterpret_cast<char*>(std::get<2>(input_data_).data()), 

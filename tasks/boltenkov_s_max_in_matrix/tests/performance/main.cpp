@@ -8,7 +8,7 @@
 namespace boltenkov_s_max_in_matrix {
 
 class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 0;
+  const int kCount_ = 10;
   InType input_data_{};
 
   void SetUp() override {

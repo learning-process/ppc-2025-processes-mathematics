@@ -1,7 +1,9 @@
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
+#include <cstddef>
 #include <vector>
+
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 
 namespace chetverikova_e_sum_matrix_elem {

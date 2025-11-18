@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "string"
+#include <string>
 #include <cstddef>
 #include <fstream>
 #include <ios>
@@ -23,7 +23,8 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
       throw std::runtime_error("Failed to open file");
     }
     
-    size_t rows, cols;
+    size_t rows = 0;
+    size_t cols = 0;
     if (!file.read(reinterpret_cast<char*>(&rows), sizeof(rows))) {
       throw std::runtime_error("Failed to read rows");
     }

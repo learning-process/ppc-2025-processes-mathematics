@@ -8,7 +8,7 @@
 
 namespace krymova_k_lex_order {
 
-using InType = std::vector<std::string>;
+using InType = std::tuple<std::string, std::string>;
 using OutType = int;
 using TestType = std::tuple<std::string, std::string, int>;
 using BaseTask = ppc::task::Task<InType, OutType>;

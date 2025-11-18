@@ -6,18 +6,14 @@
 #include "util/include/util.hpp"
 
 namespace krymova_k_lex_order {
-
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wnull-dereference"
 KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
-#pragma GCC diagnostic pop
 
 bool KrymovaKLexSEQ::ValidationImpl() {
-  return GetInput().size() == 2;
+  return true;
 }
 
 bool KrymovaKLexSEQ::PreProcessingImpl() {
@@ -25,8 +21,8 @@ bool KrymovaKLexSEQ::PreProcessingImpl() {
 }
 
 bool KrymovaKLexSEQ::RunImpl() {
-  const std::string &str1 = GetInput()[0];
-  const std::string &str2 = GetInput()[1];
+  const std::string &str1 = std::get<0>(GetInput());
+  const std::string &str2 = std::get<1>(GetInput());
 
   size_t len1 = str1.length();
   size_t len2 = str2.length();

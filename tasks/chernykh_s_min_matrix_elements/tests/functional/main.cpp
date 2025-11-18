@@ -35,7 +35,7 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
 
     std::ifstream inFile(abs_path, std::ios::in);
     if (!inFile.is_open()) {
-      throw std::runtime_error("Failed to open file: " + abs_path);
+      throw std::runtime_error("Failed to open file : " + abs_path);
     }
 
     input_data_.clear();

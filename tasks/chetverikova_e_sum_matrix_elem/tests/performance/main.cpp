@@ -1,10 +1,12 @@
 #include <gtest/gtest.h>
-#include <string>
+
+#include <cmath>
 #include <cstddef>
 #include <fstream>
 #include <ios>
 #include <stdexcept>
-#include <cmath>
+#include <string>
+
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 #include "chetverikova_e_sum_matrix_elem/seq/include/ops_seq.hpp"
@@ -17,34 +19,33 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
   OutType expected_data_{};
 
   void SetUp() override {
-     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chetverikova_e_sum_matrix_elem, "perf_2000.bin");
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chetverikova_e_sum_matrix_elem, "perf_2000.bin");
     std::ifstream file(abs_path, std::ios::binary);
     if (!file.is_open()) {
       throw std::runtime_error("Failed to open file");
     }
-    
+
     size_t rows = 0;
     size_t cols = 0;
-    if (!file.read(reinterpret_cast<char*>(&rows), sizeof(rows))) {
+    if (!file.read(reinterpret_cast<char *>(&rows), sizeof(rows))) {
       throw std::runtime_error("Failed to read rows");
     }
-    if (!file.read(reinterpret_cast<char*>(&cols), sizeof(cols))) {
+    if (!file.read(reinterpret_cast<char *>(&cols), sizeof(cols))) {
       throw std::runtime_error("Failed to read columns");
     }
-    if (!file.read(reinterpret_cast<char*>(&expected_data_), sizeof(expected_data_))) {
+    if (!file.read(reinterpret_cast<char *>(&expected_data_), sizeof(expected_data_))) {
       throw std::runtime_error("Failed to read expected result");
     }
-    
+
     std::get<0>(input_data_) = rows;
     std::get<1>(input_data_) = cols;
-    
+
     size_t total_elements = rows * cols;
     std::get<2>(input_data_).resize(total_elements);
-    if (!file.read(reinterpret_cast<char*>(std::get<2>(input_data_).data()), 
-                   total_elements * sizeof(double))) {
+    if (!file.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()), total_elements * sizeof(double))) {
       throw std::runtime_error("Failed to read matrix data");
     }
-    
+
     file.close();
   }
 
@@ -62,7 +63,8 @@ TEST_P(ChetverikovaERunPerfTestProcesses, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, ChetverikovaESumMatrixElemMPI, ChetverikovaESumMatrixElemSEQ>(PPC_SETTINGS_chetverikova_e_sum_matrix_elem);
+    ppc::util::MakeAllPerfTasks<InType, ChetverikovaESumMatrixElemMPI, ChetverikovaESumMatrixElemSEQ>(
+        PPC_SETTINGS_chetverikova_e_sum_matrix_elem);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 

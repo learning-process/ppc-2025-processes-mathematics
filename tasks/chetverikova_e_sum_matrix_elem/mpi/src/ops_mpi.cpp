@@ -1,6 +1,7 @@
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 
 #include <mpi.h>
+
 #include <cstddef>
 #include <vector>
 
@@ -15,9 +16,9 @@ ChetverikovaESumMatrixElemMPI::ChetverikovaESumMatrixElemMPI(const InType &in) {
 }
 
 bool ChetverikovaESumMatrixElemMPI::ValidationImpl() {
-  return (std::get<0>(GetInput()) > 0) && (std::get<1>(GetInput()) > 0) 
-  && (std::get<0>(GetInput()) * std::get<1>(GetInput()) == std::get<2>(GetInput()).size()) 
-  && !(std::get<2>(GetInput()).empty()) && (GetOutput() == 0.0);
+  return (std::get<0>(GetInput()) > 0) && (std::get<1>(GetInput()) > 0) &&
+         (std::get<0>(GetInput()) * std::get<1>(GetInput()) == std::get<2>(GetInput()).size()) &&
+         !(std::get<2>(GetInput()).empty()) && (GetOutput() == 0.0);
 }
 
 bool ChetverikovaESumMatrixElemMPI::PreProcessingImpl() {
@@ -26,8 +27,8 @@ bool ChetverikovaESumMatrixElemMPI::PreProcessingImpl() {
 }
 
 bool ChetverikovaESumMatrixElemMPI::RunImpl() {
-  int rank_proc = 0; 
-  int size_proc = 0; 
+  int rank_proc = 0;
+  int size_proc = 0;
   MPI_Comm_size(MPI_COMM_WORLD, &size_proc);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank_proc);
 
@@ -35,7 +36,7 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
   const auto &columns = std::get<1>(GetInput());
   OutType &res = GetOutput();
   const auto &matrix = std::get<2>(GetInput());
-  
+
   size_t size = static_cast<size_t>(rows) * static_cast<size_t>(columns);
   size_t elem_on_proc = size / size_proc;
   size_t tail_ind = size - (size % size_proc);
@@ -43,21 +44,22 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
   std::vector<double> local_data(elem_on_proc, 0);
 
   if (elem_on_proc > 0) {
-    MPI_Scatter(matrix.data(), elem_on_proc, MPI_DOUBLE, local_data.data(), elem_on_proc, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    MPI_Scatter(matrix.data(), elem_on_proc, MPI_DOUBLE, local_data.data(), elem_on_proc, MPI_DOUBLE, 0,
+                MPI_COMM_WORLD);
     OutType res_proc{};
     for (size_t i = 0; i < elem_on_proc; ++i) {
       res_proc += local_data[i];
     }
     MPI_Reduce(&res_proc, &res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
   }
-  
+
   if ((rank_proc == 0) && (tail_ind != size)) {
     for (size_t i = tail_ind; i < size; ++i) {
       res += matrix[i];
     }
   }
   MPI_Bcast(&res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
-  MPI_Barrier(MPI_COMM_WORLD); 
+  MPI_Barrier(MPI_COMM_WORLD);
   return true;
 }
 

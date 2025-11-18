@@ -16,14 +16,30 @@
 namespace chernykh_s_min_matrix_elements {
 
 class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTests<InType, OutType> {
- protected:
-  InType input_data_{};
+ private:
+  InType input_data_;
+  OutType output_data;
 
-  void SetUp() override {}
+  void SetUp() override {
+    TestType params = "create_data_2048x2048";
+    std::string inFileName = params + ".txt";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
 
-  bool CheckTestOutputData(OutType &output_data) final {
-    (void)output_data;  // подавляем предупреждение
-    return true;
+    std::ifstream inFile(abs_path, std::ios::in);
+    if (!inFile.is_open()) {
+      throw std::runtime_error("Failed to open file: " + abs_path);
+    }
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {  // такое же как в func тесте
+    const auto &mat = input_data_;
+    double expected_min = std::numeric_limits<double>::max();
+    for (const auto &row : mat) {
+      for (double v : row) {
+        expected_min = std::min(expected_min, v);
+      }
+    }
+    return std::fabs(output_data - expected_min) < 1e-6;
   }
 
   InType GetTestInputData() final {
@@ -45,4 +61,4 @@ const auto kPerfTestName = ChernykhSRunFuncTestsMinMatrixElements::CustomPerfTes
 
 INSTANTIATE_TEST_SUITE_P(RunModeTests, ChernykhSRunFuncTestsMinMatrixElements, kGtestValues, kPerfTestName);
 
-}  // namespace chernykh_s_min_matrix_elements
+};  // namespace chernykh_s_min_matrix_elements

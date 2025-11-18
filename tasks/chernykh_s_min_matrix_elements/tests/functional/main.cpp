@@ -86,7 +86,7 @@ TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
 }
 
 const std::array<TestType, 5> kTestParam = {"create_data_8x8", "create_data_16x16", "create_data_32x32",
-                                            "create_data_64x64", "create_data_2048x2048"};
+                                            "create_data_64x64"};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(
                                                kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),

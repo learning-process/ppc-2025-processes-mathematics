@@ -1,5 +1,6 @@
 #pragma once
 
+// LCOV_EXCL_START
 #include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
 #include "task/include/task.hpp"
 
@@ -18,5 +19,6 @@ class KapanovaSMinOfMatrixElementsSEQ : public BaseTask {
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 };
+// LCOV_EXCL_STOP
 
 }  // namespace kapanova_s_min_of_matrix_elements

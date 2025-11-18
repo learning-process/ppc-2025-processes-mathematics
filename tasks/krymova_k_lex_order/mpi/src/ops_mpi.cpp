@@ -4,8 +4,6 @@
 
 #include <algorithm>
 #include <climits>
-#include <string>
-#include <vector>
 
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "util/include/util.hpp"

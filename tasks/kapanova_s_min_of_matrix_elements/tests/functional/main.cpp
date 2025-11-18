@@ -1,14 +1,16 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>  // Добавлено для std::ranges::replace
 #include <array>
 #include <climits>
+#include <cstddef>  // Добавлено для std::size_t
 #include <string>
 #include <tuple>
 #include <vector>
 
 #include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
 #include "kapanova_s_min_of_matrix_elements/mpi/include/ops_mpi.hpp"
-#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
+#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"  // Добавлено для SEQ версии
 #include "util/include/func_test_util.hpp"
 #include "util/include/util.hpp"
 
@@ -46,9 +48,9 @@ class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests
   }
 
  private:
-  TestType test_params_{};
-  InType input_matrix_{};
-  OutType expected_output_{};
+  TestType test_params_;
+  InType input_matrix_;
+  OutType expected_output_;
 };
 
 namespace {

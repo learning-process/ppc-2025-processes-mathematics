@@ -2,10 +2,11 @@
 
 #include <fstream>
 #include <sstream>
+#include <string>  // Добавлено для std::string
 #include <vector>
 
 #include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
-#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
+#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"  // Добавлено для KapanovaSMinOfMatrixElementsSEQ
 
 namespace {
 
@@ -30,14 +31,14 @@ std::vector<std::vector<int>> LoadMatrixFromFile(const std::string &filename) {
   return matrix;
 }
 
-TEST(kapanova_s_min_of_matrix_elements_perf, Test_Performance) {
+TEST(KapanovaSMinOfMatrixElementsPerf, TestPerformance) {  // Убрано подчеркивание
   const int rows = 100;
   const int cols = 100;
   std::vector<std::vector<int>> matrix(rows, std::vector<int>(cols));
 
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < cols; ++j) {
-      matrix[i][j] = i * cols + j;
+      matrix[i][j] = (i * cols) + j;  // Добавлены скобки для явного указания приоритета
     }
   }
 
@@ -53,7 +54,7 @@ TEST(kapanova_s_min_of_matrix_elements_perf, Test_Performance) {
   EXPECT_EQ(-100, task.GetOutput());
 }
 
-TEST(kapanova_s_min_of_matrix_elements_perf, Test_LoadFromFile) {
+TEST(KapanovaSMinOfMatrixElementsPerf, TestLoadFromFile) {  // Убрано подчеркивание
   // Используем функцию LoadMatrixFromFile
   auto matrix = LoadMatrixFromFile("tasks/kapanova_s_min_of_matrix_elements/data/matrix_3x3.txt");
 

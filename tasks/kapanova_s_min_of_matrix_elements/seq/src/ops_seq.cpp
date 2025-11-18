@@ -1,8 +1,11 @@
 #include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
+#include <algorithm>  // Добавлено для std::min и std::ranges::all_of
 #include <climits>
 #include <cstddef>
 #include <vector>
+
+#include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {
 

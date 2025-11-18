@@ -4,7 +4,11 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstddef>  // Добавлено для size_t
 #include <vector>
+
+// Добавлено включение для InType
+#include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
 
 namespace kapanova_s_min_of_matrix_elements {
 

@@ -18,7 +18,7 @@ namespace kapanova_s_min_of_matrix_elements {
 
 class KapanovaSMinOfMatrixElementsFuncTests : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
-  KapanovaSMinOfMatrixElementsFuncTests() : expected_output_(0) {}
+  KapanovaSMinOfMatrixElementsFuncTests() : expected_output_ { 0 };
   static std::string PrintTestParam(const TestType &test_param) {
     const auto &matrix = std::get<0>(test_param);
     const auto &expected = std::get<1>(test_param);

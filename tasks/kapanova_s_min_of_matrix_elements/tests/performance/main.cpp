@@ -5,8 +5,7 @@
 #include <string>  // Добавлено для std::string
 #include <vector>
 
-#include "kapanova_s_min_of_matrix_elements/common/include/common.hpp"
-#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"  // Добавлено для KapanovaSMinOfMatrixElementsSEQ
+#include "kapanova_s_min_of_matrix_elements/seq/include/ops_seq.hpp"
 
 namespace {
 

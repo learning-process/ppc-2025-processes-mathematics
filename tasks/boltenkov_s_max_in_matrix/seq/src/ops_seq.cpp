@@ -26,27 +26,21 @@ bool BoltenkovSMaxInMatrixkSEQ::PreProcessingImpl() {
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::RunImpl() {
-  if (std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0) {
+  if (!(std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0)) {
     return false;
   }
 
   OutType& mx = GetOutput();
   std::vector<double>& v = std::get<1>(GetInput());
 
-  int n = std::get<0>(GetInput());
-  int m = v.size() / n;
-  double tmp;
+  int n = v.size();
   bool flag;
 
   for (int i = 0; i < n; ++i)
   {
-    for (int j = 0; j < m; ++j)
-    {
-      tmp = v[i * n + j];
-      flag = tmp > mx;
-      mx = (double)flag * mx + (double)!flag * mx;
-    }
+      flag = v[i] > mx;
+      mx = (double)flag * v[i] + (double)!flag * mx;
   }
 
   return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;

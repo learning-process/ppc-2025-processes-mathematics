@@ -26,8 +26,8 @@ bool BoltenkovSMaxInMatrixkMPI::PreProcessingImpl() {
 }
 
 bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
-  if (std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0) {
+  if (!(std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0)) {
     return false;
   }
 
@@ -71,14 +71,12 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
                  datatype, 0, MPI_COMM_WORLD);
   }
 
-  double tmp;
   bool flag;
   OutType tmp_mx;
   for (int i = 0; i < sendcounts[rank]; ++i)
   {
-    tmp = data[i];
-    flag = tmp > tmp_mx;
-    tmp_mx = (double)flag * tmp_mx + (double)!flag * tmp_mx;
+    flag = data[i] > tmp_mx;
+    tmp_mx = static_cast<double>(flag) * data[i] + (1. - static_cast<double>(flag)) * tmp_mx;
   }
 
   if (rank == 0)
@@ -100,9 +98,8 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   {
     for (int i = 0; i < size; ++i)
     {
-      tmp = all_maxs[i];
-      flag = tmp > tmp_mx;
-      mx = (double)flag * mx + (double)!flag * mx;
+      flag = all_maxs[i] > tmp_mx;
+      mx = static_cast<double>(flag) * all_maxs[i] + (1. - static_cast<double>(flag)) * mx;
     }
   }
 

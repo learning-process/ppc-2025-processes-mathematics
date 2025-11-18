@@ -8,14 +8,14 @@
 namespace krymova_k_lex_order {
 
 class KrymovaKLexOrderPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kStringLength_ = 1000;
+  const int kStringLength_ = 10000000;
   InType input_data_;
 
   void SetUp() override {
     std::string str1(kStringLength_, 'a');
     std::string str2(kStringLength_, 'a');
 
-    str2[kStringLength_ / 2] = 'b';
+    str2[kStringLength_ - 1] = 'b';
 
     input_data_ = {str1, str2};
   }

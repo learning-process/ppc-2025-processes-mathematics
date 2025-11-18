@@ -18,7 +18,6 @@ namespace chernykh_s_min_matrix_elements {
 class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTests<InType, OutType> {
  private:
   InType input_data_;
-  OutType output_data;
 
   void SetUp() override {
     TestType params = "create_data_2048x2048";
@@ -28,6 +27,27 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
     std::ifstream inFile(abs_path, std::ios::in);
     if (!inFile.is_open()) {
       throw std::runtime_error("Failed to open file: " + abs_path);
+    }
+
+    input_data_.clear();
+    std::string line;
+
+    while (std::getline(inFile, line)) {
+      if (line.empty()) {
+        continue;
+      }
+
+      std::istringstream iss(line);
+      std::vector<double> row;
+      double value;
+
+      while (iss >> value) {
+        row.push_back(value);
+      }
+
+      if (!row.empty()) {
+        input_data_.push_back(row);
+      }
     }
   }
 

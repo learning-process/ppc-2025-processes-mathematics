@@ -10,11 +10,14 @@
 
 namespace krymova_k_lex_order {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
 KrymovaKLexOrderMPI::KrymovaKLexOrderMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
+#pragma GCC diagnostic pop
 
 bool KrymovaKLexOrderMPI::ValidationImpl() {
   return GetInput().size() == 2;

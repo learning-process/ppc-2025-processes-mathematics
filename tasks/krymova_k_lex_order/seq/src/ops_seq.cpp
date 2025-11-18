@@ -7,11 +7,14 @@
 
 namespace krymova_k_lex_order {
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wnull-dereference"
 KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
+#pragma GCC diagnostic pop
 
 bool KrymovaKLexSEQ::ValidationImpl() {
   return GetInput().size() == 2;

@@ -3,23 +3,20 @@
 #include <mpi.h>
 
 #include <cmath>
-#include <numeric>
 #include <random>
 #include <tuple>
-#include <vector>
 
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace krasnopevtseva_v_monte_carlo_integration {
 
-KrasnopevtsevaV_MCIntegrationMPI::KrasnopevtsevaV_MCIntegrationMPI(const InType &in) {
+KrasnopevtsevaVMCIntegrationMPI::KrasnopevtsevaVMCIntegrationMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool KrasnopevtsevaV_MCIntegrationMPI::ValidationImpl() {
+bool KrasnopevtsevaVMCIntegrationMPI::ValidationImpl() {
   const auto &input = GetInput();
   double a = std::get<0>(input);
   double b = std::get<1>(input);
@@ -28,22 +25,19 @@ bool KrasnopevtsevaV_MCIntegrationMPI::ValidationImpl() {
   return (a <= b) && (num_points > 0);
 }
 
-bool KrasnopevtsevaV_MCIntegrationMPI::PreProcessingImpl() {
+bool KrasnopevtsevaVMCIntegrationMPI::PreProcessingImpl() {
   GetOutput() = 0.0;
   return true;
 }
 
-bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
+bool KrasnopevtsevaVMCIntegrationMPI::RunImpl() {
   const auto &input = GetInput();
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
 
-  if (a > b || num_points <= 0) {
-    return false;
-  }
-
-  int rank, size;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   int local_points = num_points / size;
@@ -72,7 +66,7 @@ bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
   return true;
 }
 
-bool KrasnopevtsevaV_MCIntegrationMPI::PostProcessingImpl() {
+bool KrasnopevtsevaVMCIntegrationMPI::PostProcessingImpl() {
   return true;
 }
 

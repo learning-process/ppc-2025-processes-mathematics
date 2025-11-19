@@ -2,23 +2,20 @@
 
 #include <cmath>
 #include <cstddef>
-#include <numeric>
 #include <random>
 #include <tuple>
-#include <vector>
 
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace krasnopevtseva_v_monte_carlo_integration {
 
-KrasnopevtsevaV_MCIntegrationSEQ::KrasnopevtsevaV_MCIntegrationSEQ(const InType &in) {
+KrasnopevtsevaVMCIntegrationSEQ::KrasnopevtsevaVMCIntegrationSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = 0;
 }
 
-bool KrasnopevtsevaV_MCIntegrationSEQ::ValidationImpl() {
+bool KrasnopevtsevaVMCIntegrationSEQ::ValidationImpl() {
   const auto &input = GetInput();
   double a = std::get<0>(input);
   double b = std::get<1>(input);
@@ -27,20 +24,16 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::ValidationImpl() {
   return (a <= b) && (num_points > 0);
 }
 
-bool KrasnopevtsevaV_MCIntegrationSEQ::PreProcessingImpl() {
+bool KrasnopevtsevaVMCIntegrationSEQ::PreProcessingImpl() {
   GetOutput() = 0.0;
   return true;
 }
 
-bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
+bool KrasnopevtsevaVMCIntegrationSEQ::RunImpl() {
   const auto &input = GetInput();
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
-
-  if (a > b || num_points <= 0) {
-    return false;
-  }
 
   double sum = 0.0;
 
@@ -62,7 +55,7 @@ bool KrasnopevtsevaV_MCIntegrationSEQ::RunImpl() {
   return true;
 }
 
-bool KrasnopevtsevaV_MCIntegrationSEQ::PostProcessingImpl() {
+bool KrasnopevtsevaVMCIntegrationSEQ::PostProcessingImpl() {
   return true;
 }
 

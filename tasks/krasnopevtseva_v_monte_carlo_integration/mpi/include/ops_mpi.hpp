@@ -5,12 +5,12 @@
 
 namespace krasnopevtseva_v_monte_carlo_integration {
 
-class KrasnopevtsevaV_MCIntegrationMPI : public BaseTask {
+class KrasnopevtsevaVMCIntegrationMPI : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
-  explicit KrasnopevtsevaV_MCIntegrationMPI(const InType &in);
+  explicit KrasnopevtsevaVMCIntegrationMPI(const InType &in);
 
  private:
   bool ValidationImpl() override;

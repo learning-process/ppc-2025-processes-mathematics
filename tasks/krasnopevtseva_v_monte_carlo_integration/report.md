@@ -62,8 +62,8 @@ I =  ∫  cos(x) * x³ dx
 ## 5. Детали реализации 
 
 Ключевые классы и функции: 
-- класс KrasnopevtsevaV_MCIntegrationMPI с реализацией параллельной версии метода
-- класс KrasnopevtsevaV_MCIntegrationSEQ с реализацией последовательной версии метода
+- класс KrasnopevtsevaVMCIntegrationMPI с реализацией параллельной версии метода
+- класс KrasnopevtsevaVMCIntegrationSEQ с реализацией последовательной версии метода
 - определение пространства имен namespace krasnopevtseva_v_monte_carlo_integration с определеним используемых типов данных:  
     using InType = std::tuple<double, double, int>; - тип входных данных  
     using OutType = double; - тип возвращаемых данных(значение интеграла)  
@@ -105,7 +105,7 @@ I =  ∫  cos(x) * x³ dx
 
 ## 9. Приложения
 ```cpp
-bool KrasnopevtsevaV_MCIntegrationMPI::RunImpl() {
+bool KrasnopevtsevaVMCIntegrationMPI::RunImpl() {
   const auto &input = GetInput();
   double a = std::get<0>(input);
   double b = std::get<1>(input);

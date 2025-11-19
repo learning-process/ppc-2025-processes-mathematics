@@ -5,12 +5,12 @@
 
 namespace krasnopevtseva_v_monte_carlo_integration {
 
-class KrasnopevtsevaV_MCIntegrationSEQ : public BaseTask {
+class KrasnopevtsevaVMCIntegrationSEQ : public BaseTask {
  public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kSEQ;
   }
-  explicit KrasnopevtsevaV_MCIntegrationSEQ(const InType &in);
+  explicit KrasnopevtsevaVMCIntegrationSEQ(const InType &in);
 
  private:
   bool ValidationImpl() override;

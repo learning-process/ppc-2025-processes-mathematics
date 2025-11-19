@@ -50,7 +50,7 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
     res_proc += local_data[i];
   }
   MPI_Reduce(&res_proc, &res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
-  
+
   if ((rank_proc == 0) && (size % size_proc != 0)) {
     size_t tail_ind = size - (size % size_proc);
     for (size_t i = tail_ind; i < size; ++i) {

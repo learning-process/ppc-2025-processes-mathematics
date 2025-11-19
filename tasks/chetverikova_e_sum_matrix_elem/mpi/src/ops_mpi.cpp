@@ -43,16 +43,14 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
 
   std::vector<double> local_data(elem_on_proc, 0);
 
-  if (elem_on_proc > 0) {
-    MPI_Scatter(matrix.data(), static_cast<int>(elem_on_proc), MPI_DOUBLE, local_data.data(),
-                static_cast<int>(elem_on_proc), MPI_DOUBLE, 0, MPI_COMM_WORLD);
-    OutType res_proc{};
-    for (size_t i = 0; i < elem_on_proc; ++i) {
-      res_proc += local_data[i];
-    }
-    MPI_Reduce(&res_proc, &res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  MPI_Scatter(matrix.data(), static_cast<int>(elem_on_proc), MPI_DOUBLE, local_data.data(),
+              static_cast<int>(elem_on_proc), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  OutType res_proc{};
+  for (size_t i = 0; i < elem_on_proc; ++i) {
+    res_proc += local_data[i];
   }
-
+  MPI_Reduce(&res_proc, &res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+  
   if ((rank_proc == 0) && (size % size_proc != 0)) {
     size_t tail_ind = size - (size % size_proc);
     for (size_t i = tail_ind; i < size; ++i) {

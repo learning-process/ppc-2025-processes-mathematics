@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <string>
+
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "krymova_k_lex_order/mpi/include/ops_mpi.hpp"
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"

@@ -1,9 +1,9 @@
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"
 
-#include <algorithm>
+#include <cstddef>
+#include <string>
 
 #include "krymova_k_lex_order/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace krymova_k_lex_order {
 KrymovaKLexSEQ::KrymovaKLexSEQ(const InType &in) {

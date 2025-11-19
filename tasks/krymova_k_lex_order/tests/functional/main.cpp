@@ -4,13 +4,11 @@
 #include <cstddef>
 #include <string>
 #include <tuple>
-#include <vector>
 
 #include "krymova_k_lex_order/common/include/common.hpp"
 #include "krymova_k_lex_order/mpi/include/ops_mpi.hpp"
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
-#include "util/include/util.hpp"
 
 namespace krymova_k_lex_order {
 
@@ -37,7 +35,7 @@ class KrymovaKLexOrderFuncTestsProcesses : public ppc::util::BaseRunFuncTests<In
 
  private:
   InType input_data_;
-  OutType expected_result_;
+  OutType expected_result_ = 0;
 };
 
 namespace {

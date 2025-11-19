@@ -4,9 +4,10 @@
 
 #include <algorithm>
 #include <climits>
+#include <cstddef>
+#include <string>
 
 #include "krymova_k_lex_order/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace krymova_k_lex_order {
 
@@ -28,7 +29,8 @@ bool KrymovaKLexOrderMPI::RunImpl() {
   const std::string &str1 = std::get<0>(GetInput());
   const std::string &str2 = std::get<1>(GetInput());
 
-  int rank, size;
+  int rank = 0;
+  int size = 1;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
@@ -50,14 +52,14 @@ bool KrymovaKLexOrderMPI::RunImpl() {
     }
   }
   int local_found = found_diff ? 1 : 0;
-  int global_found;
+  int global_found = 0;
   MPI_Allreduce(&local_found, &global_found, 1, MPI_INT, MPI_MAX, MPI_COMM_WORLD);
 
   int result = 0;
 
-  if (global_found) {
+  if (global_found != 0) {
     int pos_to_send = found_diff ? local_diff_pos : INT_MAX;
-    int global_min_pos;
+    int global_min_pos = 0;
     MPI_Allreduce(&pos_to_send, &global_min_pos, 1, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
     result = (str1[global_min_pos] < str2[global_min_pos]) ? -1 : 1;
   } else {

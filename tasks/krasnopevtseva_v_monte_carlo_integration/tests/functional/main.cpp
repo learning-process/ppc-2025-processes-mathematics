@@ -26,15 +26,15 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     std::string result = "a" + std::to_string(a) + "_b" + std::to_string(b) + "_points" + std::to_string(points) + "_" +
                          std::get<1>(test_param);
 
-    std::replace(result.begin(), result.end(), '-', 'n');
-    std::replace(result.begin(), result.end(), '.', '_');
+    std::ranges::replace(result, '-', 'n');
+    std::ranges::replace(result, '.', '_');
 
     return result;
   }
 
  private:
   InType input_data_;
-  double expected_integral_;
+  double expected_integral_{};
 
  protected:
   void SetUp() override {

@@ -1,7 +1,6 @@
 #include "krasnopevtseva_v_monte_carlo_integration/seq/include/ops_seq.hpp"
 
 #include <cmath>
-#include <cstddef>
 #include <random>
 #include <tuple>
 

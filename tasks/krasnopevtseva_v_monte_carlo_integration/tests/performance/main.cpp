@@ -11,7 +11,7 @@
 namespace krasnopevtseva_v_monte_carlo_integration {
 
 class KrasnopevtsevaVMCIntegrationPerfTests : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
   double expected_integral_{};
   double tolerance_{};
 

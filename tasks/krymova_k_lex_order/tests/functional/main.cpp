@@ -9,6 +9,7 @@
 #include "krymova_k_lex_order/mpi/include/ops_mpi.hpp"
 #include "krymova_k_lex_order/seq/include/ops_seq.hpp"
 #include "util/include/func_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace krymova_k_lex_order {
 

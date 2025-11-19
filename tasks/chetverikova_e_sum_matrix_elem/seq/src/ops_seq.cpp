@@ -1,7 +1,6 @@
 #include "chetverikova_e_sum_matrix_elem/seq/include/ops_seq.hpp"
 
 #include <cstddef>
-#include <vector>
 
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 

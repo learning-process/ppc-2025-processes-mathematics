@@ -58,7 +58,6 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
 
   MPI_Datatype datatype = MPI_DOUBLE;
 
-  std::vector<double> mx_elem(1);
   data.resize(sendcounts[rank]);
   if (rank == 0) {
     MPI_Scatterv(v.data(), sendcounts.data(), displs.data(), datatype, data.data(), sendcounts[rank], datatype, 0,
@@ -84,15 +83,15 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
 
   MPI_Gatherv(&tmp_mx, 1, datatype, all_maxs.data(), sendcounts.data(), displs.data(), datatype, 0, MPI_COMM_WORLD);
 
-  MPI_Barrier(MPI_COMM_WORLD);
-
   if (rank == 0) {
     for (int i = 0; i < size; ++i) {
       flag = all_maxs[i] > tmp_mx;
       mx = static_cast<double>(flag) * all_maxs[i] + (1. - static_cast<double>(flag)) * mx;
     }
   }
-
+  
+  MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Barrier(MPI_COMM_WORLD);
   return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
 }
 

@@ -15,7 +15,8 @@ ChetverikovaESumMatrixElemSEQ::ChetverikovaESumMatrixElemSEQ(const InType &in) {
 
 bool ChetverikovaESumMatrixElemSEQ::ValidationImpl() {
   return ((std::get<0>(GetInput()) > 0) && (std::get<1>(GetInput()) > 0) &&
-          (static_cast<size_t>(std::get<0>(GetInput())) * static_cast<size_t>(std::get<1>(GetInput())) == std::get<2>(GetInput()).size()) &&
+          (static_cast<size_t>(std::get<0>(GetInput())) * static_cast<size_t>(std::get<1>(GetInput())) ==
+           std::get<2>(GetInput()).size()) &&
           (!(std::get<2>(GetInput()).empty())) && (GetOutput() == 0.0));
 }
 

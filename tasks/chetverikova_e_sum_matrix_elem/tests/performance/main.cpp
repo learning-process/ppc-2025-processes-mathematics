@@ -25,7 +25,7 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
     if (!file.is_open()) {
       throw std::runtime_error("Failed to open file");
     }
-// static_cast<std::streamsize>(total_elements * sizeof(double))
+    // static_cast<std::streamsize>(total_elements * sizeof(double))
     size_t rows = 0;
     size_t cols = 0;
     if (!file.read(reinterpret_cast<char *>(&rows), sizeof(rows))) {
@@ -43,7 +43,8 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
 
     size_t total_elements = rows * cols;
     std::get<2>(input_data_).resize(total_elements);
-    if (!file.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()), static_cast<std::streamsize>(total_elements * sizeof(double))) {
+    if (!file.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()),
+                   static_cast<std::streamsize>(total_elements * sizeof(double)))) {
       throw std::runtime_error("Failed to read matrix data");
     }
 

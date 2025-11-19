@@ -2,12 +2,12 @@
 #include <stb/stb_image.h>
 
 #include <array>
+#include <cmath>
 #include <cstddef>
+#include <fstream>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <fstream>
-#include <cmath>
 
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"

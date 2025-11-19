@@ -1,16 +1,13 @@
 #include <gtest/gtest.h>
 #include <stb/stb_image.h>
 
-#include <algorithm>
 #include <array>
 #include <cstddef>
-#include <cstdint>
-#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
-#include <vector>
+#include <fstream>
+#include <cmath>
 
 #include "chetverikova_e_sum_matrix_elem/common/include/common.hpp"
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
@@ -23,7 +20,7 @@ namespace chetverikova_e_sum_matrix_elem {
 class ChetverikovaERunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  private:
   InType input_data_;
-  OutType expected_data_;
+  OutType expected_data_{};
 
  public:
   static std::string PrintTestParam(const TestType &test_param) {

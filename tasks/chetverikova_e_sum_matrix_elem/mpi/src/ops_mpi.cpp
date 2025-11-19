@@ -17,7 +17,7 @@ ChetverikovaESumMatrixElemMPI::ChetverikovaESumMatrixElemMPI(const InType &in) {
 
 bool ChetverikovaESumMatrixElemMPI::ValidationImpl() {
   return (std::get<0>(GetInput()) > 0) && (std::get<1>(GetInput()) > 0) &&
-         (std::get<0>(GetInput()) * std::get<1>(GetInput()) == std::get<2>(GetInput()).size()) &&
+         (static_cast<size_t>(std::get<0>(GetInput())) * static_cast<size_t>(std::get<1>(GetInput())) == std::get<2>(GetInput()).size()) &&
          !(std::get<2>(GetInput()).empty()) && (GetOutput() == 0.0);
 }
 
@@ -44,7 +44,7 @@ bool ChetverikovaESumMatrixElemMPI::RunImpl() {
   std::vector<double> local_data(elem_on_proc, 0);
 
   if (elem_on_proc > 0) {
-    MPI_Scatter(matrix.data(), elem_on_proc, MPI_DOUBLE, local_data.data(), elem_on_proc, MPI_DOUBLE, 0,
+    MPI_Scatter(matrix.data(), static_cast<int>(elem_on_proc), MPI_DOUBLE, local_data.data(), static_cast<int>(elem_on_proc), MPI_DOUBLE, 0,
                 MPI_COMM_WORLD);
     OutType res_proc{};
     for (size_t i = 0; i < elem_on_proc; ++i) {

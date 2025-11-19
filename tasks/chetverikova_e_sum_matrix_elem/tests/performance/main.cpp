@@ -11,11 +11,12 @@
 #include "chetverikova_e_sum_matrix_elem/mpi/include/ops_mpi.hpp"
 #include "chetverikova_e_sum_matrix_elem/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace chetverikova_e_sum_matrix_elem {
 
 class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  InType input_data_{};
+  InType input_data_;
   OutType expected_data_{};
 
   void SetUp() override {
@@ -24,7 +25,7 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
     if (!file.is_open()) {
       throw std::runtime_error("Failed to open file");
     }
-
+// static_cast<std::streamsize>(total_elements * sizeof(double))
     size_t rows = 0;
     size_t cols = 0;
     if (!file.read(reinterpret_cast<char *>(&rows), sizeof(rows))) {
@@ -42,7 +43,7 @@ class ChetverikovaERunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InT
 
     size_t total_elements = rows * cols;
     std::get<2>(input_data_).resize(total_elements);
-    if (!file.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()), total_elements * sizeof(double))) {
+    if (!file.read(reinterpret_cast<char *>(std::get<2>(input_data_).data()), static_cast<std::streamsize>(total_elements * sizeof(double))) {
       throw std::runtime_error("Failed to read matrix data");
     }
 

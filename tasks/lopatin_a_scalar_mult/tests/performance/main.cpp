@@ -6,6 +6,8 @@
 #include <stdexcept>
 #include <string>
 
+#include <mpi.h>
+
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
 #include "lopatin_a_scalar_mult/mpi/include/ops_mpi.hpp"
 #include "lopatin_a_scalar_mult/seq/include/ops_seq.hpp"
@@ -43,7 +45,13 @@ class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, O
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    return abs(output_data - output_chekup_data_) < 0.1;
+    int proc_rank = 0;
+    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+
+    if (proc_rank == 0) {
+      return abs(output_data - output_chekup_data_) < 0.1;
+    }
+    return true;
   }
 
   InType GetTestInputData() final {

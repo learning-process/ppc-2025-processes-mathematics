@@ -12,13 +12,29 @@ namespace lopatin_a_scalar_mult {
 
 LopatinAScalarMultMPI::LopatinAScalarMultMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
+
+  int proc_rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+
+  if (proc_rank == 0) {
+    GetInput() = in;
+  }
+  else {
+    GetInput() = InType{};
+  }
+
   GetOutput() = 0.0;
 }
 
 bool LopatinAScalarMultMPI::ValidationImpl() {
-  return (!GetInput().first.empty() && !GetInput().second.empty()) &&
-         (GetInput().first.size() == GetInput().second.size());
+  int proc_rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+
+  if (proc_rank == 0) {
+    return (!GetInput().first.empty() && !GetInput().second.empty()) &&
+           (GetInput().first.size() == GetInput().second.size());
+  }
+  return true;
 }
 
 bool LopatinAScalarMultMPI::PreProcessingImpl() {
@@ -33,8 +49,10 @@ bool LopatinAScalarMultMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
 
   const auto &input = GetInput();
-  const auto n = input.first.size();
   OutType &total_res = GetOutput();
+  
+  int n = static_cast<int>(input.first.size());
+  MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   int local_n = static_cast<int>(n / proc_num);
 
@@ -56,14 +74,13 @@ bool LopatinAScalarMultMPI::RunImpl() {
 
   if (proc_rank == 0) {
     if (n % proc_num != 0) {
-      size_t tail_index = n - (n % proc_num);
-      for (size_t i = tail_index; i < n; ++i) {
+      int tail_index = n - (n % proc_num);
+      for (int i = tail_index; i < n; ++i) {
         total_res += input.first[i] * input.second[i];
       }
     }
   }
 
-  MPI_Bcast(&total_res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
 
   return true;

@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <array>
+#include <cstddef>
 #include <fstream>
 #include <ios>
 #include <stdexcept>
@@ -42,7 +43,7 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
     }
     std::get<0>(input_data_) = n;
     std::vector<double> &v = std::get<1>(input_data_);
-    v.resize(static_cast<size_t>(m * n));
+    v.resize(static_cast<std::size_t>(m) * static_cast<std::size_t>(n));
     file_stream.read(reinterpret_cast<char *>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
     file_stream.close();
   }

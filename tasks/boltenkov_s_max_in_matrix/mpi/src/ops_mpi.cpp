@@ -3,10 +3,11 @@
 #include <mpi.h>
 
 #include <numeric>
+#include <cmath>
+#include <utility>
 #include <vector>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace boltenkov_s_max_in_matrix {
 
@@ -68,7 +69,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   }
 
   bool flag;
-  OutType tmp_mx;
+  OutType tmp_mx = mx;
   for (int i = 0; i < sendcounts[rank]; ++i) {
     flag = data[i] > tmp_mx;
     tmp_mx = static_cast<double>(flag) * data[i] + (1. - static_cast<double>(flag)) * tmp_mx;

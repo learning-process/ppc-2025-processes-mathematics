@@ -1,10 +1,11 @@
 #include "boltenkov_s_max_in_matrix/seq/include/ops_seq.hpp"
 
 #include <numeric>
+#include <cmath>
+#include <cstddef>
 #include <vector>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace boltenkov_s_max_in_matrix {
 

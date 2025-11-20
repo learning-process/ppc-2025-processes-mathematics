@@ -1,12 +1,17 @@
 #include <gtest/gtest.h>
 
+#include <cmath>
+#include <cstddef>
 #include <fstream>
 #include <ios>
+#include <stdexcept>
+#include <string>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"
 #include "boltenkov_s_max_in_matrix/mpi/include/ops_mpi.hpp"
 #include "boltenkov_s_max_in_matrix/seq/include/ops_seq.hpp"
 #include "util/include/perf_test_util.hpp"
+#include "util/include/util.hpp"
 
 namespace boltenkov_s_max_in_matrix {
 

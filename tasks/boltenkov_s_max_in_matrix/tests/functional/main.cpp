@@ -6,6 +6,8 @@
 #include <cstddef>
 #include <cstdint>
 #include <numeric>
+#include <fstream>
+#include <ios>
 #include <stdexcept>
 #include <string>
 #include <tuple>

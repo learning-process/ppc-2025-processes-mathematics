@@ -18,8 +18,7 @@ LopatinAScalarMultMPI::LopatinAScalarMultMPI(const InType &in) {
 
   if (proc_rank == 0) {
     GetInput() = in;
-  }
-  else {
+  } else {
     GetInput() = InType{};
   }
 
@@ -50,7 +49,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
 
   const auto &input = GetInput();
   OutType &total_res = GetOutput();
-  
+
   int n = static_cast<int>(input.first.size());
   MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 

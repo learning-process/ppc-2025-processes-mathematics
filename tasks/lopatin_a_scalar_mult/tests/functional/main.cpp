@@ -1,4 +1,5 @@
 #include <gtest/gtest.h>
+#include <mpi.h>
 #include <stb/stb_image.h>
 
 #include <array>
@@ -11,8 +12,6 @@
 #include <string>
 #include <tuple>
 #include <vector>
-
-#include <mpi.h>
 
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
 #include "lopatin_a_scalar_mult/mpi/include/ops_mpi.hpp"
@@ -71,7 +70,7 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
 
     int proc_rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
-    
+
     if (proc_rank == 0) {
       if (params == "test_vectors_func_n_4") {
         return abs(output_data - output_chekup_data_) < 1e-12;

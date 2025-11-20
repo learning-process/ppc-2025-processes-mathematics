@@ -1,12 +1,11 @@
 #include <gtest/gtest.h>
+#include <mpi.h>
 
 #include <cmath>
 #include <fstream>
 #include <ios>
 #include <stdexcept>
 #include <string>
-
-#include <mpi.h>
 
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
 #include "lopatin_a_scalar_mult/mpi/include/ops_mpi.hpp"

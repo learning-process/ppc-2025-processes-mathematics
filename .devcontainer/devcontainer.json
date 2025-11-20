@@ -1,6 +1,12 @@
 {
 	"name": "Parallel Programming Course",
 	"image": "ghcr.io/learning-process/ppc-ubuntu:1.1",
+	"features": {
+        "ghcr.io/devcontainers/features/docker-in-docker:2": {
+            "version": "latest",
+            "enableNonRootDocker": "true" 
+        }
+    },
 	"customizations": {
 		"vscode": {
 			"extensions": [

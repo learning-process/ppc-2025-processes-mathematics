@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <mpi.h>
 #include <stb/stb_image.h>
 
 #include <array>
@@ -67,22 +66,16 @@ class LopatinAScalarMultFuncTests : public ppc::util::BaseRunFuncTests<InType, O
 
   bool CheckTestOutputData(OutType &output_data) final {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-
-    int proc_rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
-
-    if (proc_rank == 0) {
-      if (params == "test_vectors_func_n_4") {
-        return abs(output_data - output_chekup_data_) < 1e-12;
-      }
-      if (params == "test_vectors_func_n_19") {
-        return abs(output_data - output_chekup_data_) < 0.1;
-      }
-      if (params == "test_vectors_func_n_7_ort") {
-        return abs(output_data - output_chekup_data_) < 1e-9;
-      }
+    if (params == "test_vectors_func_n_4") {
+      return abs(output_data - output_chekup_data_) < 1e-12;
     }
-    return true;
+    if (params == "test_vectors_func_n_19") {
+      return abs(output_data - output_chekup_data_) < 0.1;
+    }
+    if (params == "test_vectors_func_n_7_ort") {
+      return abs(output_data - output_chekup_data_) < 1e-9;
+    }
+    return false;
   }
 
   InType GetTestInputData() final {

@@ -80,6 +80,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
     }
   }
 
+  MPI_Bcast(&total_res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
 
   return true;

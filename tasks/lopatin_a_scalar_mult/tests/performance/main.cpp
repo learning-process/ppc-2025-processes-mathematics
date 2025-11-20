@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <mpi.h>
 
 #include <cmath>
 #include <fstream>
@@ -44,13 +43,7 @@ class LopatinAScalarMultPerfTests : public ppc::util::BaseRunPerfTests<InType, O
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    int proc_rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
-
-    if (proc_rank == 0) {
-      return abs(output_data - output_chekup_data_) < 0.1;
-    }
-    return true;
+    return abs(output_data - output_chekup_data_) < 0.1;
   }
 
   InType GetTestInputData() final {

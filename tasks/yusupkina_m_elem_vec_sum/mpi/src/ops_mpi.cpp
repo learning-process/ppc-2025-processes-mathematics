@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 
+#include <cstdint>
 #include <numeric>
 #include <vector>
 
@@ -43,7 +44,9 @@ bool YusupkinaMElemVecSumMPI::RunImpl() {
     if (rank == 0) {
       GetOutput() = std::accumulate(input_vec.begin(), input_vec.end(), 0LL);
     }
-    MPI_Bcast(&GetOutput(), 1, MPI_LONG_LONG, 0, MPI_COMM_WORLD);
+    OutType output = GetOutput();
+    MPI_Bcast(&output, 1, MPI_INT64_T, 0, MPI_COMM_WORLD);
+    GetOutput() = output;
     return true;
   }
 
@@ -62,8 +65,10 @@ bool YusupkinaMElemVecSumMPI::RunImpl() {
   }
 
   OutType local_sum = std::accumulate(local_vec_part.begin(), local_vec_part.end(), 0LL);
+  OutType global_sum = 0LL;
 
-  MPI_Allreduce(&local_sum, &GetOutput(), 1, MPI_LONG_LONG, MPI_SUM, MPI_COMM_WORLD);
+  MPI_Allreduce(&local_sum, &global_sum, 1, MPI_INT64_T, MPI_SUM, MPI_COMM_WORLD);
+  GetOutput() = global_sum;
   return true;
 }
 

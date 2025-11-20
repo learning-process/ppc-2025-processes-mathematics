@@ -16,8 +16,8 @@ BoltenkovSMaxInMatrixkSEQ::BoltenkovSMaxInMatrixkSEQ(const InType &in) {
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::ValidationImpl() {
-  return std::abs(GetOutput() +- std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-         std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 &&
+         !std::get<1>(GetInput()).empty() && std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::PreProcessingImpl() {

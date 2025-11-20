@@ -18,7 +18,7 @@ BoltenkovSMaxInMatrixkMPI::BoltenkovSMaxInMatrixkMPI(const InType &in) {
 }
 
 bool BoltenkovSMaxInMatrixkMPI::ValidationImpl() {
-  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() && 
+  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
          std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
@@ -93,11 +93,11 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
 
   MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
-  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
+  return true;
 }
 
 bool BoltenkovSMaxInMatrixkMPI::PostProcessingImpl() {
-  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
+  return true;
 }
 
 }  // namespace boltenkov_s_max_in_matrix

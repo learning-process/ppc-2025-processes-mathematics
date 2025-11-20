@@ -10,15 +10,13 @@
 
 namespace boltenkov_s_max_in_matrix {
 
-class ExampleRunPerfTestProcesses
-    : public ppc::util::BaseRunPerfTests<InType, OutType> {
+class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
   InType input_data_{};
 
   void SetUp() override {
     TestType params = "matrix2";
     std::string file_name = params + ".bin";
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(
-        PPC_ID_boltenkov_s_max_in_matrix, file_name);
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
     std::ifstream file_stream(abs_path, std::ios::binary);
     if (!file_stream.is_open()) {
       throw std::runtime_error("Error opening file!\n");
@@ -32,8 +30,7 @@ class ExampleRunPerfTestProcesses
     std::get<0>(input_data_) = n;
     std::vector<double> &v = std::get<1>(input_data_);
     v.resize(m * n);
-    file_stream.read(reinterpret_cast<char *>(v.data()),
-                     static_cast<std::streamsize>(sizeof(double) * m * n));
+    file_stream.read(reinterpret_cast<char *>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
     file_stream.close();
   }
 
@@ -48,21 +45,22 @@ class ExampleRunPerfTestProcesses
     return true;
   }
 
-  InType GetTestInputData() final { return input_data_; }
+  InType GetTestInputData() final {
+    return input_data_;
+  }
 };
 
-TEST_P(ExampleRunPerfTestProcesses, RunPerfModes) { ExecuteTest(GetParam()); }
+TEST_P(ExampleRunPerfTestProcesses, RunPerfModes) {
+  ExecuteTest(GetParam());
+}
 
-const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, BoltenkovSMaxInMatrixkMPI,
-                                BoltenkovSMaxInMatrixkSEQ>(
-        PPC_ID_boltenkov_s_max_in_matrix);
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, BoltenkovSMaxInMatrixkMPI, BoltenkovSMaxInMatrixkSEQ>(
+    PPC_ID_boltenkov_s_max_in_matrix);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
 const auto kPerfTestName = ExampleRunPerfTestProcesses::CustomPerfTestName;
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses,
-                         kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses, kGtestValues, kPerfTestName);
 
-} // namespace boltenkov_s_max_in_matrix
+}  // namespace boltenkov_s_max_in_matrix

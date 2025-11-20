@@ -5,9 +5,9 @@
 #include <array>
 #include <cstddef>
 #include <cstdint>
-#include <numeric>
 #include <fstream>
 #include <ios>
+#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>

@@ -1,8 +1,8 @@
 #include "boltenkov_s_max_in_matrix/seq/include/ops_seq.hpp"
 
-#include <numeric>
 #include <cmath>
 #include <cstddef>
+#include <numeric>
 #include <vector>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"

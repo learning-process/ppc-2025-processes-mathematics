@@ -15,14 +15,13 @@
 
 namespace boltenkov_s_max_in_matrix {
 
-class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
+class BoltenkovSRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
   InType input_data_{};
 
   void SetUp() override {
-    TestType params = "matrix2";
-    std::string file_name = params + ".bin";
+    std::string file_name = "matrix2.bin";
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
-    std::ifstream file_stream(abs_path, std::ios::binary);
+    std::ifstream file_stream(abs_path, std::ios::in | std::ios::binary);
     if (!file_stream.is_open()) {
       throw std::runtime_error("Error opening file!\n");
     }
@@ -40,10 +39,8 @@ class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, O
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    int n = std::get<1>(input_data_).size();
-    std::vector<double> &v = std::get<1>(input_data_);
-    for (int i = 0; i < n; ++i) {
-      if (v[i] > output_data) {
+    for (auto it : std::get<1>(input_data_)) {
+      if (it > output_data) {
         return false;
       }
     }
@@ -55,17 +52,17 @@ class ExampleRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, O
   }
 };
 
-TEST_P(ExampleRunPerfTestProcesses, RunPerfModes) {
+TEST_P(BoltenkovSRunPerfTestProcesses, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
 const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, BoltenkovSMaxInMatrixkMPI, BoltenkovSMaxInMatrixkSEQ>(
-    PPC_ID_boltenkov_s_max_in_matrix);
+    PPC_SETTINGS_boltenkov_s_max_in_matrix);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
-const auto kPerfTestName = ExampleRunPerfTestProcesses::CustomPerfTestName;
+const auto kPerfTestName = BoltenkovSRunPerfTestProcesses::CustomPerfTestName;
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, ExampleRunPerfTestProcesses, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(RunModeTests, BoltenkovSRunPerfTestProcesses, kGtestValues, kPerfTestName);
 
 }  // namespace boltenkov_s_max_in_matrix

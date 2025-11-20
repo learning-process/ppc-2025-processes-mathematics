@@ -18,7 +18,7 @@ BoltenkovSMaxInMatrixkMPI::BoltenkovSMaxInMatrixkMPI(const InType &in) {
 }
 
 bool BoltenkovSMaxInMatrixkMPI::ValidationImpl() {
-  return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 &&
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 &&
          !std::get<1>(GetInput()).empty() && std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
@@ -69,10 +69,10 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   }
 
   bool flag;
-  OutType tmp_mx = mx;
+  OutType tmp_mx = std::numeric_limits<double>::lowest();
   for (int i = 0; i < sendcounts[rank]; ++i) {
     flag = data[i] > tmp_mx;
-    tmp_mx = static_cast<double>(flag) * data[i] + (1. - static_cast<double>(flag)) * tmp_mx;
+    tmp_mx = static_cast<double>(flag) * data[i] + static_cast<double>(!flag) * tmp_mx;
   }
 
   if (rank == 0) {
@@ -86,8 +86,8 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
 
   if (rank == 0) {
     for (int i = 0; i < size; ++i) {
-      flag = all_maxs[i] > tmp_mx;
-      mx = static_cast<double>(flag) * all_maxs[i] + (1. - static_cast<double>(flag)) * mx;
+      flag = all_maxs[i] > mx;
+      mx = static_cast<double>(flag) * all_maxs[i] + static_cast<double>(!flag) * mx;
     }
   }
 

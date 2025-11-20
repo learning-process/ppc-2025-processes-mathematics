@@ -52,10 +52,8 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    int n = std::get<1>(input_data_).size();
-    std::vector<double> &v = std::get<1>(input_data_);
-    for (int i = 0; i < n; ++i) {
-      if (v[i] > output_data) {
+    for (auto it : std::get<1>(input_data_)) {
+      if (it > output_data) {
         return false;
       }
     }
@@ -79,8 +77,8 @@ TEST_P(BoltenkovSRunFuncTestsProcesses, MatmulFromPic) {
 const std::array<TestType, 2> kTestParam = {"matrix1", "matrix2"};
 
 const auto kTestTasksList = std::tuple_cat(
-    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(kTestParam, PPC_ID_boltenkov_s_max_in_matrix),
-    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkSEQ, InType>(kTestParam, PPC_ID_boltenkov_s_max_in_matrix));
+    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(kTestParam, PPC_SETTINGS_boltenkov_s_max_in_matrix),
+    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkSEQ, InType>(kTestParam, PPC_SETTINGS_boltenkov_s_max_in_matrix));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 

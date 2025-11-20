@@ -25,7 +25,7 @@ class BoltenkovSRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType
     std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
     std::ifstream file_stream(abs_path, std::ios::in | std::ios::binary);
     if (!file_stream.is_open()) {
-      throw std::runtime_error("Error opening file!\n");
+      throw std::runtime_error("Error opening file matrix2.bin!\n");
     }
     int m = -1;
     int n = -1;

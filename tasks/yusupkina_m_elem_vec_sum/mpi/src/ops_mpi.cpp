@@ -5,7 +5,6 @@
 #include <numeric>
 #include <vector>
 
-#include "util/include/util.hpp"
 #include "yusupkina_m_elem_vec_sum/common/include/common.hpp"
 
 namespace yusupkina_m_elem_vec_sum {

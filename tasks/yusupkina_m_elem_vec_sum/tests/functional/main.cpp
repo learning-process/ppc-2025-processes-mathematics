@@ -79,7 +79,7 @@ class YusupkinaMElemVecSumFuncTests : public ppc::util::BaseRunFuncTests<InType,
         input_data_ = std::vector<int>(50, 2);
         expected_ = 100;
         break;
-      case 100:
+      default:
         input_data_ = std::vector<int>(100, 1);
         expected_ = 100;
         break;

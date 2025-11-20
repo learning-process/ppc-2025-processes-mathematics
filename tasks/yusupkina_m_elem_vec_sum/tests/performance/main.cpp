@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <vector>
+
 #include "util/include/perf_test_util.hpp"
 #include "yusupkina_m_elem_vec_sum/common/include/common.hpp"
 #include "yusupkina_m_elem_vec_sum/mpi/include/ops_mpi.hpp"
@@ -9,7 +11,7 @@ namespace yusupkina_m_elem_vec_sum {
 
 class YusupkinaMRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
   const int kCount_ = 100000000;
-  InType input_data_{};
+  InType input_data_;
   OutType expected_ = 0;
 
   void SetUp() override {

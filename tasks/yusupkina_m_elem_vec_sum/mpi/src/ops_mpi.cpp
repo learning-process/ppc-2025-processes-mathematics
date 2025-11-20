@@ -32,7 +32,7 @@ bool YusupkinaMElemVecSumMPI::RunImpl() {
   MPI_Comm_size(MPI_COMM_WORLD, &count);
 
   const auto &input_vec = GetInput();
-  int vec_size = input_vec.size();
+  int vec_size = static_cast<int>(input_vec.size());
 
   if (vec_size == 0) {
     GetOutput() = 0;

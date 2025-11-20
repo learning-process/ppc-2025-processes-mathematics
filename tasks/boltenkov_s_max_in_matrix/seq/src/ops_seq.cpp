@@ -16,8 +16,8 @@ BoltenkovSMaxInMatrixkSEQ::BoltenkovSMaxInMatrixkSEQ(const InType &in) {
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::ValidationImpl() {
-  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 &&
-         !std::get<1>(GetInput()).empty() && std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+         std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::PreProcessingImpl() {
@@ -42,11 +42,11 @@ bool BoltenkovSMaxInMatrixkSEQ::RunImpl() {
     mx = static_cast<double>(flag) * v[i] + static_cast<double>(!flag) * mx;
   }
 
-  return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::PostProcessingImpl() {
-  return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
 }
 
 }  // namespace boltenkov_s_max_in_matrix

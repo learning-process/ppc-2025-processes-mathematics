@@ -18,8 +18,8 @@ BoltenkovSMaxInMatrixkMPI::BoltenkovSMaxInMatrixkMPI(const InType &in) {
 }
 
 bool BoltenkovSMaxInMatrixkMPI::ValidationImpl() {
-  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) < 1e-14 && std::get<0>(GetInput()) > 0 &&
-         !std::get<1>(GetInput()).empty() && std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() && 
+         std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
 bool BoltenkovSMaxInMatrixkMPI::PreProcessingImpl() {
@@ -52,7 +52,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   int cur_disp = 0;
   for (int i = 0; i < size; ++i) {
     int cur_cnt = cnt_item + (i < r ? 1 : 0);
-    sendcounts[r] = cur_cnt;
+    sendcounts[i] = cur_cnt;
     displs[i] = cur_disp;
     cur_disp += sendcounts[i];
   }
@@ -93,11 +93,11 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
 
   MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
-  return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
 }
 
 bool BoltenkovSMaxInMatrixkMPI::PostProcessingImpl() {
-  return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
+  return std::abs(GetOutput() - std::numeric_limits<double>::lowest()) > 1e-14;
 }
 
 }  // namespace boltenkov_s_max_in_matrix

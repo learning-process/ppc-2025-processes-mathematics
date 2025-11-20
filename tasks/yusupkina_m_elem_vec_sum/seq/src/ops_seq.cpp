@@ -3,8 +3,8 @@
 #include <numeric>
 #include <vector>
 
-#include "yusupkina_m_elem_vec_sum/common/include/common.hpp"
 #include "util/include/util.hpp"
+#include "yusupkina_m_elem_vec_sum/common/include/common.hpp"
 
 namespace yusupkina_m_elem_vec_sum {
 
@@ -24,7 +24,7 @@ bool YusupkinaMElemVecSumSEQ::PreProcessingImpl() {
 }
 
 bool YusupkinaMElemVecSumSEQ::RunImpl() {
-  GetOutput()=std::accumulate(GetInput().begin(), GetInput().end(), 0LL);
+  GetOutput() = std::accumulate(GetInput().begin(), GetInput().end(), 0LL);
   return true;
 }
 

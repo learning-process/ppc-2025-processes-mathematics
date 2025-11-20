@@ -2,7 +2,6 @@
 
 #include <mpi.h>
 
-#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -53,7 +52,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
   int n = static_cast<int>(input.first.size());
   MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  int local_n = static_cast<int>(n / proc_num);
+  int local_n = n / proc_num;
 
   if (local_n > 0) {
     InType local_data = std::make_pair(std::vector<double>(local_n), std::vector<double>(local_n));

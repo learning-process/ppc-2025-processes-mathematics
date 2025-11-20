@@ -13,4 +13,4 @@ using OutType = double;
 using TestType = std::string;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
-}  // namespace boltenkov_s_max_in_matrix
+} // namespace boltenkov_s_max_in_matrix

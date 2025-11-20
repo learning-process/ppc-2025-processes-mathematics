@@ -6,17 +6,17 @@
 namespace boltenkov_s_max_in_matrix {
 
 class BoltenkovSMaxInMatrixkSEQ : public BaseTask {
- public:
+public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kSEQ;
   }
   explicit BoltenkovSMaxInMatrixkSEQ(const InType &in);
 
- private:
+private:
   bool ValidationImpl() override;
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 };
 
-}  // namespace boltenkov_s_max_in_matrix
+} // namespace boltenkov_s_max_in_matrix

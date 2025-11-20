@@ -8,14 +8,15 @@
 
 namespace boltenkov_s_max_in_matrix {
 
-BoltenkovSMaxInMatrixkSEQ::BoltenkovSMaxInMatrixkSEQ(const InType& in) {
+BoltenkovSMaxInMatrixkSEQ::BoltenkovSMaxInMatrixkSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = std::numeric_limits<double>::lowest();
 }
 
 bool BoltenkovSMaxInMatrixkSEQ::ValidationImpl() {
-  return std::abs(GetOutput() + 1.7e+308) < 1e-14 && std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+  return std::abs(GetOutput() + 1.7e+308) < 1e-14 &&
+         std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
          std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
 }
 
@@ -30,15 +31,16 @@ bool BoltenkovSMaxInMatrixkSEQ::RunImpl() {
     return false;
   }
 
-  OutType& mx = GetOutput();
-  std::vector<double>& v = std::get<1>(GetInput());
+  OutType &mx = GetOutput();
+  std::vector<double> &v = std::get<1>(GetInput());
 
   int n = v.size();
   bool flag;
 
   for (int i = 0; i < n; ++i) {
     flag = v[i] > mx;
-    mx = static_cast<double>(flag) * v[i] + (1. - static_cast<double>(flag)) * mx;
+    mx = static_cast<double>(flag) * v[i] +
+         (1. - static_cast<double>(flag)) * mx;
   }
 
   return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
@@ -48,4 +50,4 @@ bool BoltenkovSMaxInMatrixkSEQ::PostProcessingImpl() {
   return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;
 }
 
-}  // namespace boltenkov_s_max_in_matrix
+} // namespace boltenkov_s_max_in_matrix

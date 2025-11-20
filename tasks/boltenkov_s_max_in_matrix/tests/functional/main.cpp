@@ -20,17 +20,20 @@
 
 namespace boltenkov_s_max_in_matrix {
 
-class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
- public:
+class BoltenkovSRunFuncTestsProcesses
+    : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+public:
   static std::string PrintTestParam(const TestType &test_param) {
     return test_param;
   }
 
- protected:
+protected:
   void SetUp() override {
-    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    TestType params = std::get<static_cast<std::size_t>(
+        ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::string file_name = params + ".bin";
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_boltenkov_s_max_in_matrix, file_name);
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(
+        PPC_ID_boltenkov_s_max_in_matrix, file_name);
     std::ifstream file_stream(abs_path, std::ios::in | std::ios::binary);
     if (!file_stream.is_open()) {
       throw std::runtime_error("Error opening file!\n");
@@ -44,7 +47,8 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
     std::get<0>(input_data_) = n;
     std::vector<double> &v = std::get<1>(input_data_);
     v.resize(m * n);
-    file_stream.read(reinterpret_cast<char *>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
+    file_stream.read(reinterpret_cast<char *>(v.data()),
+                     static_cast<std::streamsize>(sizeof(double) * m * n));
     file_stream.close();
     return;
   }
@@ -60,11 +64,9 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
     return true;
   }
 
-  InType GetTestInputData() final {
-    return input_data_;
-  }
+  InType GetTestInputData() final { return input_data_; }
 
- private:
+private:
   InType input_data_;
 };
 
@@ -76,16 +78,20 @@ TEST_P(BoltenkovSRunFuncTestsProcesses, MatmulFromPic) {
 
 const std::array<TestType, 2> kTestParam = {"matrix1", "matrix2"};
 
-const auto kTestTasksList = std::tuple_cat(
-    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(kTestParam, PPC_ID_boltenkov_s_max_in_matrix),
-    ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkSEQ, InType>(kTestParam, PPC_ID_boltenkov_s_max_in_matrix));
+const auto kTestTasksList =
+    std::tuple_cat(ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(
+                       kTestParam, PPC_ID_boltenkov_s_max_in_matrix),
+                   ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkSEQ, InType>(
+                       kTestParam, PPC_ID_boltenkov_s_max_in_matrix));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = BoltenkovSRunFuncTestsProcesses::PrintFuncTestName<BoltenkovSRunFuncTestsProcesses>;
+const auto kPerfTestName = BoltenkovSRunFuncTestsProcesses::PrintFuncTestName<
+    BoltenkovSRunFuncTestsProcesses>;
 
-INSTANTIATE_TEST_SUITE_P(PicMatrixTests, BoltenkovSRunFuncTestsProcesses, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(PicMatrixTests, BoltenkovSRunFuncTestsProcesses,
+                         kGtestValues, kPerfTestName);
 
-}  // namespace
+} // namespace
 
-}  // namespace boltenkov_s_max_in_matrix
+} // namespace boltenkov_s_max_in_matrix

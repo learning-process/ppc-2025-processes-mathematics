@@ -3,15 +3,11 @@
 
 #include <algorithm>
 #include <array>
-#include <cstddef>
-#include <cstdint>
 #include <fstream>
 #include <ios>
-#include <numeric>
 #include <stdexcept>
 #include <string>
 #include <tuple>
-#include <utility>
 #include <vector>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"
@@ -37,7 +33,8 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
     if (!file_stream.is_open()) {
       throw std::runtime_error("Error opening file!\n");
     }
-    int m = -1, n = -1;
+    int m = -1;
+    int n = -1;
     file_stream.read(reinterpret_cast<char *>(&m), sizeof(int));
     file_stream.read(reinterpret_cast<char *>(&n), sizeof(int));
     if (m <= 0 || n <= 0) {
@@ -45,19 +42,13 @@ class BoltenkovSRunFuncTestsProcesses : public ppc::util::BaseRunFuncTests<InTyp
     }
     std::get<0>(input_data_) = n;
     std::vector<double> &v = std::get<1>(input_data_);
-    v.resize(m * n);
+    v.resize(static_cast<size_t>(m * n));
     file_stream.read(reinterpret_cast<char *>(v.data()), static_cast<std::streamsize>(sizeof(double) * m * n));
     file_stream.close();
-    return;
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
-    for (auto it : std::get<1>(input_data_)) {
-      if (it > output_data) {
-        return false;
-      }
-    }
-    return true;
+    return std::ranges::all_of(std::get<1>(input_data_), [&](auto elem) { return elem <= output_data; });
   }
 
   InType GetTestInputData() final {

@@ -3,8 +3,7 @@
 #include <mpi.h>
 
 #include <cmath>
-#include <numeric>
-#include <utility>
+#include <limits>
 #include <vector>
 
 #include "boltenkov_s_max_in_matrix/common/include/common.hpp"
@@ -14,7 +13,7 @@ namespace boltenkov_s_max_in_matrix {
 BoltenkovSMaxInMatrixkMPI::BoltenkovSMaxInMatrixkMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
-  GetOutput() = std::numeric_limits<double>::lowest();
+  GetOutput() = -std::numeric_limits<double>::max();
 }
 
 bool BoltenkovSMaxInMatrixkMPI::ValidationImpl() {
@@ -28,8 +27,8 @@ bool BoltenkovSMaxInMatrixkMPI::PreProcessingImpl() {
 }
 
 bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
-  if (!(std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-        std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0)) {
+  if (std::get<0>(GetInput()) <= 0 || std::get<1>(GetInput()).empty() ||
+      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) != 0) {
     return false;
   }
 
@@ -45,7 +44,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   OutType &mx = GetOutput();
   std::vector<double> &v = std::get<1>(GetInput());
 
-  int len = v.size();
+  int len = static_cast<int>(v.size());
   int cnt_item = len / size;
   int r = len % size;
 
@@ -68,11 +67,11 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
                  MPI_COMM_WORLD);
   }
 
-  bool flag;
+  bool flag = false;
   OutType tmp_mx = std::numeric_limits<double>::lowest();
   for (int i = 0; i < sendcounts[rank]; ++i) {
     flag = data[i] > tmp_mx;
-    tmp_mx = static_cast<double>(flag) * data[i] + static_cast<double>(!flag) * tmp_mx;
+    tmp_mx = (static_cast<double>(flag) * data[i]) + (static_cast<double>(!flag) * tmp_mx);
   }
 
   if (rank == 0) {
@@ -87,7 +86,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   if (rank == 0) {
     for (int i = 0; i < size; ++i) {
       flag = all_maxs[i] > mx;
-      mx = static_cast<double>(flag) * all_maxs[i] + static_cast<double>(!flag) * mx;
+      mx = (static_cast<double>(flag) * all_maxs[i]) + (static_cast<double>(!flag) * mx);
     }
   }
 

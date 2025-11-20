@@ -19,47 +19,29 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
  private:
   InType input_data_;
 
-  void SetUp() override {
-    TestType params = "create_data_2048x2048";
-    std::string inFileName = params + ".txt";
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_chernykh_s_min_matrix_elements, inFileName);
-
-    std::ifstream inFile(abs_path, std::ios::in);
-    if (!inFile.is_open()) {
-      throw std::runtime_error("Failed to open file: " + abs_path);
-    }
-
-    input_data_.clear();
-    std::string line;
-
-    while (std::getline(inFile, line)) {
-      if (line.empty()) {
-        continue;
-      }
-
-      std::istringstream iss(line);
+  static InType GenerateMatrix(int n) {
+    InType matrix;
+    int seed = 999;
+    std::mt19937 generator(seed);
+    std::uniform_real_distribution<double> raspredelenie(-500.0, 500.0);
+    for (int i = 0; i < n; i++) {
       std::vector<double> row;
-      double value;
-
-      while (iss >> value) {
-        row.push_back(value);
+      row.reserve(n);
+      for (int j = 0; j < n; j++) {
+        row.push_back(raspredelenie(generator));
       }
-
-      if (!row.empty()) {
-        input_data_.push_back(row);
-      }
+      matrix.push_back(row);
     }
+    matrix[n / 2][n / 2] = -1000.0;
+    return matrix;
   }
 
-  bool CheckTestOutputData(OutType &output_data) final {  // такое же как в func тесте
-    const auto &mat = input_data_;
-    double expected_min = std::numeric_limits<double>::max();
-    for (const auto &row : mat) {
-      for (double v : row) {
-        expected_min = std::min(expected_min, v);
-      }
-    }
-    return std::fabs(output_data - expected_min) < 1e-6;
+  void SetUp() override {
+    input_data_ = GenerateMatrix(16384);
+  }
+
+  bool CheckTestOutputData(OutType &output_data) final {
+    return std::fabs(output_data + 1000.0) < 1e-6;
   }
 
   InType GetTestInputData() final {

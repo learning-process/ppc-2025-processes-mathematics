@@ -89,7 +89,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
       mx = static_cast<double>(flag) * all_maxs[i] + (1. - static_cast<double>(flag)) * mx;
     }
   }
-  
+
   MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
   return std::abs(GetOutput() + std::numeric_limits<double>::lowest()) > 1e-14;

@@ -27,8 +27,10 @@ class ZagryadskovMRunFuncTestsMaxByColumn : public ppc::util::BaseRunFuncTests<I
 
  protected:
   void SetUp() override {
+    std::cout << "HEREsetup1" << std::endl;
     int world_rank = 0;
     MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+    std::cout << "HEREsetup2" << std::endl;
     if (world_rank == 0) {
       TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
       std::string in_file_name = params + ".bin";

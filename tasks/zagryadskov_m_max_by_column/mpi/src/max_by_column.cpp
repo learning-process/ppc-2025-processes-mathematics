@@ -13,18 +13,22 @@
 namespace zagryadskov_m_max_by_column {
 
 ZagryadskovMMaxByColumnMPI::ZagryadskovMMaxByColumnMPI(const InType &in) {
+  std::cout << "HEREConstr1" << std::endl;
   SetTypeOfTask(GetStaticTypeOfTask());
   int world_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  std::cout << "HEREConstr2" << std::endl;
   if (world_rank == 0) {
     GetInput() = in;
   }
 }
 
 bool ZagryadskovMMaxByColumnMPI::ValidationImpl() {
+  std::cout << "HEREvalid1" << std::endl;
   bool res = false;
   int world_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  std::cout << "HEREvalid2" << std::endl;
   if (world_rank == 0) {
     size_t mat_size = std::get<1>(GetInput()).size();
     size_t n = std::get<0>(GetInput());

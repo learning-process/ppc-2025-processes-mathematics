@@ -5,10 +5,12 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
+#include <utility>
 #include <vector>
 
 #include "util/include/func_test_util.hpp"
@@ -70,7 +72,7 @@ class ZagryadskovMRunFuncTestsMaxByColumn : public ppc::util::BaseRunFuncTests<I
       T diff = std::abs(example[j] - output_data[j]);
       T eps = std::max(std::abs(example[j]), std::abs(output_data[j])) * std::numeric_limits<double>::epsilon();
       if (diff > eps) {
-        return res = false;
+        res = false;
       }
     }
 

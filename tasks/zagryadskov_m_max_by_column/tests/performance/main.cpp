@@ -4,9 +4,11 @@
 #include <fstream>
 #include <ios>
 #include <iosfwd>
+#include <limits>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
+#include <utility>
 
 #include "util/include/perf_test_util.hpp"
 #include "util/include/util.hpp"
@@ -64,7 +66,7 @@ class ZagryadskovMRunPerfTestMaxByColumn : public ppc::util::BaseRunPerfTests<In
       T diff = std::abs(example[j] - output_data[j]);
       T eps = std::max(std::abs(example[j]), std::abs(output_data[j])) * std::numeric_limits<double>::epsilon();
       if (diff > eps) {
-        return res = false;
+        res = false;
       }
     }
 

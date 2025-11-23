@@ -49,7 +49,7 @@ bool ZagryadskovMMaxByColumnMPI::PreProcessingImpl() {
   return true;
 }
 
-bool ZagryadskovMMaxByColumnMPI::second_phase(int m, int n, int world_size, int world_rank,
+bool ZagryadskovMMaxByColumnMPI::SecondPhase(int m, int n, int world_size, int world_rank,
                                               std::vector<int> &sendcounts, std::vector<int> &displs, OutType &res,
                                               OutType &local_res, MPI_Datatype datatype) {
   int r = 0;
@@ -162,7 +162,7 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
     }
   }
 
-  return second_phase(m, n, world_size, world_rank, sendcounts, displs, res, local_res, datatype);
+  return SecondPhase(m, n, world_size, world_rank, sendcounts, displs, res, local_res, datatype);
 }
 
 bool ZagryadskovMMaxByColumnMPI::PostProcessingImpl() {

@@ -27,31 +27,25 @@ class ZagryadskovMRunFuncTestsMaxByColumn : public ppc::util::BaseRunFuncTests<I
 
  protected:
   void SetUp() override {
-    std::cout << "HEREsetup1" << std::endl;
-    int world_rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-    std::cout << "HEREsetup2" << std::endl;
-    if (world_rank == 0) {
-      TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-      std::string in_file_name = params + ".bin";
-      std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_max_by_column, in_file_name);
-      std::ifstream in_file_stream(abs_path, std::ios::in | std::ios::binary);
-      if (!in_file_stream.is_open()) {
-        throw std::runtime_error("Error opening file!\n");
-      }
-      size_t m = 0;
-      size_t n = 0;
-      in_file_stream.read(reinterpret_cast<char *>(&m), sizeof(size_t));
-      in_file_stream.read(reinterpret_cast<char *>(&n), sizeof(size_t));
-      std::get<0>(input_data_) = n;
-      auto &mat = std::get<1>(input_data_);
-      mat.resize(m * n);
-      using T = std::decay_t<decltype(*mat.begin())>;
-
-      in_file_stream.read(reinterpret_cast<char *>(mat.data()), static_cast<std::streamsize>(sizeof(T) * m * n));
-
-      in_file_stream.close();
+    TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
+    std::string in_file_name = params + ".bin";
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_max_by_column, in_file_name);
+    std::ifstream in_file_stream(abs_path, std::ios::in | std::ios::binary);
+    if (!in_file_stream.is_open()) {
+      throw std::runtime_error("Error opening file!\n");
     }
+    size_t m = 0;
+    size_t n = 0;
+    in_file_stream.read(reinterpret_cast<char *>(&m), sizeof(size_t));
+    in_file_stream.read(reinterpret_cast<char *>(&n), sizeof(size_t));
+    std::get<0>(input_data_) = n;
+    auto &mat = std::get<1>(input_data_);
+    mat.resize(m * n);
+    using T = std::decay_t<decltype(*mat.begin())>;
+
+    in_file_stream.read(reinterpret_cast<char *>(mat.data()), static_cast<std::streamsize>(sizeof(T) * m * n));
+
+    in_file_stream.close();
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

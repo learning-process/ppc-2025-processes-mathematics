@@ -72,7 +72,7 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
   MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   int columns_count = n / world_size;
-  using T = double;
+  using T = double;  // datatype cannot be sent to other processes
   MPI_Datatype datatype = MPI_DOUBLE;
 
   int i = 0;

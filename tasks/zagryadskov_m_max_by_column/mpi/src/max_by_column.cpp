@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <limits>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -14,7 +15,11 @@ namespace zagryadskov_m_max_by_column {
 ZagryadskovMMaxByColumnMPI::ZagryadskovMMaxByColumnMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   int world_rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int err_code = 0;
+  err_code = MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Comm_rank failed");
+  }
   if (world_rank == 0) {
     GetInput() = in;
   }
@@ -23,7 +28,11 @@ ZagryadskovMMaxByColumnMPI::ZagryadskovMMaxByColumnMPI(const InType &in) {
 bool ZagryadskovMMaxByColumnMPI::ValidationImpl() {
   bool res = false;
   int world_rank = 0;
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int err_code = 0;
+  err_code = MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Comm_rank failed");
+  }
   if (world_rank == 0) {
     size_t mat_size = std::get<1>(GetInput()).size();
     size_t n = std::get<0>(GetInput());
@@ -43,8 +52,15 @@ bool ZagryadskovMMaxByColumnMPI::PreProcessingImpl() {
 bool ZagryadskovMMaxByColumnMPI::RunImpl() {
   int world_size = 0;
   int world_rank = 0;
-  MPI_Comm_size(MPI_COMM_WORLD, &world_size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  int err_code = 0;
+  err_code = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Comm_size failed");
+  }
+  err_code = MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Comm_rank failed");
+  }
   int n = 0;
   const void *mat_data = nullptr;
   int m = 0;
@@ -63,8 +79,14 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
     m = static_cast<int>(mat.size()) / n;
     mat_data = reinterpret_cast<const void *>(mat.data());
   }
-  MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  err_code = MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Bcast failed");
+  }
+  err_code = MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Bcast failed");
+  }
 
   int columns_count = n / world_size;
   using T = double;  // datatype cannot be sent to other processes
@@ -88,8 +110,11 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
 
   local_res.assign(static_cast<size_t>(sendcounts[world_rank] / m), std::numeric_limits<T>::lowest());
   columns.resize(sendcounts[world_rank]);
-  MPI_Scatterv(mat_data, sendcounts.data(), displs.data(), datatype, columns.data(), sendcounts[world_rank], datatype,
-               0, MPI_COMM_WORLD);
+  err_code = MPI_Scatterv(mat_data, sendcounts.data(), displs.data(), datatype, columns.data(), sendcounts[world_rank],
+                          datatype, 0, MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Scatterv failed");
+  }
   for (j = 0; std::cmp_less(j, local_res.size()); ++j) {
     for (i = 0; i < m; ++i) {
       tmp = columns[(j * m) + i];
@@ -104,13 +129,19 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
     }
   }
 
-  MPI_Gatherv(local_res.data(), static_cast<int>(local_res.size()), datatype, res.data(), sendcounts.data(),
-              displs.data(), datatype, 0, MPI_COMM_WORLD);
+  err_code = MPI_Gatherv(local_res.data(), static_cast<int>(local_res.size()), datatype, res.data(), sendcounts.data(),
+                         displs.data(), datatype, 0, MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Gatherv failed");
+  }
   if (world_rank != 0) {
     res.resize(n);
   }
   // sequential version requires not to call MPI funcs
-  MPI_Bcast(res.data(), static_cast<int>(res.size()), datatype, 0, MPI_COMM_WORLD);
+  err_code = MPI_Bcast(res.data(), static_cast<int>(res.size()), datatype, 0, MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Bcast failed");
+  }
 
   bool result = false;
   if (world_rank == 0) {
@@ -118,7 +149,10 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
   } else {
     result = true;
   }
-  MPI_Barrier(MPI_COMM_WORLD);
+  err_code = MPI_Barrier(MPI_COMM_WORLD);
+  if (err_code != MPI_SUCCESS) {
+    throw std::runtime_error("MPI_Barrier failed");
+  }
   return result;
 }
 

@@ -19,17 +19,20 @@ OrehovNCharacterFrequencyMPI::OrehovNCharacterFrequencyMPI(const InType &in) {
 }
 
 bool OrehovNCharacterFrequencyMPI::ValidationImpl() {
-  int rank = 0;
-  int size = 0;
-  int check = 0;
+    int rank = 0;
+    int check = 0;
 
-  MPI_Comm_size(MPI_COMM_WORLD, &size);
-  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-  if (rank == 0) {
-    check = static_cast<int>((std::get<0>(GetInput()).length()) && (std::get<1>(GetInput()).length() == 1));
-  }
-  MPI_Bcast(&check, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  return check;
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    
+    if (rank == 0) {
+        std::string text = std::get<0>(GetInput());
+        std::string target_char = std::get<1>(GetInput());
+        
+        check = static_cast<int>((!text.empty()) && (target_char.length() == 1));
+    }
+    
+    MPI_Bcast(&check, 1, MPI_INT, 0, MPI_COMM_WORLD);
+    return (check == 1);
 }
 
 bool OrehovNCharacterFrequencyMPI::PreProcessingImpl() {

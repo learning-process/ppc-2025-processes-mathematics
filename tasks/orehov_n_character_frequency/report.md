@@ -13,7 +13,7 @@
 ## 2. Problem Statement
 **Входные данные:**
  - Строка (Берётся из файла)
- - Целевой символ (Берётся из следующей строки в том же файле)
+ - Целевой символ (Берётся из следующей строки в том же файле). 
 
 **Выходные данные:**
 
@@ -22,7 +22,7 @@
 **Ограничения**
 
  - Строка не должна быть пустой
- - Строка с целевым символом не должна быть пустой
+ - Строка с целевым символом должна содержать ровно один символ
 
 ## 3. Baseline Algorithm (Sequential)
 
@@ -31,7 +31,7 @@
 
 ## 4. Parallelization Scheme
 
-Вначале считаем сколько данных получит каждый процесс. Распределяем их равномерно. 
+Вначале считаем сколько данных получит каждый процесс. Распределяем их с помощью scatterv. 
 После каждый процесс считает частоту символа в своей части данных
 Дальше с помощью MPI_AllReduce собираем данные и складываем их
 И результат отправляется всем процессам
@@ -53,27 +53,59 @@
 
 '''cpp
 bool OrehovNCharacterFrequencyMPI::RunImpl() {
-  int rank, size;
+  int rank = 0;
+  int size = 0;
+
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 
-  std::string str = std::get<0>(GetInput());
-  std::string symbol = std::get<1>(GetInput());
-  int length = str.length();
-
-  int part_size = length / size;
-  int remains = length % size;
-
-  int start = rank * part_size + std::min(rank, remains);
-  int end = (rank + 1) * part_size + std::min(rank + 1, remains);
-
+  std::string local_str;
+  std::string symbol;
+  int length = 0;
+  int global_result = 0;
   int local_result = 0;
 
-  for (int i = start; i < end; i++){
-    if (str[i] == symbol[0]) local_result++;
+  if (rank == 0) {
+    std::string str = std::get<0>(GetInput());
+    symbol = std::get<1>(GetInput());
+    length = static_cast<int>(str.length());
+    MPI_Bcast(symbol.data(), 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int part_size = length / size;
+    int remains = length % size;
+
+    std::vector<int> sendcounts(size);
+    std::vector<int> displs(size);
+
+    for (int i = 0; i < size; i++) {
+      sendcounts[i] = part_size + (i < remains ? 1 : 0);
+      displs[i] = (i * part_size) + std::min(i, remains);
+    }
+
+    local_str.resize(sendcounts[0]);
+
+    MPI_Scatterv(str.data(), sendcounts.data(), displs.data(), MPI_CHAR, local_str.data(), sendcounts[0], MPI_CHAR, 0,
+                 MPI_COMM_WORLD);
+  } else {
+    symbol.resize(1);
+    MPI_Bcast(symbol.data(), 1, MPI_CHAR, 0, MPI_COMM_WORLD);
+    MPI_Bcast(&length, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    int part_size = length / size;
+    int remains = length % size;
+
+    int local_size = part_size + (rank < remains ? 1 : 0);
+    local_str.resize(local_size);
+
+    MPI_Scatterv(nullptr, nullptr, nullptr, MPI_CHAR, local_str.data(), local_size, MPI_CHAR, 0, MPI_COMM_WORLD);
   }
 
-  int global_result = 0;
+  for (size_t i = 0; i < local_str.length(); i++) {
+    if (local_str[i] == symbol[0]) {
+      local_result++;
+    }
+  }
 
   MPI_Allreduce(&local_result, &global_result, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
   GetOutput() = global_result;

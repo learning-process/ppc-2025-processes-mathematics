@@ -1,5 +1,7 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <fstream>
 #include <ios>
@@ -8,7 +10,6 @@
 #include <stdexcept>
 #include <string>
 #include <type_traits>
-#include <utility>
 
 #include "util/include/perf_test_util.hpp"
 #include "util/include/util.hpp"

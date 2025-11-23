@@ -1,6 +1,8 @@
 #include <gtest/gtest.h>
 
+#include <algorithm>
 #include <array>
+#include <cmath>
 #include <cstddef>
 #include <fstream>
 #include <ios>
@@ -10,7 +12,6 @@
 #include <string>
 #include <tuple>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 #include "util/include/func_test_util.hpp"

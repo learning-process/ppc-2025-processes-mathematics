@@ -28,7 +28,7 @@ bool ZagryadskovMMaxByColumnMPI::ValidationImpl() {
     size_t mat_size = std::get<1>(GetInput()).size();
     size_t n = std::get<0>(GetInput());
     bool if_dividable = mat_size % n == 0;
-    bool if_suits_int = mat_size <= static_cast<size_t>(INT_MAX);
+    bool if_suits_int = mat_size <= static_cast<size_t>(std::numeric_limits<int>::max());
     res = (n > 0) && (mat_size > 0) && (GetOutput().empty()) && if_dividable && if_suits_int;
   } else {
     res = true;

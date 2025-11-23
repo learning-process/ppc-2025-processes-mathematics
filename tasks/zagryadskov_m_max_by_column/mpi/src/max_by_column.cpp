@@ -111,6 +111,11 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
 
   MPI_Gatherv(local_res.data(), static_cast<int>(local_res.size()), datatype, res.data(), sendcounts.data(),
               displs.data(), datatype, 0, MPI_COMM_WORLD);
+  if (world_rank != 0) {
+    res.resize(n);
+  }
+  // sequential version requires not to call MPI funcs
+  MPI_Bcast(res.data(), static_cast<int>(res.size()), datatype, 0, MPI_COMM_WORLD);
 
   bool result = false;
   if (world_rank == 0) {

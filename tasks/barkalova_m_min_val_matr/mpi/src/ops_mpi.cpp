@@ -41,6 +41,7 @@ bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
 }
 
 bool BarkalovaMMinValMatrMPI::RunImpl() {
+  // почему именно такое распределение - описано в отчете
   const auto &matrix = GetInput();
   auto &res = GetOutput();
   if (matrix.empty()) {
@@ -54,7 +55,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   size_t rows = matrix.size();
   size_t stolb = matrix[0].size();
-  // Распределение столбцов
+
   size_t loc_stolb = stolb / size;
   size_t ostatok = stolb % size;
   size_t start_stolb = (rank * loc_stolb) + (std::cmp_less(rank, ostatok) ? rank : ostatok);

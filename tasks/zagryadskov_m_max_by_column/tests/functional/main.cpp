@@ -80,8 +80,7 @@ class ZagryadskovMRunFuncTestsMaxByColumn : public ppc::util::BaseRunFuncTests<I
           return res = false;
         }
       }
-    }
-    else {
+    } else {
       res = true;
     }
 

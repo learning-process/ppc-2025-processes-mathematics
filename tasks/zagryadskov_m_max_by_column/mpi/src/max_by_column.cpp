@@ -30,10 +30,8 @@ bool ZagryadskovMMaxByColumnMPI::ValidationImpl() {
     size_t n = std::get<0>(GetInput());
     bool if_dividable = mat_size % n == 0;
     bool if_suits_int = mat_size <= static_cast<size_t>(INT_MAX);
-    res =
-        (n > 0) && (mat_size > 0) && (GetOutput().empty()) && if_dividable && if_suits_int;
-  }
-  else {
+    res = (n > 0) && (mat_size > 0) && (GetOutput().empty()) && if_dividable && if_suits_int;
+  } else {
     res = true;
   }
   return res;
@@ -49,7 +47,7 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
   MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   int n = 0;
-  const void* mat_data = nullptr;
+  const void *mat_data = nullptr;
   int m = 0;
   OutType &res = GetOutput();
   OutType local_res;
@@ -64,7 +62,7 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
     n = static_cast<int>(std::get<0>(GetInput()));
     const auto &mat = std::get<1>(GetInput());
     m = static_cast<int>(mat.size()) / n;
-    mat_data = reinterpret_cast<const void*>(mat.data());
+    mat_data = reinterpret_cast<const void *>(mat.data());
   }
   MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
@@ -89,11 +87,10 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
     }
   }
 
-
   local_res.assign(static_cast<size_t>(sendcounts[world_rank] / m), std::numeric_limits<T>::lowest());
   columns.resize(sendcounts[world_rank]);
-  MPI_Scatterv(mat_data, sendcounts.data(), displs.data(), datatype, columns.data(), sendcounts[world_rank],
-                   datatype, 0, MPI_COMM_WORLD);
+  MPI_Scatterv(mat_data, sendcounts.data(), displs.data(), datatype, columns.data(), sendcounts[world_rank], datatype,
+               0, MPI_COMM_WORLD);
   for (j = 0; std::cmp_less(j, local_res.size()); ++j) {
     for (i = 0; i < m; ++i) {
       tmp = columns[(j * m) + i];
@@ -109,13 +106,12 @@ bool ZagryadskovMMaxByColumnMPI::RunImpl() {
   }
 
   MPI_Gatherv(local_res.data(), static_cast<int>(local_res.size()), datatype, res.data(), sendcounts.data(),
-                  displs.data(), datatype, 0, MPI_COMM_WORLD);
+              displs.data(), datatype, 0, MPI_COMM_WORLD);
 
   bool result = false;
   if (world_rank == 0) {
     result = !GetOutput().empty();
-  }
-  else {
+  } else {
     result = true;
   }
   MPI_Barrier(MPI_COMM_WORLD);
@@ -128,8 +124,7 @@ bool ZagryadskovMMaxByColumnMPI::PostProcessingImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
   if (world_rank == 0) {
     result = !GetOutput().empty();
-  }
-  else {
+  } else {
     result = true;
   }
   return result;

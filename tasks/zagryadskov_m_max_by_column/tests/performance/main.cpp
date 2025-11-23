@@ -26,7 +26,7 @@ class ZagryadskovMRunPerfTestMaxByColumn : public ppc::util::BaseRunPerfTests<In
       std::string in_file_name = "mat1.bin";
       std::string abs_path =
           ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_max_by_column,
-                                        in_file_name);  // std::string abs_path = "../../data/mat1.bin";
+                                         in_file_name);  // std::string abs_path = "../../data/mat1.bin";
       std::ifstream in_file_stream(abs_path, std::ios::in | std::ios::binary);
       if (!in_file_stream.is_open()) {
         throw std::runtime_error("Error opening file!\n");
@@ -74,8 +74,7 @@ class ZagryadskovMRunPerfTestMaxByColumn : public ppc::util::BaseRunPerfTests<In
           return res = false;
         }
       }
-    }
-    else {
+    } else {
       res = true;
     }
 

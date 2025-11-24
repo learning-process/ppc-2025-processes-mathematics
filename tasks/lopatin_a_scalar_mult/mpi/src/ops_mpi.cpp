@@ -4,6 +4,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <stdexcept>
 #include <utility>
 #include <vector>
 
@@ -11,11 +12,20 @@
 
 namespace lopatin_a_scalar_mult {
 
+bool LopatinAScalarMultMPI::CheckMPIResult(const int result) {
+  if (result != MPI_SUCCESS) {
+    return false;
+  }
+  return true;
+}
+
 LopatinAScalarMultMPI::LopatinAScalarMultMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
 
   int proc_rank = 0;
-  if (MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank) != MPI_SUCCESS) {
+  int mpi_res = 0;
+  mpi_res = MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Comm_rank failed!");
   }
 
@@ -30,7 +40,9 @@ LopatinAScalarMultMPI::LopatinAScalarMultMPI(const InType &in) {
 
 bool LopatinAScalarMultMPI::ValidationImpl() {
   int proc_rank = 0;
-  if (MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank) != MPI_SUCCESS) {
+  int mpi_res = 0;
+  mpi_res = MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Comm_rank failed!");
   }
 
@@ -47,12 +59,17 @@ bool LopatinAScalarMultMPI::PreProcessingImpl() {
 }
 
 bool LopatinAScalarMultMPI::RunImpl() {
+  int mpi_res = 0;
+
   int proc_num = 0;
-  int proc_rank = 0;
-  if (MPI_Comm_size(MPI_COMM_WORLD, &proc_num) != MPI_SUCCESS) {
+  mpi_res = MPI_Comm_size(MPI_COMM_WORLD, &proc_num);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Comm_size failed!");
   }
-  if (MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank) != MPI_SUCCESS) {
+
+  int proc_rank = 0;
+  mpi_res = MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Comm_rank failed!");
   }
 
@@ -60,7 +77,8 @@ bool LopatinAScalarMultMPI::RunImpl() {
   OutType &total_res = GetOutput();
 
   auto n = static_cast<uint64_t>(input.first.size());
-  if (MPI_Bcast(&n, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+  mpi_res = MPI_Bcast(&n, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Bcast failed!");
   }
 
@@ -75,12 +93,15 @@ bool LopatinAScalarMultMPI::RunImpl() {
   if (local_n_int > 0) {
     InType local_data = std::make_pair(std::vector<double>(local_n), std::vector<double>(local_n));
 
-    if (MPI_Scatter(input.first.data(), local_n_int, MPI_DOUBLE, local_data.first.data(), local_n_int, MPI_DOUBLE, 0,
-                    MPI_COMM_WORLD) != MPI_SUCCESS) {
+    mpi_res = MPI_Scatter(input.first.data(), local_n_int, MPI_DOUBLE, local_data.first.data(), local_n_int, MPI_DOUBLE,
+                          0, MPI_COMM_WORLD);
+    if (CheckMPIResult(mpi_res) == false) {
       throw std::runtime_error("MPI_Scatter failed!");
     }
-    if (MPI_Scatter(input.second.data(), local_n_int, MPI_DOUBLE, local_data.second.data(), local_n_int, MPI_DOUBLE, 0,
-                    MPI_COMM_WORLD) != MPI_SUCCESS) {
+
+    mpi_res = MPI_Scatter(input.second.data(), local_n_int, MPI_DOUBLE, local_data.second.data(), local_n_int,
+                          MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    if (CheckMPIResult(mpi_res) == false) {
       throw std::runtime_error("MPI_Scatter failed!");
     }
 
@@ -89,7 +110,8 @@ bool LopatinAScalarMultMPI::RunImpl() {
       proc_res += local_data.first[i] * local_data.second[i];
     }
 
-    if (MPI_Reduce(&proc_res, &total_res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+    mpi_res = MPI_Reduce(&proc_res, &total_res, 1, MPI_DOUBLE, MPI_SUM, 0, MPI_COMM_WORLD);
+    if (CheckMPIResult(mpi_res) == false) {
       throw std::runtime_error("MPI_Reduce failed!");
     }
   }
@@ -103,7 +125,8 @@ bool LopatinAScalarMultMPI::RunImpl() {
     }
   }
 
-  if (MPI_Bcast(&total_res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD) != MPI_SUCCESS) {
+  mpi_res = MPI_Bcast(&total_res, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  if (CheckMPIResult(mpi_res) == false) {
     throw std::runtime_error("MPI_Bcast failed!");
   }
   MPI_Barrier(MPI_COMM_WORLD);

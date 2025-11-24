@@ -33,13 +33,7 @@ bool KrymovaKLexSEQ::RunImpl() {
       return true;
     }
   }
-  if (len1 < len2) {
-    GetOutput() = -1;
-  } else if (len1 > len2) {
-    GetOutput() = 1;
-  } else {
-    GetOutput() = 0;
-  }
+  GetOutput() = (len1 != len2) ? ((len1 < len2) ? -1 : 1) : 0;
   return true;
 }
 

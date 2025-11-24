@@ -17,7 +17,6 @@ class LopatinAScalarMultMPI : public BaseTask {
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
-  bool CheckMPIResult(const int);
 };
 
 }  // namespace lopatin_a_scalar_mult

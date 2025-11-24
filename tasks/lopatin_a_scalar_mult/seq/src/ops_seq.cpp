@@ -25,10 +25,10 @@ bool LopatinAScalarMultSEQ::PreProcessingImpl() {
 
 bool LopatinAScalarMultSEQ::RunImpl() {
   const auto &input = GetInput();
-  const auto n = input.first.size();
+  const uint64_t n = static_cast<uint64_t>(input.first.size());
   OutType &res = GetOutput();
 
-  for (size_t i = 0; i < n; ++i) {
+  for (uint64_t i = 0; i < n; ++i) {
     res += input.first[i] * input.second[i];
   }
 

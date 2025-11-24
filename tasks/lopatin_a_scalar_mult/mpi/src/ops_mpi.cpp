@@ -2,6 +2,8 @@
 
 #include <mpi.h>
 
+#include <cstddef>
+#include <cstdint>
 #include <utility>
 #include <vector>
 
@@ -49,10 +51,10 @@ bool LopatinAScalarMultMPI::RunImpl() {
   const auto &input = GetInput();
   OutType &total_res = GetOutput();
 
-  int n = static_cast<int>(input.first.size());
-  MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  uint64_t n = static_cast<uint64_t>(input.first.size());
+  MPI_Bcast(&n, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
-  int local_n = n / proc_num;
+  uint64_t local_n = n / static_cast<uint64_t>(proc_num);
 
   if (local_n > 0) {
     InType local_data = std::make_pair(std::vector<double>(local_n), std::vector<double>(local_n));
@@ -63,7 +65,7 @@ bool LopatinAScalarMultMPI::RunImpl() {
                 MPI_COMM_WORLD);
 
     OutType proc_res{};
-    for (int i = 0; i < local_n; ++i) {
+    for (uint64_t i = 0; i < local_n; ++i) {
       proc_res += local_data.first[i] * local_data.second[i];
     }
 
@@ -72,8 +74,8 @@ bool LopatinAScalarMultMPI::RunImpl() {
 
   if (proc_rank == 0) {
     if (n % proc_num != 0) {
-      int tail_index = n - (n % proc_num);
-      for (int i = tail_index; i < n; ++i) {
+      uint64_t tail_index = n - (n % static_cast<uint64_t>(proc_num));
+      for (uint64_t i = tail_index; i < n; ++i) {
         total_res += input.first[i] * input.second[i];
       }
     }

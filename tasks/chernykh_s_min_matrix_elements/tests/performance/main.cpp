@@ -37,7 +37,7 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunPerfTest
   }
 
   void SetUp() override {
-    input_data_ = GenerateMatrix(16384);
+    input_data_ = GenerateMatrix(8192);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

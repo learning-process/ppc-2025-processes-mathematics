@@ -1,6 +1,6 @@
 #include "lopatin_a_scalar_mult/seq/include/ops_seq.hpp"
 
-#include <cstddef>
+#include <cstdint>
 #include <vector>
 
 #include "lopatin_a_scalar_mult/common/include/common.hpp"
@@ -25,7 +25,7 @@ bool LopatinAScalarMultSEQ::PreProcessingImpl() {
 
 bool LopatinAScalarMultSEQ::RunImpl() {
   const auto &input = GetInput();
-  const uint64_t n = static_cast<uint64_t>(input.first.size());
+  const auto n = static_cast<uint64_t>(input.first.size());
   OutType &res = GetOutput();
 
   for (uint64_t i = 0; i < n; ++i) {

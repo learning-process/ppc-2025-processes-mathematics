@@ -27,13 +27,23 @@ bool KrymovaKLexSEQ::RunImpl() {
   size_t len1 = str1.length();
   size_t len2 = str2.length();
   size_t min_len = (len1 < len2) ? len1 : len2;
+
+  int result = 0;
   for (size_t i = 0; i < min_len; ++i) {
     if (str1[i] != str2[i]) {
-      GetOutput() = (str1[i] < str2[i]) ? -1 : 1;
-      return true;
+      result = (str1[i] < str2[i]) ? -1 : 1;
+      break;
     }
   }
-  GetOutput() = (len1 != len2) ? ((len1 < len2) ? -1 : 1) : 0;
+  if (result == 0) {
+    if (len1 < len2) {
+      result = -1;
+    } else if (len1 > len2) {
+      result = 1;
+    }
+  }
+
+  GetOutput() = result;
   return true;
 }
 

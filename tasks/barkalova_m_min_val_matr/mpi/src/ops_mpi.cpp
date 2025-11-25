@@ -5,7 +5,6 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
-#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
@@ -22,7 +21,8 @@ BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
 }
 
 bool BarkalovaMMinValMatrMPI::ValidationImpl() {
-  int rank, size;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
@@ -51,11 +51,13 @@ bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
 }
 
 bool BarkalovaMMinValMatrMPI::RunImpl() {
-  int rank, size;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  size_t all_rows = 0, cols = 0;
+  size_t all_rows = 0;
+  size_t cols = 0;
 
   if (rank == 0) {
     const auto &matrix = GetInput();
@@ -89,8 +91,8 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     return false;
   }
 
-  size_t base_rows_proc = all_rows / size;
-  size_t ostatok = all_rows % size;
+  size_t base_rows_proc = all_rows / static_cast<size_t>(size);
+  size_t ostatok = all_rows % static_cast<size_t>(size);
   size_t loc_rows = base_rows_proc + (static_cast<size_t>(rank) < ostatok ? 1 : 0);
 
   bool chunks_valid = true;
@@ -154,10 +156,8 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   if (loc_rows > 0 && cols > 0) {
     for (size_t i = 0; i < loc_rows; ++i) {
       for (size_t j = 0; j < cols; ++j) {
-        int value = local_data[i * cols + j];
-        if (value < local_min[j]) {
-          local_min[j] = value;
-        }
+        int value = local_data[(i * cols) + j];
+        local_min[j] = std::min(value, local_min[j]);
       }
     }
   }

@@ -92,6 +92,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   size_t base_rows_proc = all_rows / size;
   size_t ostatok = all_rows % size;
   size_t loc_rows = base_rows_proc + (static_cast<size_t>(rank) < ostatok ? 1 : 0);
+
   bool chunks_valid = true;
   if (rank == 0) {
     for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
@@ -135,19 +136,28 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     return false;
   }
 
-  std::vector<int> local_data(loc_rows * cols);
-  int recv_count = static_cast<int>(loc_rows * cols);
+  std::vector<int> local_data;
+  int recv_count = 0;
+
+  if (loc_rows > 0 && cols > 0) {
+    local_data.resize(loc_rows * cols);
+    recv_count = static_cast<int>(loc_rows * cols);
+  } else {
+    local_data.resize(0);
+  }
 
   MPI_Scatterv(rank == 0 ? flat_matrix.data() : nullptr, send_counts.data(), displacements.data(), MPI_INT,
-               local_data.data(), recv_count, MPI_INT, 0, MPI_COMM_WORLD);
+               recv_count > 0 ? local_data.data() : nullptr, recv_count, MPI_INT, 0, MPI_COMM_WORLD);
 
   std::vector<int> local_min(cols, INT_MAX);
 
-  for (size_t i = 0; i < loc_rows; ++i) {
-    for (size_t j = 0; j < cols; ++j) {
-      int value = local_data[i * cols + j];
-      if (value < local_min[j]) {
-        local_min[j] = value;
+  if (loc_rows > 0 && cols > 0) {
+    for (size_t i = 0; i < loc_rows; ++i) {
+      for (size_t j = 0; j < cols; ++j) {
+        int value = local_data[i * cols + j];
+        if (value < local_min[j]) {
+          local_min[j] = value;
+        }
       }
     }
   }

@@ -22,12 +22,22 @@ BarkalovaMMinValMatrMPI::BarkalovaMMinValMatrMPI(const InType &in) {
 }
 
 bool BarkalovaMMinValMatrMPI::ValidationImpl() {
-  const auto &matrix = GetInput();
-  if (matrix.empty()) {
-    return true;
+  int rank, size;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  bool is_valid = true;
+
+  if (rank == 0) {
+    const auto &matrix = GetInput();
+    if (!matrix.empty()) {
+      size_t stolb = matrix[0].size();
+      is_valid = std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
+    }
   }
-  size_t stolb = matrix[0].size();
-  return std::ranges::all_of(matrix, [stolb](const auto &row) { return row.size() == stolb; });
+
+  MPI_Bcast(&is_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+  return is_valid;
 }
 
 bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
@@ -41,56 +51,114 @@ bool BarkalovaMMinValMatrMPI::PreProcessingImpl() {
 }
 
 bool BarkalovaMMinValMatrMPI::RunImpl() {
-  // почему именно такое распределение - описано в отчете
-  const auto &matrix = GetInput();
-  auto &res = GetOutput();
-  if (matrix.empty()) {
-    return true;
-  }
-
-  int rank = 0;
-  int size = 0;
+  int rank, size;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  size_t rows = matrix.size();
-  size_t stolb = matrix[0].size();
+  size_t all_rows = 0, cols = 0;
 
-  size_t loc_stolb = stolb / size;
-  size_t ostatok = stolb % size;
-  size_t start_stolb = (rank * loc_stolb) + (std::cmp_less(rank, ostatok) ? rank : ostatok);
-  size_t end_stolb = start_stolb + loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
-  size_t col_stolb = end_stolb - start_stolb;
-
-  std::vector<int> loc_min(col_stolb, INT_MAX);
-  for (size_t k = 0; k < col_stolb; ++k) {
-    size_t stolb_index = start_stolb + k;
-    for (size_t i = 0; i < rows; ++i) {
-      loc_min[k] = std::min(matrix[i][stolb_index], loc_min[k]);
+  if (rank == 0) {
+    const auto &matrix = GetInput();
+    if (!matrix.empty()) {
+      all_rows = matrix.size();
+      cols = matrix[0].size();
     }
   }
 
-  std::vector<int> recv_counts(size);
+  MPI_Bcast(&all_rows, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&cols, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
+
+  if (all_rows == 0 || cols == 0) {
+    GetOutput().clear();
+    return true;
+  }
+
+  bool size_valid = true;
+  if (rank == 0) {
+    if (cols > INT_MAX || all_rows > INT_MAX) {
+      size_valid = false;
+    } else {
+      if (all_rows > 0 && cols > INT_MAX / all_rows) {
+        size_valid = false;
+      }
+    }
+  }
+  MPI_Bcast(&size_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+  if (!size_valid) {
+    GetOutput().clear();
+    return false;
+  }
+
+  size_t base_rows_proc = all_rows / size;
+  size_t ostatok = all_rows % size;
+  size_t loc_rows = base_rows_proc + (rank < ostatok ? 1 : 0);
+
+  bool chunks_valid = true;
+  if (rank == 0) {
+    for (int i = 0; i < size; ++i) {
+      size_t i_rows = base_rows_proc + (i < ostatok ? 1 : 0);
+      if (i_rows > 0 && cols > INT_MAX / i_rows) {
+        chunks_valid = false;
+        break;
+      }
+    }
+  }
+  MPI_Bcast(&chunks_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
+  if (!chunks_valid) {
+    GetOutput().clear();
+    return false;
+  }
+
+  std::vector<int> send_counts(size);
   std::vector<int> displacements(size);
 
-  for (int i = 0; i < size; i++) {
-    size_t i_start = (i * loc_stolb) + (std::cmp_less(i, ostatok) ? i : ostatok);
-    size_t i_end = i_start + loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
-    recv_counts[i] = static_cast<int>(i_end - i_start);
-    displacements[i] = static_cast<int>(i_start);
-  }
-  res.resize(stolb, INT_MAX);
+  if (rank == 0) {
+    size_t curr_displacement = 0;
+    for (int i = 0; i < size; ++i) {
+      size_t i_rows = base_rows_proc + (i < ostatok ? 1 : 0);
 
-  int send_count = static_cast<int>(col_stolb);
-
-  MPI_Gatherv(loc_min.data(), send_count, MPI_INT, res.data(), recv_counts.data(), displacements.data(), MPI_INT, 0,
-              MPI_COMM_WORLD);
-
-  if (size > 1) {
-    int stolb_int = static_cast<int>(stolb);
-    MPI_Bcast(res.data(), stolb_int, MPI_INT, 0, MPI_COMM_WORLD);
+      send_counts[i] = static_cast<int>(i_rows * cols);
+      displacements[i] = static_cast<int>(curr_displacement);
+      curr_displacement += i_rows * cols;
+    }
   }
 
+  std::vector<int> flat_matrix;
+  if (rank == 0) {
+    const auto &matrix = GetInput();
+    flat_matrix.reserve(all_rows * cols);
+    for (const auto &row : matrix) {
+      flat_matrix.insert(flat_matrix.end(), row.begin(), row.end());
+    }
+  }
+
+  if (loc_rows > 0 && cols > INT_MAX / loc_rows) {
+    GetOutput().clear();
+    return false;
+  }
+
+  std::vector<int> local_data(loc_rows * cols);
+  int recv_count = static_cast<int>(loc_rows * cols);
+
+  MPI_Scatterv(rank == 0 ? flat_matrix.data() : nullptr, send_counts.data(), displacements.data(), MPI_INT,
+               local_data.data(), recv_count, MPI_INT, 0, MPI_COMM_WORLD);
+
+  std::vector<int> local_min(cols, INT_MAX);
+
+  for (size_t i = 0; i < loc_rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      int value = local_data[i * cols + j];
+      if (value < local_min[j]) {
+        local_min[j] = value;
+      }
+    }
+  }
+
+  int cols_int = static_cast<int>(cols);
+  std::vector<int> global_min(cols);
+  MPI_Allreduce(local_min.data(), global_min.data(), cols_int, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+
+  GetOutput() = global_min;
   return true;
 }
 

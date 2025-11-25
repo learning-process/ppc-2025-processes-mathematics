@@ -52,14 +52,6 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
     int points = std::get<2>(input_data_);
-#ifdef BUILD_MPI
-    // MPI проверяем только на процессе 0
-    int rank = 0;
-    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-    if (rank != 0) {
-      return true;
-    }
-#endif
     double tolerance = (b - a) / std::sqrt(points) * 10;
     if ((a <= -3.0) || (b >= 3.0)) {
       tolerance *= 10;

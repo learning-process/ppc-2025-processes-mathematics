@@ -94,7 +94,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   size_t loc_rows = base_rows_proc + (static_cast<size_t>(rank) < ostatok ? 1 : 0);
   bool chunks_valid = true;
   if (rank == 0) {
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
       size_t i_rows = base_rows_proc + (i < ostatok ? 1 : 0);
       if (i_rows > 0 && cols > INT_MAX / i_rows) {
         chunks_valid = false;
@@ -113,7 +113,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   if (rank == 0) {
     size_t curr_displacement = 0;
-    for (size_t i = 0; i < size; ++i) {
+    for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
       size_t i_rows = base_rows_proc + (i < ostatok ? 1 : 0);
       send_counts[i] = static_cast<int>(i_rows * cols);
       displacements[i] = static_cast<int>(curr_displacement);

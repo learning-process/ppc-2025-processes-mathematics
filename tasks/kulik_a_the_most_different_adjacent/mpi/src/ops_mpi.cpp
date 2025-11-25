@@ -59,19 +59,22 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   MPI_Bcast(&size, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
   std::vector<int> elemcnt(proc_num, static_cast<int>(size)); // необходимы быть типа int из-за сигнатуры функции MPI_Scatterv
   std::vector<int> startpos(proc_num); //
-  int last_size = static_cast<int>(n) - static_cast<int>(size * (proc_num - 1));
+  int64_t last_size = static_cast<int>(n) - static_cast<int>(size * (proc_num - 1));
   if (last_size > 0) {
-    elemcnt[proc_num - 1] = last_size;
+    elemcnt[proc_num - 1] = static_cast<int>(last_size);
   } else {
     elemcnt[proc_num - 1] = 0;
   }
   for (int i = 0; i < proc_num; ++i) {
     startpos[i] = static_cast<int>(i * size);
   }
-  std::vector<double> buf(elemcnt[proc_rank]);
+  std::vector<double> buf;
+  if (elemcnt[proc_rank] > 0) {
+    buf.resize(elemcnt[proc_rank]);
+  }
   MPI_Scatterv(input.data(), elemcnt.data(), startpos.data(), MPI_DOUBLE, buf.data(), elemcnt[proc_rank], MPI_DOUBLE, 0,
                MPI_COMM_WORLD);
-  if (proc_rank == proc_num - 1 && r != 0) {
+  if (proc_rank == proc_num - 1 && r != 0 && !buf.empty()) {
     for (uint64_t i = 0; i < static_cast<uint64_t>(proc_num) - r; ++i) {
       buf.push_back(buf.back());
     }

@@ -41,7 +41,7 @@
 Алгоритмические решения: распределение строк по процессам
   size_t base_rows_proc = all_rows / size;
   size_t ostatok = all_rows % size;
-  size_t loc_rows = base_rows_proc + (rank < ostatok ? 1 : 0);
+  size_t loc_rows = base_rows_proc + (static_cast<size_t>(rank) < ostatok ? 1 : 0);
 
 С помощью MPI_Bcast передаем размеры матрицы от корневого процесса всем остальным
 

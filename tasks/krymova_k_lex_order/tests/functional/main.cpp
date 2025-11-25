@@ -45,12 +45,12 @@ TEST_P(KrymovaKLexOrderFuncTestsProcesses, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 8> kTestParam = {
-    std::make_tuple("hello", "hello", 0),   std::make_tuple("a", "a", 0),
+const std::array<TestType, 10> kTestParam = {
+    std::make_tuple("hello", "hello", 0),  std::make_tuple("a", "a", 0),           std::make_tuple("ab", "a", 1),
+    std::make_tuple("abc", "ab", 1),       std::make_tuple("apple", "banana", -1), std::make_tuple("abc", "abd", -1),
+    std::make_tuple("a", "b", -1),
 
-    std::make_tuple("apple", "banana", -1), std::make_tuple("abc", "abd", -1), std::make_tuple("a", "b", -1),
-
-    std::make_tuple("banana", "apple", 1),  std::make_tuple("abd", "abc", 1),
+    std::make_tuple("banana", "apple", 1), std::make_tuple("abd", "abc", 1),       std::make_tuple("a", "ab", -1),
 };
 
 const auto kTestTasksList =

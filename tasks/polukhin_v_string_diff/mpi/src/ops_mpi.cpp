@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <cstddef>
+#include <string>
 
 namespace polukhin_v_string_diff {
 

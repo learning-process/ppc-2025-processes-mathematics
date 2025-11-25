@@ -26,20 +26,20 @@ bool KulikATheMostDifferentAdjacentSEQ::RunImpl() {
   const auto n = input.size();
   OutType &ans = GetOutput();
   double mx = 0.;
-  size_t ind = 0;
+  uint64_t ind = 0;
   for (size_t i = 1; i < n; ++i) {
     if (std::abs(input[i - 1] - input[i]) > mx) {
       mx = std::abs(input[i - 1] - input[i]);
       ind = i - 1;
     }
   }
-  ans.first = static_cast<int>(ind);
-  ans.second = static_cast<int>(ind + 1);
+  ans.first = ind;
+  ans.second = ind + 1;
   return true;
 }
 
 bool KulikATheMostDifferentAdjacentSEQ::PostProcessingImpl() {
-  return (GetOutput().first >= 0 && GetOutput().second > GetOutput().first);
+  return (GetOutput().second == (GetOutput().first + 1));
 }
 
 }  // namespace kulik_a_the_most_different_adjacent

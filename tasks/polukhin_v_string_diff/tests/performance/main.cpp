@@ -50,6 +50,6 @@ const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
 const auto kPerfTestName = PolukhinVRunPerfTestsStringDiff::CustomPerfTestName;
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, PolukhinVRunPerfTestsStringDiff, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(RunModeTests, PolukhinVRunPerfTestsStringDiff, kGtestValues, kPerfTestName);  // NOLINT
 
 }  // namespace polukhin_v_string_diff

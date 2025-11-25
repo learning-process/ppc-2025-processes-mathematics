@@ -5,6 +5,8 @@
 #include <cstddef>
 #include <string>
 
+#include "polukhin_v_string_diff/common/include/common.hpp"
+
 namespace polukhin_v_string_diff {
 
 StringDiffTaskSEQ::StringDiffTaskSEQ(const InType &in) {

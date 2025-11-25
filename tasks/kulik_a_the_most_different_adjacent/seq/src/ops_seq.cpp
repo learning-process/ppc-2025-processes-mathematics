@@ -3,6 +3,7 @@
 #include <cmath>
 #include <cstddef>
 #include <vector>
+#include <cstdint>
 
 #include "kulik_a_the_most_different_adjacent/common/include/common.hpp"
 

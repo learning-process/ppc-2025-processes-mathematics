@@ -20,7 +20,10 @@ class BarkalovaMMinValMatrFuncTests : public ppc::util::BaseRunFuncTests<InType,
  public:
   static std::string PrintTestParam(const TestType &test_param) {
     const auto &matrix = std::get<0>(test_param);
-    return "matrix_" + std::to_string(matrix.size()) + "x" + (matrix.empty() ? "0" : std::to_string(matrix[0].size()));
+    static size_t counter = 0;
+    std::string name = "matrix_" + std::to_string(matrix.size()) + "x" +
+                       (matrix.empty() ? "0" : std::to_string(matrix[0].size())) + "_test" + std::to_string(counter++);
+    return name;
   }
 
  protected:
@@ -76,11 +79,26 @@ const std::vector<int> kExpectedNegative = {-3, -5, -4, -7};
 const std::vector<std::vector<int>> kAllSameValues = {{2, 2}, {2, 2}, {2, 2}, {2, 2}};
 const std::vector<int> kExpectedAllSame = {2, 2};
 
+const std::vector<std::vector<int>> kOddRowsMatrix = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}};
+const std::vector<int> kExpectedOddRows = {1, 2, 3};
+
+const std::vector<std::vector<int>> kPrimeRowsMatrix = {{1, 2}, {3, 4}, {5, 6}, {7, 8}, {11, 12}, {13, 14}, {17, 18}};
+const std::vector<int> kExpectedPrimeRows = {1, 2};
+
+const std::vector<std::vector<int>> kWideMatrix = {{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}, {10, 9, 8, 7, 6, 5, 4, 3, 2, 1}};
+const std::vector<int> kExpectedWide = {1, 2, 3, 4, 5, 5, 4, 3, 2, 1};
+
+const std::vector<std::vector<int>> kSmallMatrixForManyProcesses = {{1, 2}, {3, 4}};
+const std::vector<int> kExpectedSmall = {1, 2};
+
+const std::vector<std::vector<int>> kDistributedMinMatrix = {{10, 20, 30}, {5, 25, 35}, {15, 3, 40}};
+const std::vector<int> kExpectedDistributed = {5, 3, 30};
+
 TEST_P(BarkalovaMMinValMatrFuncTests, MinValuesInColumns) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 10> kTestParam = {
+const std::array<TestType, 15> kTestParam = {
     std::make_tuple(kMatrix1, kExpected1),
     std::make_tuple(kMatrix2, kExpected2),
     std::make_tuple(kMatrix3, kExpected3),
@@ -91,6 +109,11 @@ const std::array<TestType, 10> kTestParam = {
     std::make_tuple(kWithIntMax, kExpectedWithIntMax),
     std::make_tuple(kNegativeValues, kExpectedNegative),
     std::make_tuple(kAllSameValues, kExpectedAllSame),
+    std::make_tuple(kOddRowsMatrix, kExpectedOddRows),
+    std::make_tuple(kPrimeRowsMatrix, kExpectedPrimeRows),
+    std::make_tuple(kWideMatrix, kExpectedWide),
+    std::make_tuple(kSmallMatrixForManyProcesses, kExpectedSmall),
+    std::make_tuple(kDistributedMinMatrix, kExpectedDistributed),
 };
 
 const auto kTestTasksList = std::tuple_cat(

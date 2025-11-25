@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <limits>
+
 #include "chernykh_s_min_matrix_elements/common/include/common.hpp"
 
 namespace chernykh_s_min_matrix_elements {

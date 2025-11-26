@@ -11,18 +11,18 @@
 
 namespace kulik_a_the_most_different_adjacent {
 
-KulikATheMostDifferentAdjacentMPI::KulikATheMostDifferentAdjacentMPI(const InType& in) {
+KulikATheMostDifferentAdjacentMPI::KulikATheMostDifferentAdjacentMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   int proc_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
   if (proc_rank == 0) {
     GetInput() = in;
-  }else {
+  } else {
     GetInput() = InType{};
   }
 }
 
-  bool KulikATheMostDifferentAdjacentMPI::ValidationImpl() {
+bool KulikATheMostDifferentAdjacentMPI::ValidationImpl() {
   int proc_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &proc_rank);
   if (proc_rank == 0) {
@@ -47,8 +47,8 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   uint64_t active_procs = std::min(n, static_cast<uint64_t>(proc_num));
   uint64_t size = (active_procs > 0) ? n / active_procs : 0;
   uint64_t r = (active_procs > 0) ? n % active_procs : 0;
-  std::vector<int> elemcnt(proc_num, 0); // необходимы быть типа int из-за сигнатуры функции MPI_Scatterv
-  std::vector<int> startpos(proc_num, 0); //
+  std::vector<int> elemcnt(proc_num, 0);   // необходимы быть типа int из-за сигнатуры функции MPI_Scatterv
+  std::vector<int> startpos(proc_num, 0);  //
   if (proc_rank == 0) {
     uint64_t offset = 0;
     for (uint64_t i = 0; i < static_cast<uint64_t>(proc_num); ++i) {
@@ -65,8 +65,8 @@ bool KulikATheMostDifferentAdjacentMPI::RunImpl() {
   MPI_Bcast(elemcnt.data(), proc_num, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(startpos.data(), proc_num, MPI_INT, 0, MPI_COMM_WORLD);
   std::vector<double> buf(elemcnt[proc_rank]);
-  MPI_Scatterv(input.data(), elemcnt.data(), startpos.data(), MPI_DOUBLE,
-               buf.data(), elemcnt[proc_rank], MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  MPI_Scatterv(input.data(), elemcnt.data(), startpos.data(), MPI_DOUBLE, buf.data(), elemcnt[proc_rank], MPI_DOUBLE, 0,
+               MPI_COMM_WORLD);
   double max_diff_val = 0.0;
   uint64_t max_diff_ind = 0;
   double max_diffall_val = 0.0;

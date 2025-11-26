@@ -75,52 +75,21 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     return true;
   }
 
-  bool size_valid = true;
-  if (rank == 0) {
-    if (cols > INT_MAX || all_rows > INT_MAX) {
-      size_valid = false;
-    } else if (all_rows > 0 && cols > INT_MAX / all_rows) {
-      size_valid = false;
-    }
-  }
-  MPI_Bcast(&size_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
-  if (!size_valid) {
-    GetOutput().clear();
-    return false;
-  }
-
-  size_t base_rows_proc = all_rows / static_cast<size_t>(size);
-  size_t ostatok = all_rows % static_cast<size_t>(size);
-  bool rank_less_than_ostatok = (static_cast<size_t>(rank) < ostatok);
+  size_t base_rows_proc = all_rows / size;
+  size_t ostatok = all_rows % size;
+  bool rank_less_than_ostatok = (rank < static_cast<int>(ostatok));
   size_t loc_rows = base_rows_proc + (rank_less_than_ostatok ? 1 : 0);
-
-  bool chunks_valid = true;
-  if (rank == 0) {
-    for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
-      bool i_less_than_ostatok = (i < ostatok);
-      size_t i_rows = base_rows_proc + (i_less_than_ostatok ? 1 : 0);
-      if (i_rows > 0 && cols > INT_MAX / i_rows) {
-        chunks_valid = false;
-        break;
-      }
-    }
-  }
-  MPI_Bcast(&chunks_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
-  if (!chunks_valid) {
-    GetOutput().clear();
-    return false;
-  }
 
   std::vector<int> send_counts(size);
   std::vector<int> displacements(size);
 
   if (rank == 0) {
     size_t curr_displacement = 0;
-    for (size_t i = 0; i < static_cast<size_t>(size); ++i) {
-      bool i_less_than_ostatok = (i < ostatok);
+    for (int i = 0; i < size; ++i) {
+      bool i_less_than_ostatok = (i < static_cast<int>(ostatok));
       size_t i_rows = base_rows_proc + (i_less_than_ostatok ? 1 : 0);
-      send_counts[i] = static_cast<int>(i_rows * cols);
-      displacements[i] = static_cast<int>(curr_displacement);
+      send_counts[i] = i_rows * cols;
+      displacements[i] = curr_displacement;
       curr_displacement += i_rows * cols;
     }
   }
@@ -134,22 +103,8 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     }
   }
 
-  bool local_size_invalid = (loc_rows > 0 && cols > INT_MAX / loc_rows);
-  if (local_size_invalid) {
-    GetOutput().clear();
-    return false;
-  }
-
-  std::vector<int> local_data;
-  int recv_count = 0;
-
-  bool has_local_data = (loc_rows > 0 && cols > 0);
-  if (has_local_data) {
-    local_data.resize(loc_rows * cols);
-    recv_count = static_cast<int>(loc_rows * cols);
-  } else {
-    local_data.resize(0);
-  }
+  std::vector<int> local_data(loc_rows * cols);
+  int recv_count = loc_rows * cols;
 
   const void *sendbuf = (rank == 0) ? flat_matrix.data() : nullptr;
   void *recvbuf = (recv_count > 0) ? local_data.data() : nullptr;
@@ -158,19 +113,15 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
                MPI_COMM_WORLD);
 
   std::vector<int> local_min(cols, INT_MAX);
-
-  if (has_local_data) {
-    for (size_t i = 0; i < loc_rows; ++i) {
-      for (size_t j = 0; j < cols; ++j) {
-        int value = local_data[(i * cols) + j];
-        local_min[j] = std::min(value, local_min[j]);
-      }
+  for (size_t i = 0; i < loc_rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      int value = local_data[i * cols + j];
+      local_min[j] = std::min(value, local_min[j]);
     }
   }
 
-  int cols_int = static_cast<int>(cols);
   std::vector<int> global_min(cols);
-  MPI_Allreduce(local_min.data(), global_min.data(), cols_int, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+  MPI_Allreduce(local_min.data(), global_min.data(), cols, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
 
   GetOutput() = global_min;
   return true;

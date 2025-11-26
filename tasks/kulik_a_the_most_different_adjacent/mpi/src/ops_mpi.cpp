@@ -5,6 +5,7 @@
 #include <algorithm>  
 #include <cmath>
 #include <cstdint>
+#include <cstddef>
 #include <utility>
 #include <vector>
 
@@ -36,7 +37,7 @@ bool KulikATheMostDifferentAdjacentMPI::PreProcessingImpl() {
   return true;
 }
 
-static void CalculateDistribution(int proc_rank, int proc_num, uint64_t n, 
+void KulikATheMostDifferentAdjacentMPI::CalculateDistribution(int proc_rank, int proc_num, uint64_t n, 
                                  std::vector<int>& elemcnt, std::vector<int>& startpos) {
   uint64_t active_procs = std::min(n, static_cast<uint64_t>(proc_num));
   uint64_t size = (active_procs > 0) ? n / active_procs : 0;
@@ -44,9 +45,9 @@ static void CalculateDistribution(int proc_rank, int proc_num, uint64_t n,
   
   if (proc_rank == 0) {
     uint64_t offset = 0;
-    for (int i = 0; i < proc_num; ++i) {
-      if (static_cast<uint64_t>(i) < active_procs) {
-        elemcnt[i] = (static_cast<uint64_t>(i) < r) ? 
+    for (uint64_t i = 0; i < static_cast<uint64_t>(proc_num); ++i) {
+      if (i < active_procs) {
+        elemcnt[i] = (i < r) ? 
                      static_cast<int>(size + 1) : static_cast<int>(size);
         startpos[i] = static_cast<int>(offset);
         offset += elemcnt[i];
@@ -58,7 +59,7 @@ static void CalculateDistribution(int proc_rank, int proc_num, uint64_t n,
   }
 }
 
-static void FindLocalMax(const std::vector<double>& buf, int start_index, 
+void KulikATheMostDifferentAdjacentMPI::FindLocalMax(const std::vector<double>& buf, int start_index, 
                         double& max_diff_val, uint64_t& max_diff_ind) {
   if (buf.size() >= 2) {
     for (size_t i = 0; i < buf.size() - 1; ++i) {
@@ -70,7 +71,7 @@ static void FindLocalMax(const std::vector<double>& buf, int start_index,
   }
 }
 
-static void CheckBoundaries(int proc_rank, int proc_num, const std::vector<int>& elemcnt, 
+void KulikATheMostDifferentAdjacentMPI::CheckBoundaries(int proc_rank, int proc_num, const std::vector<int>& elemcnt, 
                            const std::vector<int>& startpos, const std::vector<double>& buf,
                            double& max_diff_val, uint64_t& max_diff_ind) {
   MPI_Status status;

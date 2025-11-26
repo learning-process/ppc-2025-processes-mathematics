@@ -5,6 +5,7 @@
 #include <algorithm>
 #include <climits>
 #include <cstddef>
+#include <utility>
 #include <vector>
 
 #include "barkalova_m_min_val_matr/common/include/common.hpp"
@@ -58,44 +59,47 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   size_t all_rows = 0;
   size_t cols = 0;
+  bool is_root = (rank == 0);
 
-  if (rank == 0) {
+  if (is_root) {
     const auto &matrix = GetInput();
-    if (!matrix.empty()) {
-      all_rows = matrix.size();
-      cols = matrix[0].size();
-    }
+    all_rows = matrix.size();
+    cols = matrix.empty() ? 0 : matrix[0].size();
   }
 
   MPI_Bcast(&all_rows, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
   MPI_Bcast(&cols, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
 
-  if (all_rows == 0 || cols == 0) {
+  bool empty_matrix = (all_rows == 0) || (cols == 0);
+  if (empty_matrix) {
     GetOutput().clear();
     return true;
   }
 
-  size_t base_rows_proc = all_rows / size;
-  size_t ostatok = all_rows % size;
-  bool rank_less_than_ostatok = (rank < static_cast<int>(ostatok));
-  size_t loc_rows = base_rows_proc + (rank_less_than_ostatok ? 1 : 0);
+  size_t base_rows = all_rows / static_cast<size_t>(size);
+  size_t remainder = all_rows % static_cast<size_t>(size);
 
-  std::vector<int> send_counts(size);
-  std::vector<int> displacements(size);
+  bool has_extra_row = std::cmp_less(rank, remainder);
+  size_t local_rows = base_rows + (has_extra_row ? 1 : 0);
+  int local_count = static_cast<int>(local_rows * cols);
 
-  if (rank == 0) {
-    size_t curr_displacement = 0;
-    for (int i = 0; i < size; ++i) {
-      bool i_less_than_ostatok = (i < static_cast<int>(ostatok));
-      size_t i_rows = base_rows_proc + (i_less_than_ostatok ? 1 : 0);
-      send_counts[i] = i_rows * cols;
-      displacements[i] = curr_displacement;
-      curr_displacement += i_rows * cols;
-    }
-  }
-
+  std::vector<int> scatter_counts;
+  std::vector<int> scatter_displs;
   std::vector<int> flat_matrix;
-  if (rank == 0) {
+
+  if (is_root) {
+    scatter_counts.resize(size);
+    scatter_displs.resize(size);
+
+    size_t current_offset = 0;
+    for (int i = 0; i < size; ++i) {
+      bool process_has_extra = std::cmp_less(i, remainder);
+      size_t process_rows = base_rows + (process_has_extra ? 1 : 0);
+      scatter_counts[i] = static_cast<int>(process_rows * cols);
+      scatter_displs[i] = static_cast<int>(current_offset);
+      current_offset += process_rows * cols;
+    }
+
     const auto &matrix = GetInput();
     flat_matrix.reserve(all_rows * cols);
     for (const auto &row : matrix) {
@@ -103,25 +107,38 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     }
   }
 
-  std::vector<int> local_data(loc_rows * cols);
-  int recv_count = loc_rows * cols;
+  std::vector<int> counts(size);
+  std::vector<int> displs(size);
 
-  const void *sendbuf = (rank == 0) ? flat_matrix.data() : nullptr;
-  void *recvbuf = (recv_count > 0) ? local_data.data() : nullptr;
+  if (is_root) {
+    counts = scatter_counts;
+    displs = scatter_displs;
+  }
 
-  MPI_Scatterv(sendbuf, send_counts.data(), displacements.data(), MPI_INT, recvbuf, recv_count, MPI_INT, 0,
-               MPI_COMM_WORLD);
+  MPI_Bcast(counts.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(displs.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
+
+  std::vector<int> local_data(local_count);
+
+  MPI_Scatterv(is_root ? flat_matrix.data() : nullptr, counts.data(), displs.data(), MPI_INT, local_data.data(),
+               local_count, MPI_INT, 0, MPI_COMM_WORLD);
 
   std::vector<int> local_min(cols, INT_MAX);
-  for (size_t i = 0; i < loc_rows; ++i) {
-    for (size_t j = 0; j < cols; ++j) {
-      int value = local_data[i * cols + j];
-      local_min[j] = std::min(value, local_min[j]);
+
+  bool has_local_data = (local_count > 0);
+  if (has_local_data) {
+    for (size_t i = 0; i < local_rows; ++i) {
+      size_t row_offset = i * cols;
+      for (size_t j = 0; j < cols; ++j) {
+        int current_value = local_data[row_offset + j];
+        local_min[j] = std::min(current_value, local_min[j]);
+      }
     }
   }
 
+  int cols_int = static_cast<int>(cols);
   std::vector<int> global_min(cols);
-  MPI_Allreduce(local_min.data(), global_min.data(), cols, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
+  MPI_Allreduce(local_min.data(), global_min.data(), cols_int, MPI_INT, MPI_MIN, MPI_COMM_WORLD);
 
   GetOutput() = global_min;
   return true;

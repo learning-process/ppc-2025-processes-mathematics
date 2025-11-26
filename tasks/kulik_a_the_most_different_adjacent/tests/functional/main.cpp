@@ -65,6 +65,7 @@ namespace {
 TEST_P(KulikATheMostDifferentAdjacentFuncTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
+
 const std::array<TestType, 3> kTestParam = {std::string("vector1"), std::string("vector2"), std::string("vector3")};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<KulikATheMostDifferentAdjacentMPI, InType>(

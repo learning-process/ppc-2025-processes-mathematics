@@ -108,11 +108,11 @@ std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
 
   size_t start_stolb = 0;
   for (int i = 0; i < rank; ++i) {
-    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
     start_stolb += i_cols;
   }
 
-  size_t col_stolb = loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
+  size_t col_stolb = loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
 
   return {start_stolb, col_stolb};
 }
@@ -124,9 +124,7 @@ std::vector<int> CalculateLocalMins(const std::vector<int> &flat_matrix, size_t 
     size_t stolb_index = start_stolb + k;
     for (size_t i = 0; i < rows; ++i) {
       int value = flat_matrix[(i * stolb) + stolb_index];
-      if (value < loc_min[k]) {
-        loc_min[k] = value;
-      }
+      loc_min[k] = std::min(value, loc_min[k]);
     }
   }
   return loc_min;
@@ -141,7 +139,7 @@ void PrepareGathervData(int size, size_t stolb, std::vector<int> &recv_counts, s
 
   size_t current_displacement = 0;
   for (int i = 0; i < size; i++) {
-    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
     recv_counts[i] = static_cast<int>(i_cols);
     displacements[i] = static_cast<int>(current_displacement);
     current_displacement += i_cols;

@@ -5,7 +5,6 @@
 #include <numeric>
 #include <vector>
 
-
 #include "yusupkina_m_elem_vec_sum/common/include/common.hpp"
 
 namespace yusupkina_m_elem_vec_sum {
@@ -43,7 +42,6 @@ bool YusupkinaMElemVecSumMPI::RunImpl() {
     return true;
   }
 
-
   int base_size = vec_size / count;
   int remainder = vec_size % count;
   int cur_size = base_size + (rank < remainder ? 1 : 0);
@@ -52,18 +50,18 @@ bool YusupkinaMElemVecSumMPI::RunImpl() {
   std::vector<int> displs(count);
   int start_ind = 0;
   for (int i = 0; i < count; ++i) {
-      sendcounts[i] = base_size + (i < remainder ? 1 : 0);
-      displs[i] = start_ind;
-      start_ind += sendcounts[i];
+    sendcounts[i] = base_size + (i < remainder ? 1 : 0);
+    displs[i] = start_ind;
+    start_ind += sendcounts[i];
   }
 
-  int* sendbuf = nullptr;
+  int *sendbuf = nullptr;
   if (rank == 0) {
-      sendbuf = GetInput().data();
+    sendbuf = GetInput().data();
   }
   std::vector<int> local_data(cur_size);
-  MPI_Scatterv(sendbuf, sendcounts.data(), displs.data(), MPI_INT, local_data.data(), cur_size, MPI_INT, 0, MPI_COMM_WORLD);
-
+  MPI_Scatterv(sendbuf, sendcounts.data(), displs.data(), MPI_INT, local_data.data(), cur_size, MPI_INT, 0,
+               MPI_COMM_WORLD);
 
   OutType local_sum = 0LL;
   for (int i = 0; i < cur_size; ++i) {

@@ -15,17 +15,17 @@ class YusupkinaMRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType
   OutType expected_ = 0;
 
   void SetUp() override {
-    static std::vector<int> static_data(kCount_); 
+    static std::vector<int> static_data(kCount_);
     static bool first_time = true;
-    
+
     if (first_time) {
-        for (int i = 0; i < kCount_; i++) {
-            static_data[i] = i;
-        }
-        first_time = false;
+      for (int i = 0; i < kCount_; i++) {
+        static_data[i] = i;
+      }
+      first_time = false;
     }
-    
-    input_data_ = static_data; 
+
+    input_data_ = static_data;
     expected_ = static_cast<OutType>(kCount_) * (kCount_ - 1) / 2;
   }
 

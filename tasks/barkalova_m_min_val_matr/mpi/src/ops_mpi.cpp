@@ -7,7 +7,6 @@
 #include <climits>
 #include <cstddef>
 #include <cstdint>
-#include <tuple>
 #include <utility>
 #include <vector>
 
@@ -94,7 +93,7 @@ std::vector<int> GetMatrixData(int rank, size_t rows, size_t stolb, const std::v
   if (rank == 0) {
     for (size_t i = 0; i < rows; ++i) {
       for (size_t j = 0; j < stolb; ++j) {
-        flat_matrix[i * stolb + j] = matrix[i][j];
+        flat_matrix[(i * stolb) + j] = matrix[i][j];
       }
     }
   }
@@ -107,9 +106,13 @@ std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
   size_t loc_stolb = stolb / static_cast<size_t>(size);
   size_t ostatok = stolb % static_cast<size_t>(size);
 
-  size_t start_stolb = (rank * loc_stolb) + (std::cmp_less(rank, ostatok) ? static_cast<size_t>(rank) : ostatok);
-  size_t end_stolb = start_stolb + loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
-  size_t col_stolb = end_stolb - start_stolb;
+  size_t start_stolb = 0;
+  for (int i = 0; i < rank; ++i) {
+    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    start_stolb += i_cols;
+  }
+
+  size_t col_stolb = loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
 
   return {start_stolb, col_stolb};
 }
@@ -120,8 +123,10 @@ std::vector<int> CalculateLocalMins(const std::vector<int> &flat_matrix, size_t 
   for (size_t k = 0; k < col_stolb; ++k) {
     size_t stolb_index = start_stolb + k;
     for (size_t i = 0; i < rows; ++i) {
-      int value = flat_matrix[i * stolb + stolb_index];
-      loc_min[k] = std::min(value, loc_min[k]);
+      int value = flat_matrix[(i * stolb) + stolb_index];
+      if (value < loc_min[k]) {
+        loc_min[k] = value;
+      }
     }
   }
   return loc_min;
@@ -134,11 +139,12 @@ void PrepareGathervData(int size, size_t stolb, std::vector<int> &recv_counts, s
   recv_counts.resize(size);
   displacements.resize(size);
 
+  size_t current_displacement = 0;
   for (int i = 0; i < size; i++) {
-    size_t i_start = (i * loc_stolb) + (std::cmp_less(i, ostatok) ? static_cast<size_t>(i) : ostatok);
-    size_t i_end = i_start + loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
-    recv_counts[i] = static_cast<int>(i_end - i_start);
-    displacements[i] = static_cast<int>(i_start);
+    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
+    recv_counts[i] = static_cast<int>(i_cols);
+    displacements[i] = static_cast<int>(current_displacement);
+    current_displacement += i_cols;
   }
 }
 
@@ -170,14 +176,14 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   const auto &matrix = GetInput();
   auto [rows, stolb] = GetMatrixDimensions(rank, matrix);
 
-  if (!ValidateMatrixSize(rank, rows, stolb)) {
-    GetOutput().clear();
-    return false;
-  }
-
   if (rows == 0 || stolb == 0) {
     GetOutput().clear();
     return true;
+  }
+
+  if (!ValidateMatrixSize(rank, rows, stolb)) {
+    GetOutput().clear();
+    return false;
   }
 
   std::vector<int> flat_matrix = GetMatrixData(rank, rows, stolb, matrix);

@@ -42,10 +42,10 @@ void KulikATheMostDifferentAdjacentMPI::CalculateDistribution(int proc_rank, int
   uint64_t active_procs = std::min(n, static_cast<uint64_t>(proc_num));
   uint64_t size = (active_procs > 0) ? n / active_procs : 0;
   uint64_t r = (active_procs > 0) ? n % active_procs : 0;
-
+  uint64_t unsigned_proc_num = static_cast<uint64_t>(proc_num);                                                     
   if (proc_rank == 0) {
     uint64_t offset = 0;
-    for (uint64_t i = 0; i < static_cast<uint64_t>(proc_num); ++i) {
+    for (uint64_t i = 0; i < unsigned_proc_num; ++i) {
       if (i < active_procs) {
         elemcnt[i] = (i < r) ? static_cast<int>(size + 1) : static_cast<int>(size);
         startpos[i] = static_cast<int>(offset);

@@ -3,8 +3,10 @@
 #include <mpi.h>
 
 #include <algorithm>
+#include <array>
 #include <climits>
 #include <cstddef>
+#include <cstdint>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -90,7 +92,7 @@ bool CheckChunksSize(int rank, int size, size_t all_rows, size_t cols) {
     size_t ostatok = all_rows % static_cast<size_t>(size);
 
     for (int i = 0; i < size; ++i) {
-      size_t i_rows = base_rows_proc + (i < static_cast<int>(ostatok) ? 1 : 0);
+      size_t i_rows = base_rows_proc + (std::cmp_less(i, ostatok) ? 1 : 0);
       if (i_rows > 0 && cols > 0 && i_rows > SIZE_MAX / cols) {
         chunks_valid = false;
         break;
@@ -108,7 +110,7 @@ bool CheckLocalSize(size_t loc_rows, size_t cols) {
 std::vector<int> CalculateSendCounts(int size, size_t base_rows_proc, size_t ostatok, size_t cols) {
   std::vector<int> send_counts(size, 0);
   for (int i = 0; i < size; ++i) {
-    size_t i_rows = base_rows_proc + (i < static_cast<int>(ostatok) ? 1 : 0);
+    size_t i_rows = base_rows_proc + (std::cmp_less(i, ostatok) ? 1 : 0);
     send_counts[i] = static_cast<int>(i_rows * cols);
   }
   return send_counts;
@@ -193,7 +195,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   size_t base_rows_proc = all_rows / static_cast<size_t>(size);
   size_t ostatok = all_rows % static_cast<size_t>(size);
-  size_t loc_rows = base_rows_proc + (rank < static_cast<int>(ostatok) ? 1 : 0);
+  size_t loc_rows = base_rows_proc + (std::cmp_less(rank, ostatok) ? 1 : 0);
 
   if (!CheckChunksSize(rank, size, all_rows, cols)) {
     GetOutput().clear();

@@ -63,8 +63,8 @@ std::pair<size_t, size_t> GetMatrixDimensions(int rank, const std::vector<std::v
     cols = matrix.empty() ? 0 : matrix[0].size();
   }
 
-  uint64_t dims[2] = {all_rows, cols};
-  MPI_Bcast(dims, 2, MPI_UINT64_T, 0, MPI_COMM_WORLD);
+  std::array<uint64_t, 2> dims = {all_rows, cols};
+  MPI_Bcast(dims.data(), 2, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
   return {dims[0], dims[1]};
 }
@@ -74,7 +74,8 @@ bool CheckGlobalSize(int rank, size_t all_rows, size_t cols) {
   if (rank == 0) {
     if (cols > INT_MAX || all_rows > INT_MAX) {
       size_valid = false;
-    } else if (all_rows > 0 && cols > 0 && all_rows > SIZE_MAX / cols) {
+    }
+    if (size_valid && all_rows > 0 && cols > 0 && all_rows > SIZE_MAX / cols) {
       size_valid = false;
     }
   }
@@ -89,7 +90,7 @@ bool CheckChunksSize(int rank, int size, size_t all_rows, size_t cols) {
     size_t ostatok = all_rows % static_cast<size_t>(size);
 
     for (int i = 0; i < size; ++i) {
-      size_t i_rows = base_rows_proc + (static_cast<size_t>(i) < ostatok ? 1 : 0);
+      size_t i_rows = base_rows_proc + (i < static_cast<int>(ostatok) ? 1 : 0);
       if (i_rows > 0 && cols > 0 && i_rows > SIZE_MAX / cols) {
         chunks_valid = false;
         break;
@@ -104,6 +105,35 @@ bool CheckLocalSize(size_t loc_rows, size_t cols) {
   return loc_rows == 0 || cols == 0 || loc_rows <= SIZE_MAX / cols;
 }
 
+std::vector<int> CalculateSendCounts(int size, size_t base_rows_proc, size_t ostatok, size_t cols) {
+  std::vector<int> send_counts(size, 0);
+  for (int i = 0; i < size; ++i) {
+    size_t i_rows = base_rows_proc + (i < static_cast<int>(ostatok) ? 1 : 0);
+    send_counts[i] = static_cast<int>(i_rows * cols);
+  }
+  return send_counts;
+}
+
+std::vector<int> CalculateDisplacements(const std::vector<int> &send_counts) {
+  std::vector<int> displacements(send_counts.size(), 0);
+  int curr_displacement = 0;
+  for (size_t i = 0; i < send_counts.size(); ++i) {
+    displacements[i] = curr_displacement;
+    curr_displacement += send_counts[i];
+  }
+  return displacements;
+}
+
+std::vector<int> FlattenMatrix(size_t all_rows, size_t cols, const std::vector<std::vector<int>> &matrix) {
+  std::vector<int> flat_matrix(all_rows * cols);
+  for (size_t i = 0; i < all_rows; ++i) {
+    for (size_t j = 0; j < cols; ++j) {
+      flat_matrix[(i * cols) + j] = matrix[i][j];
+    }
+  }
+  return flat_matrix;
+}
+
 std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> PrepareScatterData(
     int rank, int size, size_t all_rows, size_t cols, size_t base_rows_proc, size_t ostatok,
     const std::vector<std::vector<int>> &matrix) {
@@ -111,23 +141,16 @@ std::tuple<std::vector<int>, std::vector<int>, std::vector<int>> PrepareScatterD
   std::vector<int> displacements(size, 0);
   std::vector<int> flat_matrix;
 
-  if (rank == 0) {
-    size_t curr_displacement = 0;
-    for (int i = 0; i < size; ++i) {
-      size_t i_rows = base_rows_proc + (static_cast<size_t>(i) < ostatok ? 1 : 0);
-      send_counts[i] = static_cast<int>(i_rows * cols);
-      displacements[i] = static_cast<int>(curr_displacement);
-      curr_displacement += i_rows * cols;
-    }
+  if (rank != 0) {
+    return {send_counts, displacements, flat_matrix};
+  }
 
-    if (all_rows > 0 && cols > 0) {
-      flat_matrix.resize(all_rows * cols);
-      for (size_t i = 0; i < all_rows; ++i) {
-        for (size_t j = 0; j < cols; ++j) {
-          flat_matrix[i * cols + j] = matrix[i][j];
-        }
-      }
-    }
+  send_counts = CalculateSendCounts(size, base_rows_proc, ostatok, cols);
+
+  displacements = CalculateDisplacements(send_counts);
+
+  if (all_rows > 0 && cols > 0) {
+    flat_matrix = FlattenMatrix(all_rows, cols, matrix);
   }
 
   return {send_counts, displacements, flat_matrix};
@@ -139,10 +162,8 @@ std::vector<int> ProcessLocalData(size_t loc_rows, size_t cols, const std::vecto
   if (loc_rows > 0 && cols > 0) {
     for (size_t i = 0; i < loc_rows; ++i) {
       for (size_t j = 0; j < cols; ++j) {
-        int value = local_data[i * cols + j];
-        if (value < local_min[j]) {
-          local_min[j] = value;
-        }
+        int value = local_data[(i * cols) + j];
+        local_min[j] = std::min(value, local_min[j]);
       }
     }
   }
@@ -172,7 +193,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   size_t base_rows_proc = all_rows / static_cast<size_t>(size);
   size_t ostatok = all_rows % static_cast<size_t>(size);
-  size_t loc_rows = base_rows_proc + (static_cast<size_t>(rank) < ostatok ? 1 : 0);
+  size_t loc_rows = base_rows_proc + (rank < static_cast<int>(ostatok) ? 1 : 0);
 
   if (!CheckChunksSize(rank, size, all_rows, cols)) {
     GetOutput().clear();
@@ -187,10 +208,6 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
   auto [send_counts, displacements, flat_matrix] =
       PrepareScatterData(rank, size, all_rows, cols, base_rows_proc, ostatok, GetInput());
 
-  if (rank != 0) {
-    send_counts.resize(size);
-    displacements.resize(size);
-  }
   MPI_Bcast(send_counts.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(displacements.data(), size, MPI_INT, 0, MPI_COMM_WORLD);
 

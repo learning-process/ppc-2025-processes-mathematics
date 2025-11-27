@@ -31,10 +31,6 @@ bool StringDiffTaskMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  if (size <= 0) {
-    return false;
-  }
-
   const auto &input = GetInput();
   const std::string &str1 = input.first;
   const std::string &str2 = input.second;
@@ -42,7 +38,7 @@ bool StringDiffTaskMPI::RunImpl() {
   int min_len = static_cast<int>(std::min(str1.size(), str2.size()));
   size_t len1 = str1.size();
   size_t len2 = str2.size();
-  size_t length_diff = (len1 > len2) ? (len1 - len2) : (len2 - len1);
+  size_t length_diff = std::max<size_t>(len1, len2) - std::min<size_t>(len1, len2);
 
   size_t local_count = 0;
 

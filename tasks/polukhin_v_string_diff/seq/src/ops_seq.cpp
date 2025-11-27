@@ -39,7 +39,7 @@ bool StringDiffTaskSEQ::RunImpl() {
 
   size_t len1 = str1.size();
   size_t len2 = str2.size();
-  result += (len1 > len2) ? (len1 - len2) : (len2 - len1);
+  result += (std::max<size_t>(len1, len2) - std::min<size_t>(len1, len2));
 
   GetOutput() = result;
   return true;

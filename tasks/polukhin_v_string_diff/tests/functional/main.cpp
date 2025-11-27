@@ -39,7 +39,9 @@ class PolukhinVRunFuncTestsStringDiff : public ppc::util::BaseRunFuncTests<InTyp
         ++expected_output_;
       }
     }
-    expected_output_ += std::abs(static_cast<int>(str1.size()) - static_cast<int>(str2.size()));
+    size_t len1 = str1.size();
+    size_t len2 = str2.size();
+    expected_output_ += (len1 > len2) ? (len1 - len2) : (len2 - len1);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

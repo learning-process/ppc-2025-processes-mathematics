@@ -37,7 +37,9 @@ bool StringDiffTaskSEQ::RunImpl() {
     }
   }
 
-  result += std::abs(static_cast<int>(str1.size()) - static_cast<int>(str2.size()));
+  size_t len1 = str1.size();
+  size_t len2 = str2.size();
+  result += (len1 > len2) ? (len1 - len2) : (len2 - len1);
 
   GetOutput() = result;
   return true;

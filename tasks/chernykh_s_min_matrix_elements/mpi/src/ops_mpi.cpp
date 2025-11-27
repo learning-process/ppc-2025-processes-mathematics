@@ -2,8 +2,11 @@
 
 #include <mpi.h>
 
+#include <algorithm>
+#include <limits>
+#include <vector>
+
 #include "chernykh_s_min_matrix_elements/common/include/common.hpp"
-#include "util/include/util.hpp"
 
 namespace chernykh_s_min_matrix_elements {
 
@@ -30,7 +33,7 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
   std::vector<double> full_data_buffer;
   std::vector<double> local_portion;
-  int total_elements = 0;
+  size_t total_elements = 0;
 
   if (rank == 0) {
     const std::vector<std::vector<double>> &matrix = GetInput();
@@ -41,18 +44,20 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
     total_elements = full_data_buffer.size();
   }
 
-  MPI_Bcast(&total_elements, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  int total_elements_int = static_cast<int>(total_elements);
+  MPI_Bcast(&total_elements_int, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  total_elements = static_cast<size_t>(total_elements_int);
 
   if (total_elements == 0) {
     GetOutput() = std::numeric_limits<double>::max();
     return true;
   }
 
-  int avg_elements_per_proc = total_elements / size;
-  int remainder = total_elements % size;
+  int avg_elements_per_proc = static_cast<int>(total_elements / size);
+  int remainder = static_cast<int>(total_elements % size);
 
-  std::vector<int> elemcnt(size);   // сколько элементов получит каждый процесс
-  std::vector<int> startpos(size);  // начальная позиция элемента в полном буфере
+  std::vector<int> elemcnt(size);
+  std::vector<int> startpos(size);
 
   for (int i = 0; i < size; ++i) {
     elemcnt[i] = avg_elements_per_proc;

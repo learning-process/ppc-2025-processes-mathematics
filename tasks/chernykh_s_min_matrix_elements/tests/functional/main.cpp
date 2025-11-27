@@ -62,46 +62,46 @@ class ChernykhSRunFuncTestsMinMatrixElements : public ppc::util::BaseRunFuncTest
         }
       }
     }
-
-    bool CheckTestOutputData(OutType & output_data) final {
-      const auto &mat = input_data_;
-      double expected_min = std::numeric_limits<double>::max();
-      for (const auto &row : mat) {
-        for (double v : row) {
-          expected_min = std::min(expected_min, v);
-        }
+  }
+  bool CheckTestOutputData(OutType &output_data) final {
+    const auto &mat = input_data_;
+    double expected_min = std::numeric_limits<double>::max();
+    for (const auto &row : mat) {
+      for (double v : row) {
+        expected_min = std::min(expected_min, v);
       }
-      return std::fabs(output_data - expected_min) < 1e-6;
     }
-
-    InType GetTestInputData() final {
-      return input_data_;
-    }
-
-   private:
-    InType input_data_;
-  };
-
-  namespace {
-
-  TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
-    ExecuteTest(GetParam());
+    return std::fabs(output_data - expected_min) < 1e-6;
   }
 
-  const std::array<TestType, 4> kTestParam = {"create_data_8x8", "create_data_16x16", "create_data_32x32",
-                                              "create_data_64x64"};
+  InType GetTestInputData() final {
+    return input_data_;
+  }
 
-  const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(
-                                                 kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),
-                                             ppc::util::AddFuncTask<ChernykhSMinMatrixElementsSEQ, InType>(
-                                                 kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements));
+ private:
+  InType input_data_;
+};
 
-  const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
+namespace {
 
-  const auto kPerfTestName =
-      ChernykhSRunFuncTestsMinMatrixElements::PrintFuncTestName<ChernykhSRunFuncTestsMinMatrixElements>;
+TEST_P(ChernykhSRunFuncTestsMinMatrixElements, FindMinInMatrix) {
+  ExecuteTest(GetParam());
+}
 
-  INSTANTIATE_TEST_SUITE_P(MinMatrixTests, ChernykhSRunFuncTestsMinMatrixElements, kGtestValues, kPerfTestName);
+const std::array<TestType, 4> kTestParam = {"create_data_8x8", "create_data_16x16", "create_data_32x32",
+                                            "create_data_64x64"};
 
-  }  // namespace
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ChernykhSMinMatrixElementsMPI, InType>(
+                                               kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements),
+                                           ppc::util::AddFuncTask<ChernykhSMinMatrixElementsSEQ, InType>(
+                                               kTestParam, PPC_SETTINGS_chernykh_s_min_matrix_elements));
+
+const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
+
+const auto kPerfTestName =
+    ChernykhSRunFuncTestsMinMatrixElements::PrintFuncTestName<ChernykhSRunFuncTestsMinMatrixElements>;
+
+INSTANTIATE_TEST_SUITE_P(MinMatrixTests, ChernykhSRunFuncTestsMinMatrixElements, kGtestValues, kPerfTestName);
+
+}  // namespace
 }  // namespace chernykh_s_min_matrix_elements

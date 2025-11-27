@@ -63,7 +63,7 @@ bool StringDiffTaskMPI::RunImpl() {
 
   if (rank == 0) {
     total_count += length_diff;
-    GetOutput() = static_cast<size_t>(total_count);
+    GetOutput() = total_count;
   }
 
   size_t result = (rank == 0) ? GetOutput() : 0;

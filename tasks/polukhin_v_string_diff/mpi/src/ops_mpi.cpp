@@ -51,7 +51,7 @@ bool StringDiffTaskMPI::RunImpl() {
     size_t start = rank * els_per_process;
     size_t end = std::min<size_t>(start + els_per_process, min_len);
 
-    for (int i = start; i < end; ++i) {
+    for (size_t i = start; i < end; ++i) {
       if (str1[i] != str2[i]) {
         ++local_count;
       }

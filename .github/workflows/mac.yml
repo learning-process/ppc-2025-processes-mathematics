@@ -68,6 +68,8 @@ jobs:
         run: |
           mkdir -p install
           tar -xzvf macos-clang-install.tar.gz -C install
+      - name: Make run_tests.py executable 
+        run: chmod +x scripts/run_tests.py
       - name: Run func tests (MPI)
         run: scripts/run_tests.py --running-type="processes" --counts 1 2 3 4
         env:

@@ -24,7 +24,7 @@ bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
 bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
   const auto &matrix = GetInput();
 
-  if (matrix.size() == 0) {
+  if (matrix.empty()) {
     GetOutput() = std::numeric_limits<double>::max();
     return true;
   }

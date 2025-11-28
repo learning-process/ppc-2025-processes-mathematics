@@ -1,7 +1,6 @@
 #include "chernykh_s_min_matrix_elements/seq/include/ops_seq.hpp"
 
 #include <algorithm>
-#include <iostream>
 #include <limits>
 
 #include "chernykh_s_min_matrix_elements/common/include/common.hpp"

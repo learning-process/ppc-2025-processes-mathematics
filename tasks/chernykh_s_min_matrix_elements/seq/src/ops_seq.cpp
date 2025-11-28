@@ -24,6 +24,10 @@ bool ChernykhSMinMatrixElementsSEQ::PreProcessingImpl() {
 bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
   const auto &matrix = GetInput();
 
+  if (matrix.size() == 0) {
+    GetOutput() = std::numeric_limits<double>::max();
+    return true;
+  }
   double minimum = std::numeric_limits<double>::max();
   for (const auto &row : matrix) {
     for (double element : row) {
@@ -36,7 +40,8 @@ bool ChernykhSMinMatrixElementsSEQ::RunImpl() {
 }
 
 bool ChernykhSMinMatrixElementsSEQ::PostProcessingImpl() {
-  return GetOutput() != std::numeric_limits<double>::max();
+  return true;
+  ;
 }
 
 }  // namespace chernykh_s_min_matrix_elements

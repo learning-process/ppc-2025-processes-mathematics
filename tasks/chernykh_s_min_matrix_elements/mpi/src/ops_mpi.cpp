@@ -2,6 +2,7 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <limits>
 #include <vector>
@@ -85,9 +86,7 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
   double local_min = std::numeric_limits<double>::max();
 
   for (double element : local_portion) {
-    if (element < local_min) {
-      local_min = element;
-    }
+    local_min = std::min(element, local_min);
   }
 
   double global_min = std::numeric_limits<double>::max();

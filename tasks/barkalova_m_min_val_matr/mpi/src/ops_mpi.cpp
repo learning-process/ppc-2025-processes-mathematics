@@ -111,9 +111,7 @@ std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
     size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
     start_stolb += i_cols;
   }
-
   size_t col_stolb = loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
-
   return {start_stolb, col_stolb};
 }
 

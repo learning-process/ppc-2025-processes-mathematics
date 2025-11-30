@@ -19,8 +19,10 @@ bool KrasnopevtsevaVMCIntegrationSEQ::ValidationImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
+  int func = std::get<3>(input);
 
-  return (a <= b) && (num_points > 0);
+
+  return (a <= b) && (num_points > 0) && (func >= 0) && (func <= 3);
 }
 
 bool KrasnopevtsevaVMCIntegrationSEQ::PreProcessingImpl() {
@@ -33,6 +35,7 @@ bool KrasnopevtsevaVMCIntegrationSEQ::RunImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
+  int func = std::get<3>(input);
 
   double sum = 0.0;
 
@@ -44,7 +47,7 @@ bool KrasnopevtsevaVMCIntegrationSEQ::RunImpl() {
   // cos(x)*x^3
   for (int i = 0; i < num_points; i++) {
     double x = dis(gen);
-    double fx = std::cos(x) * x * x * x;
+    double fx = FuncSystem::getFunc(func, x);
     sum += fx;
   }
 

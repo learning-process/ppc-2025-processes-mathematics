@@ -21,8 +21,9 @@ bool KrasnopevtsevaVMCIntegrationMPI::ValidationImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
+  int func = std::get<3>(input);
 
-  return (a <= b) && (num_points > 0);
+  return (a <= b) && (num_points > 0) && (func>=0) && (func<=3);
 }
 
 bool KrasnopevtsevaVMCIntegrationMPI::PreProcessingImpl() {
@@ -35,6 +36,7 @@ bool KrasnopevtsevaVMCIntegrationMPI::RunImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
+  int func = std::get<3>(input);
 
   int rank = 0;
   int size = 0;
@@ -52,7 +54,7 @@ bool KrasnopevtsevaVMCIntegrationMPI::RunImpl() {
 
   for (int i = 0; i < local_points; i++) {
     double x = dis(gen);
-    double fx = std::cos(x) * x * x * x;
+    double fx = FuncSystem::getFunc(func, x);
     local_sum += fx;
   }
   double global_sum = 0.0;

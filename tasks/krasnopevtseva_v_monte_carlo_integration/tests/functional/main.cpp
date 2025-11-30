@@ -22,9 +22,10 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     double a = std::get<0>(params);
     double b = std::get<1>(params);
     int points = std::get<2>(params);
+    int func = std::get<3>(params);
 
     std::string result = "a" + std::to_string(a) + "_b" + std::to_string(b) + "_points" + std::to_string(points) + "_" +
-                         std::get<1>(test_param);
+                        "_func" + std::to_string(func) +  std::get<1>(test_param);
 
     std::ranges::replace(result, '-', 'n');
     std::ranges::replace(result, '.', '_');
@@ -43,18 +44,21 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
 
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
+    int func = std::get<3>(input_data_);
 
-    expected_integral_ = ((b * b * b - 6 * b) * std::sin(b)) + ((3 * b * b - 6) * std::cos(b)) -
-                         ((a * a * a - 6 * a) * std::sin(a)) - ((3 * a * a - 6) * std::cos(a));
+    expected_integral_ = FuncSystem::analyticIntegral(func, a, b);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
     int points = std::get<2>(input_data_);
+    int func = std::get<3>(input_data_);
     double tolerance = (b - a) / std::sqrt(points) * 10;
     if ((a <= -3.0) || (b >= 3.0)) {
-      tolerance *= 10;
+      if(func<=1){
+         tolerance *= 10;
+      }
     }
     bool result = std::abs(output_data - expected_integral_) <= tolerance;
     return result;
@@ -71,13 +75,30 @@ TEST_P(KrasnopevtsevaVMCIntegrationFuncTests, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 6> kTestParam = {
-    std::make_tuple(std::make_tuple(0.0, 1.0, 1000), "small_interval_few_points"),
-    std::make_tuple(std::make_tuple(0.0, 1.0, 3333), "odd_numper_of_points"),
-    std::make_tuple(std::make_tuple(0.0, 2.3, 10000), "medium_interval_medium_points"),
-    std::make_tuple(std::make_tuple(0.0, 3.0, 400000), "large_interval_many_points"),
-    std::make_tuple(std::make_tuple(-1.0, 1.0, 50000), "simmerty_interval"),
-    std::make_tuple(std::make_tuple(0.0, 1.0, 20000), "small_range_high_precision"),
+const std::array<TestType, 20> kTestParam = {
+  std::make_tuple(std::make_tuple(0.0, 1.0, 1000, 0), "cos_x3_small"),
+  std::make_tuple(std::make_tuple(-2.0, 2.0, 10000, 0), "cos_x3_simmetr"),
+  std::make_tuple(std::make_tuple(0.0, 3.0, 100000, 0), "cos_x3_large"),
+  std::make_tuple(std::make_tuple(0.0, 0.0, 10, 0), "cos_x3_zero"),
+  std::make_tuple(std::make_tuple(0.0, 1.0, 33333, 0), "cos_x3_odd_points"),
+  
+  std::make_tuple(std::make_tuple(0.0, 1.0, 1000, 1), "sin_x2_small"),
+  std::make_tuple(std::make_tuple(-2.0, 2.0, 10000, 1), "sin_x2_simmetr"),
+  std::make_tuple(std::make_tuple(0.0, 3.0, 100000, 1), "sin_x2_large"),
+  std::make_tuple(std::make_tuple(0.0, 0.0, 10, 1), "sin_x2_zero"),
+  std::make_tuple(std::make_tuple(0.0, 1.0, 99999, 1), "sin_x2_odd_points"),
+  
+  std::make_tuple(std::make_tuple(0.0, 1.0, 1000, 2), "exp_x_small"),
+  std::make_tuple(std::make_tuple(-2.0, 2.0, 10000, 2), "exp_x_simmetr"),
+  std::make_tuple(std::make_tuple(1.0, 3.0, 100000, 2), "exp_x_large"),
+  std::make_tuple(std::make_tuple(0.0, 0.0, 10, 2), "exp_x_zero"),
+  std::make_tuple(std::make_tuple(0.0, 1.0, 33333, 2), "exp_x_odd_points"),
+
+  std::make_tuple(std::make_tuple(-1.0, 1.0, 1000, 3), "poly_symmetr"),
+  std::make_tuple(std::make_tuple(0.0, 2.0, 10000, 3), "poly_positive"),
+  std::make_tuple(std::make_tuple(-2.0, 2.0, 100000, 3), "poly_large"),
+  std::make_tuple(std::make_tuple(0.0, 0.0, 10000, 3), "poly_zero"),
+  std::make_tuple(std::make_tuple(0.0, 0.0, 99999, 3), "poly_odd_points")
 };
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<KrasnopevtsevaVMCIntegrationMPI, InType>(

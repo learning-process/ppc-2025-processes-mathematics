@@ -18,11 +18,11 @@ class KrasnopevtsevaVMCIntegrationPerfTests : public ppc::util::BaseRunPerfTests
   void SetUp() override {
     double a = 0.0;
     double b = 2.0;
-    int points = 500000;
-    input_data_ = std::make_tuple(a, b, points);
+    int points = 50000000;
+    int func = 0;
+    input_data_ = std::make_tuple(a, b, points, func);
     tolerance_ = (b - a) / std::sqrt(points) * 10;
-    expected_integral_ = ((b * b * b - 6 * b) * std::sin(b)) + ((3 * b * b - 6) * std::cos(b)) -
-                         ((a * a * a - 6 * a) * std::sin(a)) - ((3 * a * a - 6) * std::cos(a));
+    expected_integral_ = FuncSystem::analyticIntegral(func, a, b);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

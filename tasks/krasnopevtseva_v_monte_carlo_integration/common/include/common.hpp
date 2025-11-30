@@ -13,23 +13,23 @@ using TestType = std::tuple<std::tuple<double, double, int, int>, std::string>;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
 enum class FuncIndex : int {
-  kCOS_X3 = 0,  // cos(x) * x^3
-  kSIN_X2 = 1,  // sin(x) * x^2
-  kEXP_X = 2,   // exp(-x) * x
-  kPOLY_X = 3   // x^4 - 2*x^2 + 1
+  kCosX3 = 0,  // cos(x) * x^3
+  kSinX2 = 1,  // sin(x) * x^2
+  kExpX = 2,   // exp(-x) * x
+  kPolyX = 3   // x^4 - 2*x^2 + 1
 };
 
 class FuncSystem {
  public:
   static double GetFunc(int index, double x) {
     switch (static_cast<FuncIndex>(index)) {
-      case FuncIndex::kCOS_X3:
+      case FuncIndex::kCosX3:
         return std::cos(x) * x * x * x;
-      case FuncIndex::kSIN_X2:
+      case FuncIndex::kSinX2:
         return std::sin(x) * x * x;
-      case FuncIndex::kEXP_X:
+      case FuncIndex::kExpX:
         return std::exp(-x) * x;
-      case FuncIndex::kPOLY_X:
+      case FuncIndex::kPolyX:
         return (x * x * x * x) - (2 * x * x) + 1;
       default:
         return std::cos(x) * x * x * x;
@@ -38,13 +38,13 @@ class FuncSystem {
 
   static double AnalyticIntegral(int index, double a, double b) {
     switch (static_cast<FuncIndex>(index)) {
-      case FuncIndex::kCOS_X3:
+      case FuncIndex::kCosX3:
         return AnalyticCosX3(a, b);
-      case FuncIndex::kSIN_X2:
+      case FuncIndex::kSinX2:
         return AnalyticSinX2(a, b);
-      case FuncIndex::kEXP_X:
+      case FuncIndex::kExpX:
         return AnalyticExpX(a, b);
-      case FuncIndex::kPOLY_X:
+      case FuncIndex::kPolyX:
         return AnalyticPolyX(a, b);
       default:
         return AnalyticCosX3(a, b);
@@ -74,12 +74,12 @@ class FuncSystem {
     return FExp(b) - FExp(a);
   }
 
-  static double f_poly(double x) {
+  static double FPoly(double x) {
     return ((x * x * x * x * x) / 5.0) - ((2 * x * x * x) / 3.0) + x;
   }
 
   static double AnalyticPolyX(double a, double b) {
-    return f_poly(b) - f_poly(a);
+    return FPoly(b) - FPoly(a);
   }
 };
 

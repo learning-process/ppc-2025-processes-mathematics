@@ -62,8 +62,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     }
     bool result = std::abs(output_data - expected_integral_) <= tolerance;
     if (!result) {
-        std::cout << "diff=" << std::abs(output_data - expected_integral_) 
-                  << ", tolerance=" << tolerance << std::endl;
+      std::cout << "diff=" << std::abs(output_data - expected_integral_) << ", tolerance=" << tolerance << std::endl;
     }
     return result;
   }

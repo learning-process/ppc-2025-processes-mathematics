@@ -9,8 +9,7 @@
 
 namespace petrov_e_find_max_in_columns_matrix {
 
-template <typename MatrixElemType>
-MPI_Datatype GetMPIDatatype() {
+template <typename MatrixElemType> MPI_Datatype GetMPIDatatype() {
   MPI_Datatype res = MPI_DATATYPE_NULL;
   if (std::is_same_v<MatrixElemType, char>) {
     res = MPI_CHAR;
@@ -41,17 +40,17 @@ MPI_Datatype GetMPIDatatype() {
 }
 
 class PetrovEFindMaxInColumnsMatrixMPI : public BaseTask {
- public:
+public:
   static constexpr ppc::task::TypeOfTask GetStaticTypeOfTask() {
     return ppc::task::TypeOfTask::kMPI;
   }
   explicit PetrovEFindMaxInColumnsMatrixMPI(const InType &in);
 
- private:
+private:
   bool ValidationImpl() override;
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
 };
 
-}  // namespace petrov_e_find_max_in_columns_matrix
+} // namespace petrov_e_find_max_in_columns_matrix

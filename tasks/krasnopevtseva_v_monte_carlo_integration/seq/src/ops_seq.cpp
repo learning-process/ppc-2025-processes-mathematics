@@ -21,7 +21,6 @@ bool KrasnopevtsevaVMCIntegrationSEQ::ValidationImpl() {
   int num_points = std::get<2>(input);
   int func = std::get<3>(input);
 
-
   return (a <= b) && (num_points > 0) && (func >= 0) && (func <= 3);
 }
 

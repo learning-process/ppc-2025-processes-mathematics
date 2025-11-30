@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cmath>
+#include <cstdint>
 #include <string>
 #include <tuple>
 
@@ -7,12 +9,12 @@
 
 namespace krasnopevtseva_v_monte_carlo_integration {
 
-using InType = std::tuple<double, double, int, int>;
+using InType = std::tuple<double, double, int, std::uint8_t>;
 using OutType = double;
-using TestType = std::tuple<std::tuple<double, double, int, int>, std::string>;
+using TestType = std::tuple<std::tuple<double, double, int, std::uint8_t>, std::string>;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
-enum class FuncIndex : int {
+enum class FuncIndex : std::uint8_t {
   kCosX3 = 0,  // cos(x) * x^3
   kSinX2 = 1,  // sin(x) * x^2
   kExpX = 2,   // exp(-x) * x
@@ -21,33 +23,27 @@ enum class FuncIndex : int {
 
 class FuncSystem {
  public:
-  static double GetFunc(int index, double x) {
-    switch (static_cast<FuncIndex>(index)) {
-      case FuncIndex::kCosX3:
-        return std::cos(x) * x * x * x;
-      case FuncIndex::kSinX2:
-        return std::sin(x) * x * x;
-      case FuncIndex::kExpX:
-        return std::exp(-x) * x;
-      case FuncIndex::kPolyX:
-        return (x * x * x * x) - (2 * x * x) + 1;
-      default:
-        return std::cos(x) * x * x * x;
+  static double GetFunc(std::uint8_t index, double x) {
+    if (index == 0) {
+      return std::cos(x) * x * x * x;
+    } else if (index == 1) {
+      return std::sin(x) * x * x;
+    } else if (index == 2) {
+      return std::exp(-x) * x;
+    } else {
+      return (x * x * x * x) - (2 * x * x) + 1;
     }
   }
 
-  static double AnalyticIntegral(int index, double a, double b) {
-    switch (static_cast<FuncIndex>(index)) {
-      case FuncIndex::kCosX3:
-        return AnalyticCosX3(a, b);
-      case FuncIndex::kSinX2:
-        return AnalyticSinX2(a, b);
-      case FuncIndex::kExpX:
-        return AnalyticExpX(a, b);
-      case FuncIndex::kPolyX:
-        return AnalyticPolyX(a, b);
-      default:
-        return AnalyticCosX3(a, b);
+  static double AnalyticIntegral(std::uint8_t index, double a, double b) {
+    if (index == 0) {
+      return AnalyticCosX3(a, b);
+    } else if (index == 1) {
+      return AnalyticSinX2(a, b);
+    } else if (index == 2) {
+      return AnalyticExpX(a, b);
+    } else {
+      return AnalyticPolyX(a, b);
     }
   }
 

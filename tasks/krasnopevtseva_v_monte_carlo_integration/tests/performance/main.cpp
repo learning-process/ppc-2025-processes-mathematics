@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <cmath>
+#include <cstdint>
 #include <tuple>
 
 #include "krasnopevtseva_v_monte_carlo_integration/common/include/common.hpp"
@@ -19,7 +20,7 @@ class KrasnopevtsevaVMCIntegrationPerfTests : public ppc::util::BaseRunPerfTests
     double a = 0.0;
     double b = 2.0;
     int points = 50000000;
-    int func = 0;
+    std::uint8_t func = 0;
     input_data_ = std::make_tuple(a, b, points, func);
     tolerance_ = (b - a) / std::sqrt(points) * 10;
     expected_integral_ = FuncSystem::AnalyticIntegral(func, a, b);

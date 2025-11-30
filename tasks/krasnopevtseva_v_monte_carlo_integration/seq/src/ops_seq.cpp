@@ -1,6 +1,7 @@
 #include "krasnopevtseva_v_monte_carlo_integration/seq/include/ops_seq.hpp"
 
 #include <cmath>
+#include <cstdint>
 #include <random>
 #include <tuple>
 
@@ -19,9 +20,9 @@ bool KrasnopevtsevaVMCIntegrationSEQ::ValidationImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
-  int func = std::get<3>(input);
+  std::uint8_t func = std::get<3>(input);
 
-  return (a <= b) && (num_points > 0) && (func >= 0) && (func <= 3);
+  return (a <= b) && (num_points > 0) && (func <= 3);
 }
 
 bool KrasnopevtsevaVMCIntegrationSEQ::PreProcessingImpl() {
@@ -34,7 +35,7 @@ bool KrasnopevtsevaVMCIntegrationSEQ::RunImpl() {
   double a = std::get<0>(input);
   double b = std::get<1>(input);
   int num_points = std::get<2>(input);
-  int func = std::get<3>(input);
+  std::uint8_t func = std::get<3>(input);
 
   double sum = 0.0;
 

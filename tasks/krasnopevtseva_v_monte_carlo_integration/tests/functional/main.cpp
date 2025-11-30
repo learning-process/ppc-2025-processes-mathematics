@@ -4,6 +4,8 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
+#include <cstdint>
+#include <iostream>
 #include <string>
 #include <tuple>
 
@@ -22,7 +24,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     double a = std::get<0>(params);
     double b = std::get<1>(params);
     int points = std::get<2>(params);
-    int func = std::get<3>(params);
+    std::uint8_t func = std::get<3>(params);
 
     std::string result = "a" + std::to_string(a) + "_b" + std::to_string(b) + "_points" + std::to_string(points) + "_" +
                          "_func" + std::to_string(func) + std::get<1>(test_param);
@@ -44,7 +46,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
 
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
-    int func = std::get<3>(input_data_);
+    std::uint8_t func = std::get<3>(input_data_);
 
     expected_integral_ = FuncSystem::AnalyticIntegral(func, a, b);
   }
@@ -53,7 +55,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     double a = std::get<0>(input_data_);
     double b = std::get<1>(input_data_);
     int points = std::get<2>(input_data_);
-    int func = std::get<3>(input_data_);
+    std::uint8_t func = std::get<3>(input_data_);
     double tolerance = (b - a) / std::sqrt(points) * 10;
     if ((a <= -3.0) || (b >= 3.0)) {
       if (func <= 1) {
@@ -62,7 +64,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     }
     bool result = std::abs(output_data - expected_integral_) <= tolerance;
     if (!result) {
-      std::cout << "diff=" << std::abs(output_data - expected_integral_) << ", tolerance=" << tolerance << std::endl;
+      std::cout << "diff=" << std::abs(output_data - expected_integral_) << ", tolerance=" << tolerance << '\n';
     }
     return result;
   }

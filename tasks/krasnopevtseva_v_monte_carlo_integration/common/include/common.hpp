@@ -26,25 +26,27 @@ class FuncSystem {
   static double GetFunc(std::uint8_t index, double x) {
     if (index == 0) {
       return std::cos(x) * x * x * x;
-    } else if (index == 1) {
-      return std::sin(x) * x * x;
-    } else if (index == 2) {
-      return std::exp(-x) * x;
-    } else {
-      return (x * x * x * x) - (2 * x * x) + 1;
     }
+    if (index == 1) {
+      return std::sin(x) * x * x;
+    }
+    if (index == 2) {
+      return std::exp(-x) * x;
+    }
+    return (x * x * x * x) - (2 * x * x) + 1;
   }
 
   static double AnalyticIntegral(std::uint8_t index, double a, double b) {
     if (index == 0) {
       return AnalyticCosX3(a, b);
-    } else if (index == 1) {
-      return AnalyticSinX2(a, b);
-    } else if (index == 2) {
-      return AnalyticExpX(a, b);
-    } else {
-      return AnalyticPolyX(a, b);
     }
+    if (index == 1) {
+      return AnalyticSinX2(a, b);
+    }
+    if (index == 2) {
+      return AnalyticExpX(a, b);
+    }
+    return AnalyticPolyX(a, b);
   }
 
  private:

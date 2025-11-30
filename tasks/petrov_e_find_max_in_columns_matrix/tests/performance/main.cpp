@@ -14,13 +14,11 @@
 
 namespace petrov_e_find_max_in_columns_matrix {
 
-class PetrovERunPerfFindMaxInColumnsMatrix
-    : public ppc::util::BaseRunPerfTests<InType, OutType> {
+class PetrovERunPerfFindMaxInColumnsMatrix : public ppc::util::BaseRunPerfTests<InType, OutType> {
   InType input_data_;
 
   void SetUp() override {
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(
-        PPC_ID_petrov_e_find_max_in_columns_matrix, "perf_test.txt");
+    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_petrov_e_find_max_in_columns_matrix, "perf_test.txt");
     std::ifstream in(abs_path);
     if (in.is_open()) {
       int n = 0;
@@ -58,8 +56,7 @@ class PetrovERunPerfFindMaxInColumnsMatrix
 
     for (i = 0; i < m; i++) {
       using DifferenceType = typename OutType::difference_type;
-      auto start = matrix.begin() + static_cast<DifferenceType>(i) *
-                                        static_cast<DifferenceType>(n);
+      auto start = matrix.begin() + static_cast<DifferenceType>(i) * static_cast<DifferenceType>(n);
       auto end = start + static_cast<DifferenceType>(n);
       auto element = *std::max_element(start, end);
       if (output_data[i] != element) {
@@ -69,7 +66,9 @@ class PetrovERunPerfFindMaxInColumnsMatrix
     return true;
   }
 
-  InType GetTestInputData() final { return input_data_; }
+  InType GetTestInputData() final {
+    return input_data_;
+  }
 };
 
 TEST_P(PetrovERunPerfFindMaxInColumnsMatrix, RunPerfModes) {
@@ -77,15 +76,12 @@ TEST_P(PetrovERunPerfFindMaxInColumnsMatrix, RunPerfModes) {
 }
 
 const auto kAllPerfTasks =
-    ppc::util::MakeAllPerfTasks<InType, PetrovEFindMaxInColumnsMatrixMPI,
-                                PetrovEFindMaxInColumnsMatrixSEQ>(
+    ppc::util::MakeAllPerfTasks<InType, PetrovEFindMaxInColumnsMatrixMPI, PetrovEFindMaxInColumnsMatrixSEQ>(
         PPC_SETTINGS_petrov_e_find_max_in_columns_matrix);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);
 
-const auto kPerfTestName =
-    PetrovERunPerfFindMaxInColumnsMatrix::CustomPerfTestName;
+const auto kPerfTestName = PetrovERunPerfFindMaxInColumnsMatrix::CustomPerfTestName;
 
-INSTANTIATE_TEST_SUITE_P(RunModeTests, PetrovERunPerfFindMaxInColumnsMatrix,
-                         kGtestValues, kPerfTestName);
-} // namespace petrov_e_find_max_in_columns_matrix
+INSTANTIATE_TEST_SUITE_P(RunModeTests, PetrovERunPerfFindMaxInColumnsMatrix, kGtestValues, kPerfTestName);
+}  // namespace petrov_e_find_max_in_columns_matrix

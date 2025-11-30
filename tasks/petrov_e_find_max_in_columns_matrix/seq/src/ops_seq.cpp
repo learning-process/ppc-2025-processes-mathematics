@@ -9,27 +9,23 @@
 
 namespace petrov_e_find_max_in_columns_matrix {
 
-PetrovEFindMaxInColumnsMatrixSEQ::PetrovEFindMaxInColumnsMatrixSEQ(
-    const InType &in) {
+PetrovEFindMaxInColumnsMatrixSEQ::PetrovEFindMaxInColumnsMatrixSEQ(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = {};
 }
 
 bool PetrovEFindMaxInColumnsMatrixSEQ::ValidationImpl() {
-  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) ==
-          static_cast<int>(std::get<2>(GetInput()).size())) &&
+  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) == static_cast<int>(std::get<2>(GetInput()).size())) &&
          (GetOutput().empty());
 }
 
 bool PetrovEFindMaxInColumnsMatrixSEQ::PreProcessingImpl() {
-  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) ==
-          static_cast<int>(std::get<2>(GetInput()).size()));
+  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) == static_cast<int>(std::get<2>(GetInput()).size()));
 }
 
 bool PetrovEFindMaxInColumnsMatrixSEQ::RunImpl() {
-  if ((std::get<0>(GetInput()) * std::get<1>(GetInput()) !=
-       static_cast<int>(std::get<2>(GetInput()).size()))) {
+  if ((std::get<0>(GetInput()) * std::get<1>(GetInput()) != static_cast<int>(std::get<2>(GetInput()).size()))) {
     return false;
   }
 
@@ -57,6 +53,8 @@ bool PetrovEFindMaxInColumnsMatrixSEQ::RunImpl() {
   return true;
 }
 
-bool PetrovEFindMaxInColumnsMatrixSEQ::PostProcessingImpl() { return true; }
+bool PetrovEFindMaxInColumnsMatrixSEQ::PostProcessingImpl() {
+  return true;
+}
 
-} // namespace petrov_e_find_max_in_columns_matrix
+}  // namespace petrov_e_find_max_in_columns_matrix

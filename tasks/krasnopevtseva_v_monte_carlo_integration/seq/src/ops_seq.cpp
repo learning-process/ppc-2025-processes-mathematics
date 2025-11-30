@@ -46,7 +46,7 @@ bool KrasnopevtsevaVMCIntegrationSEQ::RunImpl() {
   // cos(x)*x^3
   for (int i = 0; i < num_points; i++) {
     double x = dis(gen);
-    double fx = FuncSystem::getFunc(func, x);
+    double fx = FuncSystem::GetFunc(func, x);
     sum += fx;
   }
 

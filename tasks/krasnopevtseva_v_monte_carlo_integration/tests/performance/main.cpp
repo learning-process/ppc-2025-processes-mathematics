@@ -22,7 +22,7 @@ class KrasnopevtsevaVMCIntegrationPerfTests : public ppc::util::BaseRunPerfTests
     int func = 0;
     input_data_ = std::make_tuple(a, b, points, func);
     tolerance_ = (b - a) / std::sqrt(points) * 10;
-    expected_integral_ = FuncSystem::analyticIntegral(func, a, b);
+    expected_integral_ = FuncSystem::AnalyticIntegral(func, a, b);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

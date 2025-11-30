@@ -54,7 +54,7 @@ bool KrasnopevtsevaVMCIntegrationMPI::RunImpl() {
 
   for (int i = 0; i < local_points; i++) {
     double x = dis(gen);
-    double fx = FuncSystem::getFunc(func, x);
+    double fx = FuncSystem::GetFunc(func, x);
     local_sum += fx;
   }
   double global_sum = 0.0;

@@ -46,7 +46,7 @@ class KrasnopevtsevaVMCIntegrationFuncTests : public ppc::util::BaseRunFuncTests
     double b = std::get<1>(input_data_);
     int func = std::get<3>(input_data_);
 
-    expected_integral_ = FuncSystem::analyticIntegral(func, a, b);
+    expected_integral_ = FuncSystem::AnalyticIntegral(func, a, b);
   }
 
   bool CheckTestOutputData(OutType &output_data) final {

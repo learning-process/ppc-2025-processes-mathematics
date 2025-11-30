@@ -14,23 +14,27 @@
 
 namespace petrov_e_find_max_in_columns_matrix {
 
-PetrovEFindMaxInColumnsMatrixMPI::PetrovEFindMaxInColumnsMatrixMPI(const InType &in) {
+PetrovEFindMaxInColumnsMatrixMPI::PetrovEFindMaxInColumnsMatrixMPI(
+    const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
   GetInput() = in;
   GetOutput() = {};
 }
 
 bool PetrovEFindMaxInColumnsMatrixMPI::ValidationImpl() {
-  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) == static_cast<int>(std::get<2>(GetInput()).size())) &&
+  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) ==
+          static_cast<int>(std::get<2>(GetInput()).size())) &&
          (GetOutput().empty());
 }
 
 bool PetrovEFindMaxInColumnsMatrixMPI::PreProcessingImpl() {
-  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) == static_cast<int>(std::get<2>(GetInput()).size()));
+  return (std::get<0>(GetInput()) * std::get<1>(GetInput()) ==
+          static_cast<int>(std::get<2>(GetInput()).size()));
 }
 
 bool PetrovEFindMaxInColumnsMatrixMPI::RunImpl() {
-  if ((std::get<0>(GetInput()) * std::get<1>(GetInput()) != static_cast<int>(std::get<2>(GetInput()).size()))) {
+  if ((std::get<0>(GetInput()) * std::get<1>(GetInput()) !=
+       static_cast<int>(std::get<2>(GetInput()).size()))) {
     return false;
   }
 
@@ -39,7 +43,8 @@ bool PetrovEFindMaxInColumnsMatrixMPI::RunImpl() {
   auto &matrix = std::get<2>(GetInput());
   OutType &res = GetOutput();
   using MatrixElemType = std::remove_reference_t<decltype(matrix[0])>;
-  MPI_Datatype mpi_matrix_elem_type = petrov_e_find_max_in_columns_matrix::GetMPIDatatype<MatrixElemType>();
+  MPI_Datatype mpi_matrix_elem_type =
+      petrov_e_find_max_in_columns_matrix::GetMPIDatatype<MatrixElemType>();
   if (mpi_matrix_elem_type == MPI_DATATYPE_NULL) {
     return false;
   }
@@ -72,8 +77,9 @@ bool PetrovEFindMaxInColumnsMatrixMPI::RunImpl() {
       end[i] = start[i] + col_num_per_proc + flag;
     }
   }
-  
-  MPI_Scatter(start.data(), 1, MPI_INT, &proc_start, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  MPI_Scatter(start.data(), 1, MPI_INT, &proc_start, 1, MPI_INT, 0,
+              MPI_COMM_WORLD);
   MPI_Scatter(end.data(), 1, MPI_INT, &proc_end, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
   OutType proc_res(m, std::numeric_limits<MatrixElemType>::lowest());
@@ -86,13 +92,12 @@ bool PetrovEFindMaxInColumnsMatrixMPI::RunImpl() {
     proc_res[i] = max;
   }
 
-  MPI_Allreduce(proc_res.data(), res.data(), m, mpi_matrix_elem_type, MPI_MAX, MPI_COMM_WORLD);
+  MPI_Allreduce(proc_res.data(), res.data(), m, mpi_matrix_elem_type, MPI_MAX,
+                MPI_COMM_WORLD);
 
   return true;
 }
 
-bool PetrovEFindMaxInColumnsMatrixMPI::PostProcessingImpl() {
-  return true;
-}
+bool PetrovEFindMaxInColumnsMatrixMPI::PostProcessingImpl() { return true; }
 
-}  // namespace petrov_e_find_max_in_columns_matrix
+} // namespace petrov_e_find_max_in_columns_matrix

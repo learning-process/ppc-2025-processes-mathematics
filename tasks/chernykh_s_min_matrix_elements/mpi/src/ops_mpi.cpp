@@ -62,8 +62,8 @@ bool ChernykhSMinMatrixElementsMPI::RunImpl() {
 
   for (int i = 0; i < size; ++i) {
     elemcnt[i] = avg_elements_per_proc;
-    if (i < remainder) {
-      elemcnt[i]++;
+    if (i == size - 1) {
+      elemcnt[i] += remainder;
     }
     if (i == 0) {
       startpos[i] = 0;

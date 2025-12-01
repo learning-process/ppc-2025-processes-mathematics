@@ -203,14 +203,18 @@ int rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  std::string str1, str2;
+  std::string str1;
+  std::string str2;
+
   if (rank == 0) {
     const auto &input = GetInput();
     str1 = input.first;
     str2 = input.second;
   }
 
-  int len1 = 0, len2 = 0;
+  int len1 = 0;
+  int len2 = 0;
+
   if (rank == 0) {
     len1 = static_cast<int>(str1.size());
     len2 = static_cast<int>(str2.size());
@@ -219,26 +223,25 @@ int rank = 0;
   MPI_Bcast(&len1, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&len2, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-  int min_len = std::min(len1, len2);
-  int length_diff = std::abs(len1 - len2);
+  const int min_len = std::min(len1, len2);
+  const int length_diff = std::abs(len1 - len2);
 
-  unsigned long long local_count = 0;
+  uint64_t local_count = 0;
 
   if (min_len > 0) {
     std::vector<int> sendcounts(size, 0);
     std::vector<int> displs(size, 0);
 
     if (rank == 0) {
-      int els_per_process = (min_len + size - 1) / size;
+      const int els_per_process = (min_len + size - 1) / size;
       int offset = 0;
 
       for (int i = 0; i < size; ++i) {
-        int start = i * els_per_process;
-        int end = std::min(start + els_per_process, min_len);
+        const int start = i * els_per_process;
+        const int end = std::min(start + els_per_process, min_len);
 
         if (start < min_len) {
-          int count = end - start;
-          sendcounts[i] = count;
+          sendcounts[i] = end - start;
         }
 
         displs[i] = offset;
@@ -270,16 +273,16 @@ int rank = 0;
     }
   }
 
-  unsigned long long total_count = 0;
-  MPI_Reduce(&local_count, &total_count, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+  uint64_t total_count = 0;
+  MPI_Reduce(&local_count, &total_count, 1, MPI_UINT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
 
   if (rank == 0) {
-    total_count += static_cast<unsigned long long>(length_diff);
+    total_count += static_cast<uint64_t>(length_diff);
     GetOutput() = static_cast<size_t>(total_count);
   }
 
-  unsigned long long result = (rank == 0) ? total_count : 0;
-  MPI_Bcast(&result, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
+  uint64_t result = (rank == 0) ? total_count : 0;
+  MPI_Bcast(&result, 1, MPI_UINT64_T, 0, MPI_COMM_WORLD);
 
   if (rank != 0) {
     GetOutput() = static_cast<size_t>(result);

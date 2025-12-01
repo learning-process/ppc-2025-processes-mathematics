@@ -59,16 +59,16 @@ bool StringDiffTaskMPI::RunImpl() {
     std::vector<int> displs(size, 0);
 
     if (rank == 0) {
-      size_t els_per_process = (min_len + size - 1) / size;
+      int els_per_process = (min_len + size - 1) / size;
       int offset = 0;
 
       for (int i = 0; i < size; ++i) {
-        size_t start = i * els_per_process;
-        size_t end = std::min<size_t>(start + els_per_process, static_cast<size_t>(min_len));
+        int start = i * els_per_process;
+        int end = std::min(start + els_per_process, min_len);
 
         if (start < min_len) {
-          size_t count = end - start;
-          sendcounts[i] = static_cast<int>(count);
+          int count = end - start;
+          sendcounts[i] = count;
         }
 
         displs[i] = offset;

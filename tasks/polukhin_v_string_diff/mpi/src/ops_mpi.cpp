@@ -1,6 +1,7 @@
 #include "polukhin_v_string_diff/mpi/include/ops_mpi.hpp"
 
 #include <algorithm>
+#include <cmath>
 #include <cstddef>
 #include <cstdint>
 #include <string>

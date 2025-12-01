@@ -3,7 +3,9 @@
 #include <algorithm>
 #include <cmath>
 #include <cstddef>
+#include <limits>
 #include <string>
+#include <vector>
 
 #include "mpi.h"
 #include "polukhin_v_string_diff/common/include/common.hpp"
@@ -31,42 +33,86 @@ bool StringDiffTaskMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  const auto &input = GetInput();
-  const std::string &str1 = input.first;
-  const std::string &str2 = input.second;
+  std::string str1, str2;
+  if (rank == 0) {
+    const auto &input = GetInput();
+    str1 = input.first;
+    str2 = input.second;
+  }
 
-  int min_len = static_cast<int>(std::min(str1.size(), str2.size()));
-  size_t len1 = str1.size();
-  size_t len2 = str2.size();
-  size_t length_diff = std::max<size_t>(len1, len2) - std::min<size_t>(len1, len2);
+  int len1 = 0, len2 = 0;
+  if (rank == 0) {
+    len1 = static_cast<int>(str1.size());
+    len2 = static_cast<int>(str2.size());
+  }
 
-  size_t local_count = 0;
+  MPI_Bcast(&len1, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  MPI_Bcast(&len2, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+  int min_len = std::min(len1, len2);
+  int length_diff = std::abs(len1 - len2);
+
+  unsigned long long local_count = 0;
 
   if (min_len > 0) {
-    size_t els_per_process = (min_len + size - 1) / size;
-    size_t start = rank * els_per_process;
-    size_t end = std::min<size_t>(start + els_per_process, min_len);
+    std::vector<int> sendcounts(size, 0);
+    std::vector<int> displs(size, 0);
 
-    for (size_t i = start; i < end; ++i) {
-      if (str1[i] != str2[i]) {
-        ++local_count;
+    if (rank == 0) {
+      size_t els_per_process = (min_len + size - 1) / size;
+      int offset = 0;
+
+      for (int i = 0; i < size; ++i) {
+        size_t start = i * els_per_process;
+        size_t end = std::min<size_t>(start + els_per_process, static_cast<size_t>(min_len));
+
+        if (start < min_len) {
+          size_t count = end - start;
+          sendcounts[i] = static_cast<int>(count);
+        }
+
+        displs[i] = offset;
+
+        if (start < min_len) {
+          offset += sendcounts[i];
+        }
+      }
+    }
+
+    int recvcount = 0;
+    MPI_Scatter(sendcounts.data(), 1, MPI_INT, &recvcount, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
+    if (recvcount > 0) {
+      std::vector<char> local_str1(recvcount);
+      std::vector<char> local_str2(recvcount);
+
+      MPI_Scatterv(rank == 0 ? str1.data() : nullptr, sendcounts.data(), displs.data(), MPI_CHAR, local_str1.data(),
+                   recvcount, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+      MPI_Scatterv(rank == 0 ? str2.data() : nullptr, sendcounts.data(), displs.data(), MPI_CHAR, local_str2.data(),
+                   recvcount, MPI_CHAR, 0, MPI_COMM_WORLD);
+
+      for (int i = 0; i < recvcount; ++i) {
+        if (local_str1[i] != local_str2[i]) {
+          ++local_count;
+        }
       }
     }
   }
 
-  size_t total_count = 0;
-  MPI_Reduce(&local_count, &total_count, 1, MPI_UNSIGNED_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
+  unsigned long long total_count = 0;
+  MPI_Reduce(&local_count, &total_count, 1, MPI_UNSIGNED_LONG_LONG, MPI_SUM, 0, MPI_COMM_WORLD);
 
   if (rank == 0) {
-    total_count += length_diff;
-    GetOutput() = total_count;
+    total_count += static_cast<unsigned long long>(length_diff);
+    GetOutput() = static_cast<size_t>(total_count);
   }
 
-  size_t result = (rank == 0) ? GetOutput() : 0;
-  MPI_Bcast(&result, 1, MPI_UNSIGNED_LONG, 0, MPI_COMM_WORLD);
+  unsigned long long result = (rank == 0) ? total_count : 0;
+  MPI_Bcast(&result, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
 
   if (rank != 0) {
-    GetOutput() = result;
+    GetOutput() = static_cast<size_t>(result);
   }
 
   return true;

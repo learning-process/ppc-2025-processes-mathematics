@@ -10,7 +10,7 @@
 namespace yusupkina_m_elem_vec_sum {
 
 class YusupkinaMRunPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kCount_ = 10000000;
+  const int kCount_ = 100000000;
   InType input_data_;
   OutType expected_ = 0;
 

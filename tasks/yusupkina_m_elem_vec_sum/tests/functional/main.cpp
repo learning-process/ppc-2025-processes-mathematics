@@ -70,13 +70,13 @@ class YusupkinaMElemVecSumFuncTests : public ppc::util::BaseRunFuncTests<InType,
         input_data_ = std::vector<int>(10, -10);
         expected_ = -100;
         break;
-      case 50:
-        input_data_ = std::vector<int>(50, 2);
-        expected_ = 100;
+      case 500:
+        input_data_ = std::vector<int>(500, 2);
+        expected_ = 1000;
         break;
       default:
-        input_data_ = std::vector<int>(100, 1);
-        expected_ = 100;
+        input_data_ = std::vector<int>(100000, 1);
+        expected_ = 100000;
         break;
     }
   }
@@ -104,8 +104,8 @@ const std::array<TestType, 13> kTestParam = {
     std::make_tuple(0, "empty_vector"),     std::make_tuple(1, "one_element"),      std::make_tuple(2, "two_elements"),
     std::make_tuple(3, "with_zeros"),       std::make_tuple(4, "negative_numbers"), std::make_tuple(5, "mixed_numbers"),
     std::make_tuple(6, "all_zeros"),        std::make_tuple(7, "sequential"),       std::make_tuple(8, "all_ones"),
-    std::make_tuple(9, "alternating_sign"), std::make_tuple(10, "all_negative"),    std::make_tuple(50, "medium_size"),
-    std::make_tuple(100, "big_size")};
+    std::make_tuple(9, "alternating_sign"), std::make_tuple(10, "all_negative"),    std::make_tuple(500, "medium_size"),
+    std::make_tuple(100000, "big_size")};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<YusupkinaMElemVecSumMPI, InType>(kTestParam, PPC_SETTINGS_yusupkina_m_elem_vec_sum),

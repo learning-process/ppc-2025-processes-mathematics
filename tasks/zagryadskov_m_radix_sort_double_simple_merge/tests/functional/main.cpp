@@ -22,7 +22,8 @@
 
 namespace zagryadskov_m_radix_sort_double_simple_merge {
 
-class ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
+class ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge
+    : public ppc::util::BaseRunFuncTests<InType, OutType, TestType> {
  public:
   static std::string PrintTestParam(const TestType &test_param) {
     return test_param;
@@ -32,7 +33,8 @@ class ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge : public ppc::util::Bas
   void SetUp() override {
     TestType params = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
     std::string in_file_name = params + ".bin";
-    std::string abs_path = ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_radix_sort_double_simple_merge, in_file_name);
+    std::string abs_path =
+        ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_radix_sort_double_simple_merge, in_file_name);
     std::ifstream in_file_stream(abs_path, std::ios::in | std::ios::binary);
     if (!in_file_stream.is_open()) {
       throw std::runtime_error("Error opening file!\n");
@@ -96,15 +98,18 @@ TEST_P(ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge, GetRadixSortDoubleSim
 
 const std::array<TestType, 2> kTestParam = {std::string("mat1"), std::string("mat2")};
 
-const auto kTestTasksList = std::tuple_cat(
-    ppc::util::AddFuncTask<ZagryadskovMRadixSortDoubleSimpleMergeMPI, InType>(kTestParam, PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge),
-    ppc::util::AddFuncTask<ZagryadskovMRadixSortDoubleSimpleMergeSEQ, InType>(kTestParam, PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge));
+const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ZagryadskovMRadixSortDoubleSimpleMergeMPI, InType>(
+                                               kTestParam, PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge),
+                                           ppc::util::AddFuncTask<ZagryadskovMRadixSortDoubleSimpleMergeSEQ, InType>(
+                                               kTestParam, PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge));
 
 const auto kGtestValues = ppc::util::ExpandToValues(kTestTasksList);
 
-const auto kPerfTestName = ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge::PrintFuncTestName<ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge>;
+const auto kPerfTestName = ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge::PrintFuncTestName<
+    ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge>;
 
-INSTANTIATE_TEST_SUITE_P(RadixSortDoubleSimpleMergeTests, ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge, kGtestValues, kPerfTestName);
+INSTANTIATE_TEST_SUITE_P(RadixSortDoubleSimpleMergeTests, ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge,
+                         kGtestValues, kPerfTestName);
 
 }  // namespace
 

@@ -49,9 +49,9 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::PreProcessingImpl() {
   return true;
 }
 
-bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::SecondPhase(int m, int n, int world_size, int world_rank, std::vector<int> &sendcounts,
-                                             std::vector<int> &displs, OutType &res, OutType &local_res,
-                                             MPI_Datatype datatype) {
+bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::SecondPhase(int m, int n, int world_size, int world_rank,
+                                                            std::vector<int> &sendcounts, std::vector<int> &displs,
+                                                            OutType &res, OutType &local_res, MPI_Datatype datatype) {
   int r = 0;
   int err_code = 0;
   for (r = 0; r < world_size; ++r) {

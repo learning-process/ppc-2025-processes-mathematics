@@ -83,7 +83,8 @@ TEST_P(ZagryadskovMRunPerfTestRadixSortDoubleSimpleMerge, RunPerfModes) {
   ExecuteTest(GetParam());
 }
 
-const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, ZagryadskovMRadixSortDoubleSimpleMergeMPI, ZagryadskovMRadixSortDoubleSimpleMergeSEQ>(
+const auto kAllPerfTasks = ppc::util::MakeAllPerfTasks<InType, ZagryadskovMRadixSortDoubleSimpleMergeMPI,
+                                                       ZagryadskovMRadixSortDoubleSimpleMergeSEQ>(
     PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge);
 
 const auto kGtestValues = ppc::util::TupleToGTestValues(kAllPerfTasks);

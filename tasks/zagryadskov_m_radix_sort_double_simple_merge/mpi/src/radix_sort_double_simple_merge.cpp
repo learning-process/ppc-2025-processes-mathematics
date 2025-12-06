@@ -95,6 +95,9 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
                MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       std::ranges::inplace_merge(data.begin(), data.begin() + static_cast<int64_t>(midsize), data.end());
     }
+    if (rank >= p2) {
+      break;
+    }
   }
 }
 

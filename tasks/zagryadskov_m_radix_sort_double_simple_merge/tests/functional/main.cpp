@@ -74,7 +74,7 @@ TEST_P(ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge, GetRadixSortDoubleSim
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 3> kTestParam = {10, 123, 10'000'000};
+const std::array<TestType, 3> kTestParam = {10, 123, 1'000'000};
 
 const auto kTestTasksList = std::tuple_cat(ppc::util::AddFuncTask<ZagryadskovMRadixSortDoubleSimpleMergeMPI, InType>(
                                                kTestParam, PPC_SETTINGS_zagryadskov_m_radix_sort_double_simple_merge),

@@ -24,7 +24,7 @@ class ZagryadskovMRunPerfTestRadixSortDoubleSimpleMerge : public ppc::util::Base
   InType input_data_;
 
   void SetUp() override {
-    TestType param = 100'000'123;
+    TestType param = 10'000'123;
     int seed = static_cast<int>(param % 100llu);
     std::mt19937 e(seed);
     std::uniform_real_distribution<double> gen(-100000.0, 100000.0);

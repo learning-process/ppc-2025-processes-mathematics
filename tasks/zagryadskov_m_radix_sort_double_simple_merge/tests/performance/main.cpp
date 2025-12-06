@@ -25,18 +25,18 @@ class ZagryadskovMRunPerfTestRadixSortDoubleSimpleMerge : public ppc::util::Base
 
   void SetUp() override {
     TestType param = 10'000'123;
-    int seed = static_cast<int>(param % 100llu);
+    int seed = static_cast<int>(param % 100ULL);
     std::mt19937 e(seed);
     std::uniform_real_distribution<double> gen(-100000.0, 100000.0);
     std::vector<double> &vec = input_data_;
     vec.resize(param);
-    std::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
+    std::ranges::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
     bool res = true;
     std::vector<double> example = input_data_;
-    std::sort(example.begin(), example.end());
+    std::ranges::sort(example.begin(), example.end());
     if (example.size() != output_data.size()) {
       return false;
     }

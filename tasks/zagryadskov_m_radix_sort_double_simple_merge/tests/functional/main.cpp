@@ -4,12 +4,8 @@
 #include <array>
 #include <cmath>
 #include <cstddef>
-#include <fstream>
-#include <ios>
-#include <iosfwd>
 #include <limits>
 #include <random>
-#include <stdexcept>
 #include <string>
 #include <tuple>
 #include <type_traits>
@@ -33,18 +29,18 @@ class ZagryadskovMRunFuncTestsRadixSortDoubleSimpleMerge
  protected:
   void SetUp() override {
     TestType param = std::get<static_cast<std::size_t>(ppc::util::GTestParamIndex::kTestParams)>(GetParam());
-    int seed = static_cast<int>(param % 100llu);
+    int seed = static_cast<int>(param % 100ULL);
     std::mt19937 e(seed);
     std::uniform_real_distribution<double> gen(-100000.0, 100000.0);
     std::vector<double> &vec = input_data_;
     vec.resize(param);
-    std::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
+    std::ranges::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
     bool res = true;
     std::vector<double> example = input_data_;
-    std::sort(example.begin(), example.end());
+    std::ranges::sort(example.begin(), example.end());
     if (example.size() != output_data.size()) {
       return false;
     }

@@ -46,7 +46,7 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::PreProcessingImpl() {
   return true;
 }
 
-void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPI_merge(std::vector<double> &data) {
+void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &data) {
   int rank = 0;
   int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
@@ -142,8 +142,8 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
     throw std::runtime_error("MPI_Scatterv failed");
   }
 
-  ZagryadskovMRadixSortDoubleSimpleMergeSEQ::radix_sort_LSD(data.data(), data.size());
-  MyMPI_merge(data);
+  ZagryadskovMRadixSortDoubleSimpleMergeSEQ::RadixSortLSD(data.data(), data.size());
+  MyMPIMerge(data);
 
   if (world_rank == 0) {
     GetOutput() = data;

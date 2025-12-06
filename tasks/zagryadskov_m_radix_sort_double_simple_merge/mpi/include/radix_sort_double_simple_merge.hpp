@@ -21,7 +21,7 @@ class ZagryadskovMRadixSortDoubleSimpleMergeMPI : public BaseTask {
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
-  static void MyMPI_merge(std::vector<double> &data);
+  static void MyMPIMerge(std::vector<double> &data);
 };
 
 }  // namespace zagryadskov_m_radix_sort_double_simple_merge

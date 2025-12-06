@@ -1,7 +1,11 @@
 #include "zagryadskov_m_radix_sort_double_simple_merge/seq/include/radix_sort_double_simple_merge.hpp"
 
 #include <cstddef>
+#include <cstdint>
 #include <cstdlib>
+#include <cstring>
+#include <utility>
+#include <vector>
 
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
 
@@ -20,49 +24,54 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeSEQ::PreProcessingImpl() {
   return true;
 }
 
-void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::foffset(uint8_t *mas, size_t size, size_t offset,
-                                                        uint64_t count[255ull + 1ull]) {
-  size_t i;
-  uint64_t tmp;
-  memset(count, 0, (255ull + 1ull) * sizeof(uint64_t));
+void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::Foffset(const uint8_t *mas, size_t size, size_t offset,
+                                                        std::array<uint64_t, 256> count) {
+  size_t i = 0;
+  uint64_t tmp = 0;
+  memset(count.data(), 0, (255ULL + 1ULL) * sizeof(uint64_t));
   for (i = 0; i < size * sizeof(double); i += sizeof(double)) {
     count[mas[i + offset]]++;
   }
-  tmp = count[0ull];
-  count[0ull] = 0ull;
-  for (i = 0ull; i < 255ull; i++) {
-    std::swap(tmp, count[i + 1ull]);
-    count[i + 1ull] += count[i];
+  tmp = count[0ULL];
+  count[0ULL] = 0ULL;
+  for (i = 0ULL; i < 255ULL; i++) {
+    std::swap(tmp, count[i + 1ULL]);
+    count[i + 1ULL] += count[i];
   }
 }
 
-void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::radix_sort_LSD(double *mas, size_t size) {
-  size_t i, j, k;
-  uint8_t *pm;
-  uint64_t count[255ull + 1ull];
+void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::RadixSortLSD(double *mas, size_t size) {
+  size_t i = 0;
+  size_t j = 0;
+  size_t k = 0;
+  size_t tidy_const = 0;
+  uint8_t *pm = nullptr;
+  std::array<uint64_t, 256> count;
   std::vector<double> vec_buf(size);
   double *mas2 = vec_buf.data();
   pm = reinterpret_cast<uint8_t *>(mas);
 
-  for (i = 0ull; i < sizeof(double); i++) {
-    foffset(pm, size, i, count);
-    for (j = 0ull; j < size; j++) {
-      mas2[count[pm[(j * sizeof(double)) + i]]++] = mas[j];
+  for (i = 0ULL; i < sizeof(double); i++) {
+    Foffset(pm, size, i, count);
+    for (j = 0ULL; j < size; j++) {
+      tidy_const = count[pm[(j * sizeof(double)) + i]];
+      mas2[tidy_const] = mas[j];
+      count[pm[(j * sizeof(double)) + i]]++;
     }
     std::swap(mas, mas2);
     pm = reinterpret_cast<uint8_t *>(mas);
   }
 
-  k = 0ull;
-  if (mas[size - 1ull] < 0.0) {
-    for (i = size; i > 0ull; i--) {
+  k = 0ULL;
+  if (mas[size - 1ULL] < 0.0) {
+    for (i = size; i > 0ULL; i--) {
       if (mas[i - 1] > 0.0) {
         break;
       }
-      mas2[k++] = mas[i - 1ull];
+      mas2[k++] = mas[i - 1ULL];
     }
 
-    for (i = 0ull; i < size; i++) {
+    for (i = 0ULL; i < size; i++) {
       if (mas[i] < 0.0) {
         break;
       }
@@ -75,7 +84,7 @@ void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::radix_sort_LSD(double *mas, size
 
 bool ZagryadskovMRadixSortDoubleSimpleMergeSEQ::RunImpl() {
   GetOutput() = GetInput();
-  radix_sort_LSD(GetOutput().data(), GetOutput().size());
+  RadixSortLSD(GetOutput().data(), GetOutput().size());
 
   return !GetOutput().empty();
 }

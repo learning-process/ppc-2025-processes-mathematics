@@ -73,9 +73,9 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
     MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     midsize = data.size();
     data.resize(midsize + bufsize);
-    MPI_Recv(data.data() + midsize, static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD,
-             MPI_STATUS_IGNORE);
-    std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
+    MPI_Recv(data.data() + static_cast<int64_t>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
+             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    std::ranges::inplace_merge(data.begin(), data.begin() + static_cast<int64_t>(midsize), data.end());
   }
 
   while (p2 > 1) {
@@ -86,15 +86,14 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
       midsize = data.size();
       MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
       MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
-      break;
     } else {
       partner = p2 + (rank % p2);
       MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       midsize = data.size();
       data.resize(midsize + bufsize);
-      MPI_Recv(data.data() + static_cast<long>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
+      MPI_Recv(data.data() + static_cast<int64_t>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
                MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
+      std::ranges::inplace_merge(data.begin(), data.begin() + static_cast<int64_t>(midsize), data.end());
     }
   }
 }

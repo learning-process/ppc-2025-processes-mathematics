@@ -2,16 +2,15 @@
 
 #include <cstddef>
 #include <string>
-#include <tuple>
 #include <vector>
 
 #include "task/include/task.hpp"
 
 namespace zagryadskov_m_radix_sort_double_simple_merge {
 
-using InType = std::tuple<size_t, std::vector<double>>;
+using InType = std::vector<double>;
 using OutType = std::vector<double>;
-using TestType = std::string;
+using TestType = size_t;
 using BaseTask = ppc::task::Task<InType, OutType>;
 
 }  // namespace zagryadskov_m_radix_sort_double_simple_merge

@@ -9,6 +9,7 @@
 #include <vector>
 
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
+#include "zagryadskov_m_radix_sort_double_simple_merge/seq/include/radix_sort_double_simple_merge.hpp"
 
 namespace zagryadskov_m_radix_sort_double_simple_merge {
 
@@ -34,11 +35,8 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::ValidationImpl() {
     throw std::runtime_error("MPI_Comm_rank failed");
   }
   if (world_rank == 0) {
-    size_t mat_size = std::get<1>(GetInput()).size();
-    size_t n = std::get<0>(GetInput());
-    bool if_dividable = mat_size % n == 0;
-    bool if_suits_int = mat_size <= static_cast<size_t>(std::numeric_limits<int>::max());
-    res = (n > 0) && (mat_size > 0) && (GetOutput().empty()) && if_dividable && if_suits_int;
+    std::cout << "GetInputSize: " << GetInput().size() << std::endl;
+    res = !GetInput().empty();
   } else {
     res = true;
   }
@@ -49,49 +47,63 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::PreProcessingImpl() {
   return true;
 }
 
-bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::SecondPhase(int m, int n, int world_size, int world_rank,
-                                                            std::vector<int> &sendcounts, std::vector<int> &displs,
-                                                            OutType &res, OutType &local_res, MPI_Datatype datatype) {
-  int r = 0;
-  int err_code = 0;
-  for (r = 0; r < world_size; ++r) {
-    sendcounts[r] /= m;
-    if (r > 0) {
-      displs[r] = displs[r - 1] + sendcounts[r - 1];
+void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPI_merge(std::vector<double> &data) {
+  int rank = 0;
+  int size = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+  int partner = -1;
+  size_t bufsize = 0;
+  size_t midsize = 0;
+
+  int p2 = 1;
+  while (p2 << 1 <= size) {
+    p2 <<= 1;
+  }
+
+  if (rank >= p2) {
+    partner = rank - p2;
+    midsize = data.size();
+    MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
+    MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
+    return;
+  }
+
+  if (rank + p2 < size) {
+    partner = rank + p2;
+    MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    midsize = data.size();
+    data.resize(midsize + bufsize);
+    MPI_Recv(data.data() + midsize, bufsize, MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    std::inplace_merge(data.begin(), data.begin() + midsize, data.end());
+  }
+
+  while (p2 > 1) {
+    p2 >>= 1;
+
+    if (rank >= p2) {
+      partner = rank % p2;
+      midsize = data.size();
+      MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
+      MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
+      return;
+    } else {
+      partner = p2 + rank % p2;
+      MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      midsize = data.size();
+      data.resize(midsize + bufsize);
+      MPI_Recv(data.data() + midsize, bufsize, MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      std::inplace_merge(data.begin(), data.begin() + midsize, data.end());
     }
   }
-
-  err_code = MPI_Gatherv(local_res.data(), static_cast<int>(local_res.size()), datatype, res.data(), sendcounts.data(),
-                         displs.data(), datatype, 0, MPI_COMM_WORLD);
-  if (err_code != MPI_SUCCESS) {
-    throw std::runtime_error("MPI_Gatherv failed");
-  }
-  if (world_rank != 0) {
-    res.resize(n);
-  }
-  // sequential version requires not to call MPI funcs
-  err_code = MPI_Bcast(res.data(), static_cast<int>(res.size()), datatype, 0, MPI_COMM_WORLD);
-  if (err_code != MPI_SUCCESS) {
-    throw std::runtime_error("MPI_Bcast failed");
-  }
-
-  bool result = false;
-  if (world_rank == 0) {
-    result = !res.empty();
-  } else {
-    result = true;
-  }
-  err_code = MPI_Barrier(MPI_COMM_WORLD);
-  if (err_code != MPI_SUCCESS) {
-    throw std::runtime_error("MPI_Barrier failed");
-  }
-  return result;
 }
 
 bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
   int world_size = 0;
   int world_rank = 0;
   int err_code = 0;
+  bool res = true;
   err_code = MPI_Comm_size(MPI_COMM_WORLD, &world_size);
   if (err_code != MPI_SUCCESS) {
     throw std::runtime_error("MPI_Comm_size failed");
@@ -100,81 +112,54 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
   if (err_code != MPI_SUCCESS) {
     throw std::runtime_error("MPI_Comm_rank failed");
   }
-  int n = 0;
-  const void *mat_data = nullptr;
-  int m = 0;
-  OutType &res = GetOutput();
-  OutType local_res;
-  OutType columns;
-  std::vector<int> sendcounts(world_size);
-  std::vector<int> displs(world_size);
-  if (!displs.empty()) {
-    displs[0] = 0;
-  }
-
+  size_t data_size = 0;
+  size_t world_size_st = static_cast<size_t>(world_size);
+  std::vector<double> data;
+  double *in_data = nullptr;
+  std::vector<int> sendcounts(world_size_st);
+  std::vector<int> displs(world_size_st);
   if (world_rank == 0) {
-    n = static_cast<int>(std::get<0>(GetInput()));
-    const auto &mat = std::get<1>(GetInput());
-    m = static_cast<int>(mat.size()) / n;
-    mat_data = reinterpret_cast<const void *>(mat.data());
+    data_size = GetInput().size();
+    in_data = GetInput().data();
   }
-  err_code = MPI_Bcast(&n, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  err_code = MPI_Bcast(&data_size, 1, MPI_UNSIGNED_LONG_LONG, 0, MPI_COMM_WORLD);
   if (err_code != MPI_SUCCESS) {
     throw std::runtime_error("MPI_Bcast failed");
   }
-  err_code = MPI_Bcast(&m, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  if (err_code != MPI_SUCCESS) {
-    throw std::runtime_error("MPI_Bcast failed");
-  }
-
-  int columns_count = n / world_size;
-  using T = double;  // datatype cannot be sent to other processes
+  size_t data_by_process = data_size / world_size_st;
   MPI_Datatype datatype = MPI_DOUBLE;
 
-  int i = 0;
-  int j = 0;
-  int r = 0;
-  T tmp = std::numeric_limits<T>::lowest();
-  bool tmp_flag = false;
-
-  if (world_rank == 0) {
-    res.assign(n, std::numeric_limits<T>::lowest());
-  }
-  for (r = 0; r < world_size; ++r) {
-    sendcounts[r] = (columns_count + static_cast<int>(r < (n % world_size))) * m;
+  for (size_t r = 0; r < world_size_st; ++r) {
+    sendcounts[r] = static_cast<int>(data_by_process + static_cast<size_t>(r < (data_size % world_size_st)));
     if (r > 0) {
       displs[r] = displs[r - 1] + sendcounts[r - 1];
     }
   }
 
-  local_res.assign(static_cast<size_t>(sendcounts[world_rank] / m), std::numeric_limits<T>::lowest());
-  columns.resize(sendcounts[world_rank]);
-  err_code = MPI_Scatterv(mat_data, sendcounts.data(), displs.data(), datatype, columns.data(), sendcounts[world_rank],
+  data.resize(sendcounts[world_rank]);
+  err_code = MPI_Scatterv(in_data, sendcounts.data(), displs.data(), datatype, data.data(), sendcounts[world_rank],
                           datatype, 0, MPI_COMM_WORLD);
   if (err_code != MPI_SUCCESS) {
     throw std::runtime_error("MPI_Scatterv failed");
   }
-  for (j = 0; std::cmp_less(j, local_res.size()); ++j) {
-    for (i = 0; i < m; ++i) {
-      tmp = columns[(j * m) + i];
-      tmp_flag = tmp > local_res[j];
-      local_res[j] = (static_cast<T>(tmp_flag) * tmp) + (static_cast<T>(!tmp_flag) * local_res[j]);
-    }
-  }
 
-  return SecondPhase(m, n, world_size, world_rank, sendcounts, displs, res, local_res, datatype);
+  ZagryadskovMRadixSortDoubleSimpleMergeSEQ::radix_sort_LSD(data.data(), data.size());
+  MyMPI_merge(data);
+
+  if (world_rank == 0) {
+    GetOutput() = data;
+    res = !GetOutput().empty();
+  } else {
+    res = true;
+  }
+  return res;
 }
 
 bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::PostProcessingImpl() {
-  bool result = false;
   int world_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  if (world_rank == 0) {
-    result = !GetOutput().empty();
-  } else {
-    result = true;
-  }
-  return result;
+  MPI_Bcast(GetOutput().data(), static_cast<int>(GetOutput().size()), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  return !GetOutput().empty();
 }
 
 }  // namespace zagryadskov_m_radix_sort_double_simple_merge

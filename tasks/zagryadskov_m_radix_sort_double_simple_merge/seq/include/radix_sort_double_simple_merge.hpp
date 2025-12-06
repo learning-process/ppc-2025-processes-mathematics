@@ -17,6 +17,10 @@ class ZagryadskovMRadixSortDoubleSimpleMergeSEQ : public BaseTask {
   bool PreProcessingImpl() override;
   bool RunImpl() override;
   bool PostProcessingImpl() override;
+
+ public:
+  static void foffset(uint8_t *mas, size_t size, size_t offset, uint64_t count[255ull + 1ull]);
+  static void radix_sort_LSD(double *mas, size_t size);
 };
 
 }  // namespace zagryadskov_m_radix_sort_double_simple_merge

@@ -7,6 +7,7 @@
 #include <ios>
 #include <iosfwd>
 #include <limits>
+#include <random>
 #include <stdexcept>
 #include <string>
 #include <type_traits>
@@ -23,49 +24,25 @@ class ZagryadskovMRunPerfTestRadixSortDoubleSimpleMerge : public ppc::util::Base
   InType input_data_;
 
   void SetUp() override {
-    std::string in_file_name = "mat1.bin";
-    std::string abs_path =
-        ppc::util::GetAbsoluteTaskPath(PPC_ID_zagryadskov_m_radix_sort_double_simple_merge,
-                                       in_file_name);  // std::string abs_path = "../../data/mat1.bin";
-    std::ifstream in_file_stream(abs_path, std::ios::in | std::ios::binary);
-    if (!in_file_stream.is_open()) {
-      throw std::runtime_error("Error opening file!\n");
-    }
-    size_t m = 0;
-    size_t n = 0;
-    in_file_stream.read(reinterpret_cast<char *>(&m), sizeof(size_t));
-    in_file_stream.read(reinterpret_cast<char *>(&n), sizeof(size_t));
-    std::get<0>(input_data_) = n;
-    auto &mat = std::get<1>(input_data_);
-    mat.resize(m * n);
-    using T = std::decay_t<decltype(*mat.begin())>;
-
-    in_file_stream.read(reinterpret_cast<char *>(mat.data()), static_cast<std::streamsize>(sizeof(T) * m * n));
-
-    in_file_stream.close();
+    TestType param = 100'000'123;
+    int seed = static_cast<int>(param % 100llu);
+    std::mt19937 e(seed);
+    std::uniform_real_distribution<double> gen(-100000.0, 100000.0);
+    std::vector<double> vec(param);
+    std::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
   }
 
   bool CheckTestOutputData(OutType &output_data) final {
     bool res = true;
-    size_t n = std::get<0>(input_data_);
-    size_t m = std::get<1>(input_data_).size() / n;
-    auto &mat = std::get<1>(input_data_);
-    if (output_data.size() != n) {
-      res = false;
-      return res;
+    std::vector<double> example = input_data_;
+    std::sort(example.begin(), example.end());
+    if (example.size() != output_data.size()) {
+      return false;
     }
 
-    using T = std::decay_t<decltype(*mat.begin())>;
-    OutType example(n, std::numeric_limits<T>::lowest());
-    for (size_t j = 0; j < n; ++j) {
-      for (size_t i = 0; i < m; ++i) {
-        example[j] = std::max(example[j], mat[(j * m) + i]);
-      }
-    }
-
-    for (size_t j = 0; j < n; ++j) {
-      T diff = std::abs(example[j] - output_data[j]);
-      T eps = std::max(std::abs(example[j]), std::abs(output_data[j])) * std::numeric_limits<double>::epsilon();
+    for (size_t j = 0; j < example.size(); ++j) {
+      double diff = std::abs(example[j] - output_data[j]);
+      double eps = std::max(std::abs(example[j]), std::abs(output_data[j])) * std::numeric_limits<double>::epsilon();
       if (diff > eps) {
         res = false;
       }

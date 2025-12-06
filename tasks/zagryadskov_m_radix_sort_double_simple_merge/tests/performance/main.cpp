@@ -28,7 +28,8 @@ class ZagryadskovMRunPerfTestRadixSortDoubleSimpleMerge : public ppc::util::Base
     int seed = static_cast<int>(param % 100llu);
     std::mt19937 e(seed);
     std::uniform_real_distribution<double> gen(-100000.0, 100000.0);
-    std::vector<double> vec(param);
+    std::vector<double> &vec = input_data_;
+    vec.resize(param);
     std::generate(vec.begin(), vec.end(), [&]() { return gen(e); });
   }
 

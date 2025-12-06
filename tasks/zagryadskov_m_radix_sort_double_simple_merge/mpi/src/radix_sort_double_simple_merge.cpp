@@ -35,7 +35,6 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::ValidationImpl() {
     throw std::runtime_error("MPI_Comm_rank failed");
   }
   if (world_rank == 0) {
-    std::cout << "GetInputSize: " << GetInput().size() << std::endl;
     res = !GetInput().empty();
   } else {
     res = true;
@@ -158,7 +157,13 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
 bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::PostProcessingImpl() {
   int world_rank = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &world_rank);
-  MPI_Bcast(GetOutput().data(), static_cast<int>(GetOutput().size()), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+  int size = 0;
+  if (world_rank == 0) {
+    size = static_cast<int>(GetOutput().size());
+  }
+  MPI_Bcast(&size, 1, MPI_INT, 0, MPI_COMM_WORLD);
+  GetOutput().resize(size);
+  MPI_Bcast(GetOutput().data(), size, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   return !GetOutput().empty();
 }
 

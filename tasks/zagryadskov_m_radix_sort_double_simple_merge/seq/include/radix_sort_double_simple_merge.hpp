@@ -1,8 +1,8 @@
 #pragma once
 
-#include <cstdint>
-#include <cstddef>
 #include <array>
+#include <cstddef>
+#include <cstdint>
 
 #include "task/include/task.hpp"
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
@@ -23,7 +23,7 @@ class ZagryadskovMRadixSortDoubleSimpleMergeSEQ : public BaseTask {
   bool PostProcessingImpl() override;
 
  public:
-  static void Foffset(const uint8_t *mas, size_t size, size_t offset, std::array<uint64_t, 256>& count);
+  static void Foffset(const uint8_t *mas, size_t size, size_t offset, std::array<uint64_t, 256> &count);
   static void RadixSortLSD(double *mas, size_t size);
 };
 

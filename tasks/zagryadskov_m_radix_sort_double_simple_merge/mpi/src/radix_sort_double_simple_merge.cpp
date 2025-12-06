@@ -2,10 +2,10 @@
 
 #include <mpi.h>
 
+#include <algorithm>
 #include <cstddef>
 #include <stdexcept>
 #include <vector>
-#include <algorithm>
 
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
 #include "zagryadskov_m_radix_sort_double_simple_merge/seq/include/radix_sort_double_simple_merge.hpp"
@@ -73,7 +73,8 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
     MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     midsize = data.size();
     data.resize(midsize + bufsize);
-    MPI_Recv(data.data() + midsize, static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(data.data() + midsize, static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD,
+             MPI_STATUS_IGNORE);
     std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
   }
 
@@ -91,7 +92,8 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
       MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       midsize = data.size();
       data.resize(midsize + bufsize);
-      MPI_Recv(data.data() + static_cast<long>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      MPI_Recv(data.data() + static_cast<long>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
+               MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
     }
   }

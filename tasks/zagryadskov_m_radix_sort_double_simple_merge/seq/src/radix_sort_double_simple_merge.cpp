@@ -1,12 +1,12 @@
 #include "zagryadskov_m_radix_sort_double_simple_merge/seq/include/radix_sort_double_simple_merge.hpp"
 
+#include <array>
 #include <cstddef>
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <utility>
 #include <vector>
-#include <array>
 
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
 
@@ -26,7 +26,7 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeSEQ::PreProcessingImpl() {
 }
 
 void ZagryadskovMRadixSortDoubleSimpleMergeSEQ::Foffset(const uint8_t *mas, size_t size, size_t offset,
-                                                        std::array<uint64_t, 256>& count) {
+                                                        std::array<uint64_t, 256> &count) {
   size_t i = 0;
   uint64_t tmp = 0;
   memset(count.data(), 0, (255ULL + 1ULL) * sizeof(uint64_t));

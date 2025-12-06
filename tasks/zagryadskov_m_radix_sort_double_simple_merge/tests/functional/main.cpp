@@ -8,7 +8,6 @@
 #include <random>
 #include <string>
 #include <tuple>
-#include <type_traits>
 #include <vector>
 
 #include "util/include/func_test_util.hpp"

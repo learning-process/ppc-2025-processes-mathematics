@@ -1,7 +1,6 @@
 #pragma once
 
 #include <cstddef>
-#include <string>
 #include <vector>
 
 #include "task/include/task.hpp"

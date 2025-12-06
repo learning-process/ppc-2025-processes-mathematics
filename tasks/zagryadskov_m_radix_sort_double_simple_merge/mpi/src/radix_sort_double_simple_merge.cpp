@@ -3,10 +3,9 @@
 #include <mpi.h>
 
 #include <cstddef>
-#include <limits>
 #include <stdexcept>
-#include <utility>
 #include <vector>
+#include <algorithm>
 
 #include "zagryadskov_m_radix_sort_double_simple_merge/common/include/common.hpp"
 #include "zagryadskov_m_radix_sort_double_simple_merge/seq/include/radix_sort_double_simple_merge.hpp"
@@ -74,8 +73,8 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
     MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     midsize = data.size();
     data.resize(midsize + bufsize);
-    MPI_Recv(data.data() + midsize, bufsize, MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    std::inplace_merge(data.begin(), data.begin() + midsize, data.end());
+    MPI_Recv(data.data() + midsize, static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
   }
 
   while (p2 > 1) {
@@ -86,14 +85,14 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
       midsize = data.size();
       MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
       MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
-      return;
+      break;
     } else {
-      partner = p2 + rank % p2;
+      partner = p2 + (rank % p2);
       MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       midsize = data.size();
       data.resize(midsize + bufsize);
-      MPI_Recv(data.data() + midsize, bufsize, MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      std::inplace_merge(data.begin(), data.begin() + midsize, data.end());
+      MPI_Recv(data.data() + static_cast<long>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      std::ranges::inplace_merge(data.begin(), data.begin() + midsize, data.end());
     }
   }
 }
@@ -112,7 +111,7 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
     throw std::runtime_error("MPI_Comm_rank failed");
   }
   size_t data_size = 0;
-  size_t world_size_st = static_cast<size_t>(world_size);
+  auto world_size_st = static_cast<size_t>(world_size);
   std::vector<double> data;
   double *in_data = nullptr;
   std::vector<int> sendcounts(world_size_st);
@@ -128,10 +127,10 @@ bool ZagryadskovMRadixSortDoubleSimpleMergeMPI::RunImpl() {
   size_t data_by_process = data_size / world_size_st;
   MPI_Datatype datatype = MPI_DOUBLE;
 
-  for (size_t r = 0; r < world_size_st; ++r) {
-    sendcounts[r] = static_cast<int>(data_by_process + static_cast<size_t>(r < (data_size % world_size_st)));
-    if (r > 0) {
-      displs[r] = displs[r - 1] + sendcounts[r - 1];
+  for (size_t rk = 0; rk < world_size_st; ++rk) {
+    sendcounts[rk] = static_cast<int>(data_by_process + static_cast<size_t>(rk < (data_size % world_size_st)));
+    if (rk > 0) {
+      displs[rk] = displs[rk - 1] + sendcounts[rk - 1];
     }
   }
 

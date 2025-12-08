@@ -17,5 +17,3 @@ CMakeSettings.json
 .cache
 install
 *.pyc
-create_data
-create_data.cpp

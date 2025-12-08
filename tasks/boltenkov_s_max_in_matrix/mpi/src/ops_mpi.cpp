@@ -57,6 +57,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   std::vector<double> &v = std::get<1>(GetInput());
 
   int len = static_cast<int>(v.size());
+  MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
   int cnt_item = len / size;
   int r = len % size;
 

@@ -112,6 +112,7 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
     }
   }
 
+  MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
   return true;
 }

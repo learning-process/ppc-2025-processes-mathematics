@@ -12,30 +12,42 @@ namespace boltenkov_s_max_in_matrix {
 
 BoltenkovSMaxInMatrixkMPI::BoltenkovSMaxInMatrixkMPI(const InType &in) {
   SetTypeOfTask(GetStaticTypeOfTask());
-  GetInput() = in;
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    GetInput() = in;
+  } else {
+    GetInput() = InType{};
+  }
   GetOutput() = -std::numeric_limits<double>::max();
 }
 
 bool BoltenkovSMaxInMatrixkMPI::ValidationImpl() {
-  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-         std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+           std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  }
+  return true;
 }
 
 bool BoltenkovSMaxInMatrixkMPI::PreProcessingImpl() {
-  return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
-         std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  int rank = 0;
+  MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  if (rank == 0) {
+    return std::get<0>(GetInput()) > 0 && !std::get<1>(GetInput()).empty() &&
+           std::get<1>(GetInput()).size() % std::get<0>(GetInput()) == 0;
+  }
+  return true;
 }
 
 bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
-  if (std::get<0>(GetInput()) <= 0 || std::get<1>(GetInput()).empty() ||
-      std::get<1>(GetInput()).size() % std::get<0>(GetInput()) != 0) {
-    return false;
-  }
-
   int size = 0;
   int rank = 0;
   MPI_Comm_size(MPI_COMM_WORLD, &size);
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
   std::vector<int> sendcounts(size, 0);
   std::vector<int> displs(size, 0);
   std::vector<double> data;
@@ -62,9 +74,6 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   if (rank == 0) {
     MPI_Scatterv(v.data(), sendcounts.data(), displs.data(), datatype, data.data(), sendcounts[rank], datatype, 0,
                  MPI_COMM_WORLD);
-  } else {
-    MPI_Scatterv(nullptr, sendcounts.data(), displs.data(), datatype, data.data(), sendcounts[rank], datatype, 0,
-                 MPI_COMM_WORLD);
   }
 
   bool flag = false;
@@ -74,11 +83,9 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
     tmp_mx = (static_cast<double>(flag) * data[i]) + (static_cast<double>(!flag) * tmp_mx);
   }
 
-  if (rank == 0) {
-    for (int i = 0; i < size; ++i) {
-      sendcounts[i] = 1;
-      displs[i] = i;
-    }
+  for (int i = 0; i < size; ++i) {
+    sendcounts[i] = 1;
+    displs[i] = i;
   }
 
   MPI_Gatherv(&tmp_mx, 1, datatype, all_maxs.data(), sendcounts.data(), displs.data(), datatype, 0, MPI_COMM_WORLD);
@@ -90,7 +97,6 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
     }
   }
 
-  MPI_Bcast(&mx, 1, MPI_DOUBLE, 0, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
   return true;
 }

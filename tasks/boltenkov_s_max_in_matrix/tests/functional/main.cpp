@@ -66,7 +66,7 @@ TEST_P(BoltenkovSRunFuncTestsProcesses, MatmulFromPic) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 2> kTestParam = {"matrix1", "matrix2"};
+const std::array<TestType, 3> kTestParam = {"matrix1", "matrix2", "matrix3"};
 
 const auto kTestTasksList = std::tuple_cat(
     ppc::util::AddFuncTask<BoltenkovSMaxInMatrixkMPI, InType>(kTestParam, PPC_SETTINGS_boltenkov_s_max_in_matrix),

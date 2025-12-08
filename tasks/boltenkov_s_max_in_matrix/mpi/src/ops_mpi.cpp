@@ -56,26 +56,26 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
   OutType &mx = GetOutput();
   std::vector<double> &v = std::get<1>(GetInput());
 
-  int len = static_cast<int>(v.size());
-  MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
-  int cnt_item = len / size;
-  int r = len % size;
-
-  int cur_disp = 0;
-  for (int i = 0; i < size; ++i) {
-    int cur_cnt = cnt_item + (i < r ? 1 : 0);
-    sendcounts[i] = cur_cnt;
-    displs[i] = cur_disp;
-    cur_disp += sendcounts[i];
-  }
-
   MPI_Datatype datatype = MPI_DOUBLE;
 
-  data.resize(sendcounts[rank]);
+  int len = static_cast<int>(v.size());
+  MPI_Bcast(&len, 1, MPI_INT, 0, MPI_COMM_WORLD);
+
   if (rank == 0) {
-    MPI_Scatterv(v.data(), sendcounts.data(), displs.data(), datatype, data.data(), sendcounts[rank], datatype, 0,
-                 MPI_COMM_WORLD);
+    int cur_disp = 0;
+    int cnt_item = len / size;
+    int r = len % size;
+    for (int i = 0; i < size; ++i) {
+      int cur_cnt = cnt_item + (i < r ? 1 : 0);
+      sendcounts[i] = cur_cnt;
+      displs[i] = cur_disp;
+      cur_disp += sendcounts[i];
+    }
   }
+  data.resize(sendcounts[rank]);
+
+  MPI_Scatterv((rank == 0) ? v.data() : nullptr, sendcounts.data(), displs.data(), datatype, data.data(),
+               sendcounts[rank], datatype, 0, MPI_COMM_WORLD);
 
   bool flag = false;
   OutType tmp_mx = std::numeric_limits<double>::lowest();

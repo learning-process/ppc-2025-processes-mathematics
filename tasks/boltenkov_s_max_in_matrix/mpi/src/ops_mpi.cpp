@@ -70,22 +70,6 @@ bool BoltenkovSMaxInMatrixkMPI::RunImpl() {
     displs[i] = cur_disp;
     cur_disp += sendcounts[i];
   }
-  /*
-  if (rank == 0) {
-    int cur_disp = 0;
-    int cnt_item = len / size;
-    int r = len % size;
-    for (int i = 0; i < size; ++i) {
-      int cur_cnt = cnt_item + (i < r ? 1 : 0);
-      sendcounts[i] = cur_cnt;
-      displs[i] = cur_disp;
-      cur_disp += sendcounts[i];
-      MPI_Send(static_cast<void *>(sendcounts.data() + i), 1, MPI_INT, i, 0, MPI_COMM_WORLD);
-    }
-  } else {
-    MPI_Status status;
-    MPI_Recv(static_cast<void *>(sendcounts.data() + rank), 1, MPI_INT, 0, 0, MPI_COMM_WORLD, &status);
-  }*/
   data.resize(sendcounts[rank]);
 
   MPI_Scatterv((rank == 0) ? v.data() : nullptr, sendcounts.data(), displs.data(), datatype, data.data(),

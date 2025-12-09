@@ -63,12 +63,17 @@ TEST_P(PolukhinVRunFuncTestsStringDiff, StringDiff) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 6> kTestParam = {std::make_tuple("abc", "abc"),  std::make_tuple("abc", "abd"),
-                                            std::make_tuple("abc", "abcd"), std::make_tuple("hello", "hallo"),
-                                            std::make_tuple("abc", "acb"),  std::make_tuple("", "a"),
-                                            std::make_tuple("Helen", "hellen", std::make_tuple("", ""),
-                                            std::make_tuple("Alexander", "Alex"), std::make_tuple("BaRbArA", "bArBaRa"),
-                                            std::make_tuple("MarcusAurelius", "MarkAureliy")};
+const std::array<TestType, 11> kTestParam = {std::make_tuple("abc", "abc"),
+                                             std::make_tuple("abc", "abd"),
+                                             std::make_tuple("abc", "abcd"),
+                                             std::make_tuple("hello", "hallo"),
+                                             std::make_tuple("abc", "acb"),
+                                             std::make_tuple("", "a"),
+                                             std::make_tuple("Helen", "hellen"),
+                                             std::make_tuple("", ""),
+                                             std::make_tuple("Alexander", "Alex"),
+                                             std::make_tuple("BaRbArA", "bArBaRa"),
+                                             std::make_tuple("MarcusAurelius", "MarkAureliy")};
 
 const auto kTestTasksList =
     std::tuple_cat(ppc::util::AddFuncTask<StringDiffTaskMPI, InType>(kTestParam, PPC_SETTINGS_polukhin_v_string_diff),

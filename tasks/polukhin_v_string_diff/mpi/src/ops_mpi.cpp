@@ -26,7 +26,7 @@ bool StringDiffTaskMPI::PreProcessingImpl() {
   return true;
 }
 
-bool StringDiffTaskMPI::RunImpl() {  // NOLINT(readability-function-cognitive-complexity)
+bool StringDiffTaskMPI::RunImpl() {
   int rank = 0;
   int size = 0;
 

@@ -94,11 +94,77 @@ const std::vector<int> kExpectedSmall = {1, 2};
 const std::vector<std::vector<int>> kDistributedMinMatrix = {{10, 20, 30}, {5, 25, 35}, {15, 3, 40}};
 const std::vector<int> kExpectedDistributed = {5, 3, 30};
 
+// 1. Большие матрицы для проверки производительности
+const std::vector<std::vector<int>> kLargeRowsMatrix = {
+    {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3},
+    {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}, {1, 2, 3}};
+const std::vector<int> kExpectedLargeRows = {1, 2, 3};
+
+const std::vector<std::vector<int>> kLargeColsMatrix = {{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16},
+                                                        {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}};
+const std::vector<int> kExpectedLargeCols = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+
+// 2. Матрицы с минимумами в разных позициях
+const std::vector<std::vector<int>> kMinInFirstRow = {{1, 2, 3}, {10, 20, 30}, {5, 6, 7}};
+const std::vector<int> kExpectedMinInFirstRow = {1, 2, 3};
+
+const std::vector<std::vector<int>> kMinInLastRow = {{10, 20, 30}, {5, 6, 7}, {1, 2, 3}};
+const std::vector<int> kExpectedMinInLastRow = {1, 2, 3};
+
+const std::vector<std::vector<int>> kMinInMiddleRow = {{10, 20, 30}, {1, 2, 3}, {5, 6, 7}};
+const std::vector<int> kExpectedMinInMiddleRow = {1, 2, 3};
+
+// 3. Матрицы для проверки распределения с остатком
+const std::vector<std::vector<int>> k7x3Matrix = {{7, 14, 21}, {6, 13, 20}, {5, 12, 19}, {4, 11, 18},
+                                                  {3, 10, 17}, {2, 9, 16},  {1, 8, 15}};
+const std::vector<int> kExpected7x3 = {1, 8, 15};
+
+const std::vector<std::vector<int>> k3x7Matrix = {{1, 2, 3, 4, 5, 6, 7}, {7, 6, 5, 4, 3, 2, 1}, {2, 3, 4, 5, 6, 7, 8}};
+const std::vector<int> kExpected3x7 = {1, 2, 3, 4, 3, 2, 1};
+
+// 4. Матрицы с чередующимися минимумами
+const std::vector<std::vector<int>> kAlternatingMins = {{10, 1, 10, 1, 10}, {1, 10, 1, 10, 1}, {10, 1, 10, 1, 10}};
+const std::vector<int> kExpectedAlternating = {1, 1, 1, 1, 1};
+
+// 5. Матрицы с повторяющимися минимумами
+const std::vector<std::vector<int>> kDuplicateMinInColumns = {{5, 1, 3, 2}, {1, 5, 2, 3}, {2, 3, 1, 5}, {3, 2, 5, 1}};
+const std::vector<int> kExpectedDuplicateMin = {1, 1, 1, 1};
+
+// 6. Матрицы с INT_MIN
+const std::vector<std::vector<int>> kWithIntMin = {{INT_MIN, 0, 100}, {50, INT_MIN, 200}, {-100, 50, INT_MIN}};
+const std::vector<int> kExpectedWithIntMin = {INT_MIN, INT_MIN, INT_MIN};
+
+// 7. Матрицы для проверки, когда процессов больше чем столбцов
+const std::vector<std::vector<int>> k2x15Matrix = {{15, 14, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1},
+                                                   {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15}};
+const std::vector<int> kExpected2x15 = {1, 2, 3, 4, 5, 6, 7, 8, 7, 6, 5, 4, 3, 2, 1};
+
+// 8. Матрицы с нулевыми значениями
+const std::vector<std::vector<int>> kWithZeros = {{0, 5, 10}, {5, 0, 15}, {10, 15, 0}};
+const std::vector<int> kExpectedWithZeros = {0, 0, 0};
+
+// 9. Матрицы с убывающими значениями
+const std::vector<std::vector<int>> kDescendingColumns = {{9, 8, 7}, {6, 5, 4}, {3, 2, 1}};
+const std::vector<int> kExpectedDescending = {3, 2, 1};
+
+// 10. Матрицы с возрастающими значениями
+const std::vector<std::vector<int>> kAscendingColumns = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+const std::vector<int> kExpectedAscending = {1, 2, 3};
+
+// 11. Матрицы для проверки диагональных минимумов
+const std::vector<std::vector<int>> kDiagonalMins = {{1, 10, 10}, {10, 2, 10}, {10, 10, 3}};
+const std::vector<int> kExpectedDiagonal = {1, 2, 3};
+
+// 12. Матрицы с разными комбинациями
+const std::vector<std::vector<int>> kMixedValues = {
+    {-5, 100, 0, INT_MAX}, {INT_MIN, 50, -10, 0}, {0, 0, 0, 0}, {1, 2, 3, 4}};
+const std::vector<int> kExpectedMixed = {INT_MIN, 0, -10, 0};
+
 TEST_P(BarkalovaMMinValMatrFuncTests, MinValuesInColumns) {
   ExecuteTest(GetParam());
 }
 
-const std::array<TestType, 15> kTestParam = {
+const std::array<TestType, 32> kTestParam = {
     std::make_tuple(kMatrix1, kExpected1),
     std::make_tuple(kMatrix2, kExpected2),
     std::make_tuple(kMatrix3, kExpected3),
@@ -114,6 +180,23 @@ const std::array<TestType, 15> kTestParam = {
     std::make_tuple(kWideMatrix, kExpectedWide),
     std::make_tuple(kSmallMatrixForManyProcesses, kExpectedSmall),
     std::make_tuple(kDistributedMinMatrix, kExpectedDistributed),
+    // Дополнительные тесты для 95% покрытия (17)
+    std::make_tuple(kLargeRowsMatrix, kExpectedLargeRows),
+    std::make_tuple(kLargeColsMatrix, kExpectedLargeCols),
+    std::make_tuple(kMinInFirstRow, kExpectedMinInFirstRow),
+    std::make_tuple(kMinInLastRow, kExpectedMinInLastRow),
+    std::make_tuple(kMinInMiddleRow, kExpectedMinInMiddleRow),
+    std::make_tuple(k7x3Matrix, kExpected7x3),
+    std::make_tuple(k3x7Matrix, kExpected3x7),
+    std::make_tuple(kAlternatingMins, kExpectedAlternating),
+    std::make_tuple(kDuplicateMinInColumns, kExpectedDuplicateMin),
+    std::make_tuple(kWithIntMin, kExpectedWithIntMin),
+    std::make_tuple(k2x15Matrix, kExpected2x15),
+    std::make_tuple(kWithZeros, kExpectedWithZeros),
+    std::make_tuple(kDescendingColumns, kExpectedDescending),
+    std::make_tuple(kAscendingColumns, kExpectedAscending),
+    std::make_tuple(kDiagonalMins, kExpectedDiagonal),
+    std::make_tuple(kMixedValues, kExpectedMixed),
 };
 
 const auto kTestTasksList = std::tuple_cat(

@@ -69,8 +69,17 @@ bool ValidateMatrixSize(int rank, size_t rows, size_t stolb) {
   return size_valid;
 }
 
-bool ValidateLocalSize(size_t col_stolb) {
-  return col_stolb <= static_cast<size_t>(INT_MAX);
+bool CheckLocalBufferOverflow(size_t rows, size_t local_cols) {
+  if (rows > 0 && local_cols > 0) {
+    if (rows > SIZE_MAX / local_cols) {
+      return false;
+    }
+    size_t total = rows * local_cols;
+    if (total > static_cast<size_t>(INT_MAX)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 std::pair<size_t, size_t> GetMatrixDimensions(int rank, const std::vector<std::vector<int>> &matrix) {
@@ -87,21 +96,6 @@ std::pair<size_t, size_t> GetMatrixDimensions(int rank, const std::vector<std::v
   return {dims[0], dims[1]};
 }
 
-std::vector<int> GetMatrixData(int rank, size_t rows, size_t stolb, const std::vector<std::vector<int>> &matrix) {
-  std::vector<int> flat_matrix(rows * stolb);
-
-  if (rank == 0) {
-    for (size_t i = 0; i < rows; ++i) {
-      for (size_t j = 0; j < stolb; ++j) {
-        flat_matrix[(i * stolb) + j] = matrix[i][j];
-      }
-    }
-  }
-
-  MPI_Bcast(flat_matrix.data(), static_cast<int>(rows * stolb), MPI_INT, 0, MPI_COMM_WORLD);
-  return flat_matrix;
-}
-
 std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
   size_t loc_stolb = stolb / static_cast<size_t>(size);
   size_t ostatok = stolb % static_cast<size_t>(size);
@@ -115,16 +109,84 @@ std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
   return {start_stolb, col_stolb};
 }
 
-std::vector<int> CalculateLocalMins(const std::vector<int> &flat_matrix, size_t rows, size_t stolb, size_t start_stolb,
-                                    size_t col_stolb) {
-  std::vector<int> loc_min(col_stolb, INT_MAX);
-  for (size_t k = 0; k < col_stolb; ++k) {
-    size_t stolb_index = start_stolb + k;
-    for (size_t i = 0; i < rows; ++i) {
-      int value = flat_matrix[(i * stolb) + stolb_index];
-      loc_min[k] = std::min(value, loc_min[k]);
+std::vector<int> ScatterColumns(int rank, int size, size_t rows, size_t stolb,
+                                const std::vector<std::vector<int>> &matrix) {
+  std::vector<int> local_data;
+
+  if (rank == 0) {
+    bool all_valid = true;
+    for (int proc = 0; proc < size; ++proc) {
+      auto [proc_start, proc_cols] = GetColumnRange(proc, size, stolb);
+      if (proc_cols > 0 && !CheckLocalBufferOverflow(rows, proc_cols)) {
+        all_valid = false;
+        break;
+      }
+    }
+
+    for (int proc = 1; proc < size; ++proc) {
+      char valid_char = all_valid ? 1 : 0;
+      MPI_Send(&valid_char, 1, MPI_CHAR, proc, 1, MPI_COMM_WORLD);
+    }
+
+    if (!all_valid) {
+      return local_data;
+    }
+
+    for (int proc = 0; proc < size; ++proc) {
+      auto [proc_start, proc_cols] = GetColumnRange(proc, size, stolb);
+
+      if (proc == 0) {
+        if (proc_cols > 0) {
+          local_data.resize(rows * proc_cols);
+          for (size_t i = 0; i < rows; ++i) {
+            for (size_t j = 0; j < proc_cols; ++j) {
+              local_data[(i * proc_cols) + j] = matrix[i][proc_start + j];
+            }
+          }
+        }
+      } else if (proc_cols > 0) {
+        std::vector<int> send_buffer(rows * proc_cols);
+        for (size_t i = 0; i < rows; ++i) {
+          for (size_t j = 0; j < proc_cols; ++j) {
+            send_buffer[(i * proc_cols) + j] = matrix[i][proc_start + j];
+          }
+        }
+
+        int send_count = static_cast<int>(rows * proc_cols);
+        MPI_Send(send_buffer.data(), send_count, MPI_INT, proc, 0, MPI_COMM_WORLD);
+      }
+    }
+  } else {
+    char valid_char;
+    MPI_Recv(&valid_char, 1, MPI_CHAR, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    bool all_valid = (valid_char != 0);
+
+    if (!all_valid) {
+      return local_data;
+    }
+
+    auto [proc_start, proc_cols] = GetColumnRange(rank, size, stolb);
+
+    if (proc_cols > 0) {
+      local_data.resize(rows * proc_cols);
+      int recv_count = static_cast<int>(rows * proc_cols);
+      MPI_Recv(local_data.data(), recv_count, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
     }
   }
+
+  return local_data;
+}
+
+std::vector<int> CalculateLocalMins(const std::vector<int> &local_data, size_t rows, size_t col_stolb) {
+  std::vector<int> loc_min(col_stolb, INT_MAX);
+
+  for (size_t j = 0; j < col_stolb; ++j) {
+    for (size_t i = 0; i < rows; ++i) {
+      int value = local_data[(i * col_stolb) + j];
+      loc_min[j] = std::min(value, loc_min[j]);
+    }
+  }
+
   return loc_min;
 }
 
@@ -182,17 +244,33 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     return false;
   }
 
-  std::vector<int> flat_matrix = GetMatrixData(rank, rows, stolb, matrix);
   auto [start_stolb, col_stolb] = GetColumnRange(rank, size, stolb);
 
-  if (!ValidateLocalSize(col_stolb)) {
+  if (col_stolb > static_cast<size_t>(INT_MAX)) {
     GetOutput().clear();
     return false;
   }
 
-  std::vector<int> loc_min = CalculateLocalMins(flat_matrix, rows, stolb, start_stolb, col_stolb);
-  GatherAndBroadcastResults(loc_min, size, stolb, col_stolb, GetOutput());
+  if (col_stolb > 0 && !CheckLocalBufferOverflow(rows, col_stolb)) {
+    GetOutput().clear();
+    return false;
+  }
 
+  std::vector<int> local_data = ScatterColumns(rank, size, rows, stolb, matrix);
+
+  if (col_stolb > 0 && local_data.size() != rows * col_stolb) {
+    GetOutput().clear();
+    return false;
+  }
+
+  std::vector<int> loc_min;
+  if (col_stolb > 0) {
+    loc_min = CalculateLocalMins(local_data, rows, col_stolb);
+  } else {
+    loc_min.resize(0);
+  }
+
+  GatherAndBroadcastResults(loc_min, size, stolb, col_stolb, GetOutput());
   return true;
 }
 

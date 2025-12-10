@@ -10,7 +10,7 @@
 namespace krymova_k_lex_order {
 
 class KrymovaKLexOrderPerfTestProcesses : public ppc::util::BaseRunPerfTests<InType, OutType> {
-  const int kStringLength_ = 10000000;
+  const int kStringLength_ = 100000000;
   InType input_data_;
 
   void SetUp() override {

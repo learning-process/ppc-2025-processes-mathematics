@@ -65,12 +65,12 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
 
     int partner = rank + step;
     if (partner < size) {
-      uint64_t recv_size;
+      uint64_t recv_size = 0;
       MPI_Recv(&recv_size, 1, MPI_UINT64_T, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
       tmp.resize(data.size() + recv_size);
       std::vector<double> recvbuf(recv_size);
       MPI_Recv(recvbuf.data(), static_cast<int>(recv_size), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      std::merge(data.begin(), data.end(), recvbuf.begin(), recvbuf.end(), tmp.begin());
+      std::ranges::merge(data.begin(), data.end(), recvbuf.begin(), recvbuf.end(), tmp.begin());
       data.swap(tmp);
     }
   }

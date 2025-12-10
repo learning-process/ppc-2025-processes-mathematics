@@ -125,22 +125,34 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     return false;
   }
 
+  if (size > cols) {
+    size = cols;
+    if (rank >= cols) {
+      GetOutput().clear();
+      return true;
+    }
+  }
+
   auto [start_col, col_count] = GetLocalColumns(rank, size, cols);
 
   std::vector<int> local_data;
+
   if (rank == 0) {
-    local_data = GetColumnData(GetInput(), start_col, col_count);
+    const auto &matrix = GetInput();
+
+    if (col_count > 0) {
+      local_data = GetColumnData(matrix, start_col, col_count);
+    }
 
     for (int proc = 1; proc < size; ++proc) {
       auto [proc_start, proc_count] = GetLocalColumns(proc, size, cols);
       if (proc_count > 0) {
-        auto proc_data = GetColumnData(GetInput(), proc_start, proc_count);
+        auto proc_data = GetColumnData(matrix, proc_start, proc_count);
         MPI_Send(proc_data.data(), rows * proc_count, MPI_INT, proc, 0, MPI_COMM_WORLD);
       }
     }
   } else if (col_count > 0) {
-    size_t total_elements = static_cast<size_t>(rows) * static_cast<size_t>(col_count);
-    local_data.resize(total_elements);
+    local_data.resize(static_cast<size_t>(rows) * static_cast<size_t>(col_count));
     MPI_Recv(local_data.data(), rows * col_count, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 

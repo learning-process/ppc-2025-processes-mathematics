@@ -58,7 +58,7 @@ namespace {
 std::pair<int, int> GetLocalColumns(int rank, int size, int total_cols) {
   int base = total_cols / size;
   int extra = total_cols % size;
-  int start = rank * base + std::min(rank, extra);
+  int start = (rank * base) + std::min(rank, extra);
   int count = base + (rank < extra ? 1 : 0);
   return {start, count};
 }
@@ -69,11 +69,12 @@ std::vector<int> GetColumnData(const std::vector<std::vector<int>> &matrix, int 
   }
 
   int rows = static_cast<int>(matrix.size());
-  std::vector<int> data(rows * col_count);
+  size_t total_elements = static_cast<size_t>(rows) * static_cast<size_t>(col_count);
+  std::vector<int> data(total_elements);
 
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < col_count; ++j) {
-      data[i * col_count + j] = matrix[i][start_col + j];
+      data[(i * col_count) + j] = matrix[i][start_col + j];
     }
   }
   return data;
@@ -87,7 +88,7 @@ std::vector<int> FindColumnMins(const std::vector<int> &data, int rows, int col_
   std::vector<int> mins(col_count, INT_MAX);
   for (int i = 0; i < rows; ++i) {
     for (int j = 0; j < col_count; ++j) {
-      mins[j] = std::min(mins[j], data[i * col_count + j]);
+      mins[j] = std::min(mins[j], data[(i * col_count) + j]);
     }
   }
   return mins;
@@ -96,19 +97,21 @@ std::vector<int> FindColumnMins(const std::vector<int> &data, int rows, int col_
 }  // namespace
 
 bool BarkalovaMMinValMatrMPI::RunImpl() {
-  int rank, size;
+  int rank = 0;
+  int size = 0;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int rows = 0, cols = 0;
+  int rows = 0;
+  int cols = 0;
   if (rank == 0) {
     const auto &matrix = GetInput();
     rows = static_cast<int>(matrix.size());
     cols = matrix.empty() ? 0 : static_cast<int>(matrix[0].size());
   }
 
-  int dims[2] = {rows, cols};
-  MPI_Bcast(dims, 2, MPI_INT, 0, MPI_COMM_WORLD);
+  std::array<int, 2> dims = {rows, cols};
+  MPI_Bcast(dims.data(), 2, MPI_INT, 0, MPI_COMM_WORLD);
   rows = dims[0];
   cols = dims[1];
 
@@ -136,13 +139,15 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
       }
     }
   } else if (col_count > 0) {
-    local_data.resize(rows * col_count);
+    size_t total_elements = static_cast<size_t>(rows) * static_cast<size_t>(col_count);
+    local_data.resize(total_elements);
     MPI_Recv(local_data.data(), rows * col_count, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 
   auto local_mins = FindColumnMins(local_data, rows, col_count);
 
-  std::vector<int> recv_counts(size), displs(size);
+  std::vector<int> recv_counts(size);
+  std::vector<int> displs(size);
   int current_displacement = 0;
   for (int i = 0; i < size; ++i) {
     auto [i_start, i_count] = GetLocalColumns(i, size, cols);

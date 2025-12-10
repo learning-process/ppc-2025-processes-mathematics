@@ -3,9 +3,8 @@
 #include <mpi.h>
 
 #include <algorithm>
-#include <climits>
-#include <cstddef>
 #include <string>
+#include <vector>
 
 #include "krymova_k_lex_order/common/include/common.hpp"
 
@@ -34,7 +33,8 @@ bool KrymovaKLexOrderMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int len1 = 0, len2 = 0;
+  int len1 = 0;
+  int len2 = 0;
   if (rank == 0) {
     len1 = static_cast<int>(str1.length());
     len2 = static_cast<int>(str2.length());
@@ -79,7 +79,8 @@ bool KrymovaKLexOrderMPI::RunImpl() {
   int result = 0;
 
   if (global_first_diff < min_len) {
-    char char1 = 0, char2 = 0;
+    char char1 = 0;
+    char char2 = 0;
 
     if (rank == 0) {
       char1 = str1[global_first_diff];

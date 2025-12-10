@@ -76,7 +76,7 @@
 
 ## Результаты экспериментов и подтверждение корректности
 
-Эксперименты проводились при помощи CI на машине, выполняющей github-actions, количество процессов **= 2**.  
+Эксперименты проводились на локальной машине.  
 Параметры тестового вектора:
 - размер **10.000.123** элементов.
 - элементы типа `double`.
@@ -84,10 +84,10 @@
 - Диапазон значений элементов матрицы: от -10<sup>6</sup> до 10<sup>6</sup>.
 
 
-| Версия алгоритма | Время выполнения (с) |
-|------------------:|---------------------:|
-| Последовательная | 0.34 |
-| Параллельная (MPI) | 0.26 |
+| Версия алгоритма | Время выполнения (с), 2 потока | Время выполнения (с), 4 потока |
+|------------------:|---------------------:|---------------------:|
+| Последовательная | 0.52 | 0.52 |
+| Параллельная (MPI) | 0.47 | 0.42 |
 
 **Подтверждение корректности:**  
 Функция тестирования выполняет сортировку при помощи алгоритма std::sort и затем сравнивает массивы с точностью до машинного epsilon. При тестировании размеры массивов составляли от **10** до **1.000.000**. Все тесты корректности пройдены успешно.
@@ -96,7 +96,7 @@
 
 ## Выводы из результатов
 
-Реализация с использованием MPI показывает ускорение примерно в **1,3 раза** по сравнению с последовательной версией при запуске на удаленной машине github-actions на **2** процессах.  
+Реализация с использованием MPI показывает ускорение примерно в **1,24 раза** по сравнению с последовательной версией при запуске на удаленной машине github-actions на **4** процессах.  
 Это демонстрирует эффективность параллельного подхода при работе с крупными векторами.  
 При увеличении числа процессов можно ожидать дальнейшего сокращения времени выполнения, однако при малых размерах входных данных затраты на коммуникацию и слияние могут нивелировать прирост производительности сортировки.
 
@@ -190,52 +190,26 @@ void ZagryadskovMRadixSortDoubleSimpleMergeMPI::MyMPIMerge(std::vector<double> &
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  int partner = -1;
-  size_t bufsize = 0;
-  size_t midsize = 0;
+  std::vector<double> tmp;
 
-  int p2 = 1;
-  while (p2 << 1 <= size) {
-    p2 <<= 1;
-  }
+  for (int step = 1; step < size; step <<= 1) {
+    if ((rank % (2 * step)) == step) {
+      uint64_t n = data.size();
+      MPI_Send(&n, 1, MPI_UINT64_T, rank - step, 0, MPI_COMM_WORLD);
+      MPI_Send(data.data(), static_cast<int>(n), MPI_DOUBLE, rank - step, 1, MPI_COMM_WORLD);
 
-  if (rank >= p2) {
-    partner = rank - p2;
-    midsize = data.size();
-    MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
-    MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
-    return;
-  }
-
-  if (rank + p2 < size) {
-    partner = rank + p2;
-    MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    midsize = data.size();
-    data.resize(midsize + bufsize);
-    MPI_Recv(data.data() + static_cast<int64_t>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
-             MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-    std::ranges::inplace_merge(data.begin(), data.begin() + static_cast<int64_t>(midsize), data.end());
-  }
-
-  while (p2 > 1) {
-    p2 >>= 1;
-
-    if (rank >= p2) {
-      partner = rank % p2;
-      midsize = data.size();
-      MPI_Send(&midsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD);
-      MPI_Send(data.data(), static_cast<int>(data.size()), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD);
-    } else {
-      partner = p2 + (rank % p2);
-      MPI_Recv(&bufsize, 1, MPI_UNSIGNED_LONG_LONG, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      midsize = data.size();
-      data.resize(midsize + bufsize);
-      MPI_Recv(data.data() + static_cast<int64_t>(midsize), static_cast<int>(bufsize), MPI_DOUBLE, partner, 1,
-               MPI_COMM_WORLD, MPI_STATUS_IGNORE);
-      std::ranges::inplace_merge(data.begin(), data.begin() + static_cast<int64_t>(midsize), data.end());
+      return;
     }
-    if (rank >= p2) {
-      break;
+
+    int partner = rank + step;
+    if (partner < size) {
+      uint64_t recv_size;
+      MPI_Recv(&recv_size, 1, MPI_UINT64_T, partner, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      tmp.resize(data.size() + recv_size);
+      std::vector<double> recvbuf(recv_size);
+      MPI_Recv(recvbuf.data(), static_cast<int>(recv_size), MPI_DOUBLE, partner, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+      std::merge(data.begin(), data.end(), recvbuf.begin(), recvbuf.end(), tmp.begin());
+      data.swap(tmp);
     }
   }
 }

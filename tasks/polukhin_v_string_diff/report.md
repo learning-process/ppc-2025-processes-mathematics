@@ -199,20 +199,20 @@ GetOutput() = result;
 ```cpp
 namespace {
 
-void BroadcastStringLengths(int rank, int& len1, int& len2) {
+void BroadcastStringLengths(int rank, int &len1, int &len2) {
   if (rank == 0) {
   }
   MPI_Bcast(&len1, 1, MPI_INT, 0, MPI_COMM_WORLD);
   MPI_Bcast(&len2, 1, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
-void PrepareDataDistribution(int rank, int size, int min_len, std::vector<int>& sendcounts, std::vector<int>& displs) {
+void PrepareDataDistribution(int rank, int size, int min_len, std::vector<int> &sendcounts, std::vector<int> &displs) {
   if (rank != 0) {
     return;
   }
 
-  std::fill(sendcounts.begin(), sendcounts.end(), 0);
-  std::fill(displs.begin(), displs.end(), 0);
+  std::ranges::fill(sendcounts, 0);
+  std::ranges::fill(displs, 0);
 
   const int els_per_process = (min_len + size - 1) / size;
   int offset = 0;
@@ -233,7 +233,7 @@ void PrepareDataDistribution(int rank, int size, int min_len, std::vector<int>& 
   }
 }
 
-uint64_t ComputeLocalDifferences(const std::vector<char>& local_str1, const std::vector<char>& local_str2) {
+uint64_t ComputeLocalDifferences(const std::vector<char> &local_str1, const std::vector<char> &local_str2) {
   uint64_t local_count = 0;
   const size_t recvcount = local_str1.size();
 
@@ -245,9 +245,9 @@ uint64_t ComputeLocalDifferences(const std::vector<char>& local_str1, const std:
   return local_count;
 }
 
-void DistributeStrings(int rank, int recvcount, const std::vector<int>& sendcounts, const std::vector<int>& displs,
-                       const std::string& str1, const std::string& str2, std::vector<char>& local_str1,
-                       std::vector<char>& local_str2) {
+void DistributeStrings(int rank, int recvcount, const std::vector<int> &sendcounts, const std::vector<int> &displs,
+                       const std::string &str1, const std::string &str2, std::vector<char> &local_str1,
+                       std::vector<char> &local_str2) {
   if (recvcount <= 0) {
     return;
   }
@@ -259,7 +259,7 @@ void DistributeStrings(int rank, int recvcount, const std::vector<int>& sendcoun
                recvcount, MPI_CHAR, 0, MPI_COMM_WORLD);
 }
 
-void CollectAndSetResults(int rank, uint64_t local_count, int length_diff, size_t& output) {
+void CollectAndSetResults(int rank, uint64_t local_count, int length_diff, size_t &output) {
   uint64_t total_count = 0;
   MPI_Reduce(&local_count, &total_count, 1, MPI_UINT64_T, MPI_SUM, 0, MPI_COMM_WORLD);
 
@@ -287,11 +287,13 @@ bool StringDiffTaskMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  std::string str1, str2;
-  int len1 = 0, len2 = 0;
+  std::string str1;
+  std::string str2;
+  int len1 = 0;
+  int len2 = 0;
 
   if (rank == 0) {
-    const auto& input = GetInput();
+    const auto &input = GetInput();
     str1 = input.first;
     str2 = input.second;
     len1 = static_cast<int>(str1.size());

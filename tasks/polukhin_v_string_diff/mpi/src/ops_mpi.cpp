@@ -42,8 +42,8 @@ void PrepareDataDistribution(int rank, int size, int min_len, std::vector<int> &
     return;
   }
 
-  std::fill(sendcounts.begin(), sendcounts.end(), 0);
-  std::fill(displs.begin(), displs.end(), 0);
+  std::ranges::fill(sendcounts, 0);
+  std::ranges::fill(displs, 0);
 
   const int els_per_process = (min_len + size - 1) / size;
   int offset = 0;
@@ -118,8 +118,10 @@ bool StringDiffTaskMPI::RunImpl() {
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
   MPI_Comm_size(MPI_COMM_WORLD, &size);
 
-  std::string str1, str2;
-  int len1 = 0, len2 = 0;
+  std::string str1;
+  std::string str2;
+  int len1 = 0;
+  int len2 = 0;
 
   if (rank == 0) {
     const auto &input = GetInput();

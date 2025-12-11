@@ -121,31 +121,31 @@ std::vector<int> PrepareProcessData(int proc, const std::vector<std::vector<int>
   return buffer;
 }
 
-void PrepareRankZeroData(const std::vector<std::vector<int>> &matrix, size_t rows, size_t start_stolb, size_t col_stolb,
-                         std::vector<int> &local_data) {
-  local_data.resize(rows * col_stolb);
-  for (size_t i = 0; i < rows; ++i) {
-    for (size_t j = 0; j < col_stolb; ++j) {
-      local_data[(i * col_stolb) + j] = matrix[i][start_stolb + j];
-    }
-  }
-}
+void HandleRankZeroData(int size, const std::vector<std::vector<int>> &matrix, size_t rows, size_t stolb,
+                        std::vector<int> &local_data) {
+  local_data = PrepareProcessData(0, matrix, rows, stolb, size);
 
-void SendDataToOtherProcesses(int size, const std::vector<std::vector<int>> &matrix, size_t rows, size_t stolb) {
   for (int proc = 1; proc < size; ++proc) {
     auto buffer = PrepareProcessData(proc, matrix, rows, stolb, size);
-    if (!buffer.empty()) {
+
+    if (buffer.empty()) {
+      int zero_marker = 0;
+      MPI_Send(&zero_marker, 1, MPI_INT, proc, 0, MPI_COMM_WORLD);
+    } else {
       int count = static_cast<int>(buffer.size());
-      MPI_Send(buffer.data(), count, MPI_INT, proc, 0, MPI_COMM_WORLD);
+      MPI_Send(&count, 1, MPI_INT, proc, 0, MPI_COMM_WORLD);
+      MPI_Send(buffer.data(), count, MPI_INT, proc, 1, MPI_COMM_WORLD);
     }
   }
 }
 
-void ReceiveDataFromRoot(size_t rows, size_t col_stolb, std::vector<int> &local_data) {
-  if (col_stolb > 0) {
-    int count = static_cast<int>(rows * col_stolb);
+void HandleOtherRankData(std::vector<int> &local_data) {
+  int count = 0;
+  MPI_Recv(&count, 1, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+
+  if (count > 0) {
     local_data.resize(count);
-    MPI_Recv(local_data.data(), count, MPI_INT, 0, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    MPI_Recv(local_data.data(), count, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
   }
 }
 
@@ -157,15 +157,10 @@ void ScatterMatrixData(int rank, int size, const std::vector<std::vector<int>> &
   auto [start_stolb, col_stolb] = GetColumnRange(rank, size, stolb);
   local_cols = col_stolb;
 
-  if (col_stolb == 0) {
-    return;
-  }
-
   if (rank == 0) {
-    PrepareRankZeroData(matrix, rows, start_stolb, col_stolb, local_data);
-    SendDataToOtherProcesses(size, matrix, rows, stolb);
+    HandleRankZeroData(size, matrix, rows, stolb, local_data);
   } else {
-    ReceiveDataFromRoot(rows, col_stolb, local_data);
+    HandleOtherRankData(local_data);
   }
 }
 

@@ -182,12 +182,6 @@ std::vector<int> CalculateLocalMins(const std::vector<int> &local_data, size_t r
 }
 
 void PrepareGathervData(int size, size_t stolb, std::vector<int> &recv_counts, std::vector<int> &displacements) {
-  if (size == 0 || stolb == 0) {
-    recv_counts.clear();
-    displacements.clear();
-    return;
-  }
-
   size_t loc_stolb = stolb / static_cast<size_t>(size);
   size_t ostatok = stolb % static_cast<size_t>(size);
 

@@ -258,12 +258,9 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     GetOutput().clear();
     return false;
   }
-
   std::vector<int> local_data;
   ScatterMatrixData(rank, size, matrix, rows, stolb, local_data, local_cols);
-
   std::vector<int> loc_min = CalculateLocalMins(local_data, rows, local_cols);
-
   GatherAndBroadcastResults(loc_min, size, stolb, local_cols, GetOutput());
 
   return true;

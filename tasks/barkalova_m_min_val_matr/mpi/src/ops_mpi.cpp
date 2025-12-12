@@ -97,10 +97,10 @@ std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
 
   size_t start_stolb = 0;
   for (int i = 0; i < rank; ++i) {
-    size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
+    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
     start_stolb += i_cols;
   }
-  size_t col_stolb = loc_stolb + (std::cmp_less(rank, ostatok) ? 1 : 0);
+  size_t col_stolb = loc_stolb + (rank < static_cast<int>(ostatok) ? 1 : 0);
   return {start_stolb, col_stolb};
 }
 
@@ -113,11 +113,14 @@ std::vector<int> PrepareProcessData(int proc, const std::vector<std::vector<int>
   }
 
   std::vector<int> buffer(rows * proc_cols);
-  for (size_t i = 0; i < rows; ++i) {
-    for (size_t j = 0; j < proc_cols; ++j) {
-      buffer[(i * proc_cols) + j] = matrix[i][proc_start + j];
+
+  for (size_t col = 0; col < proc_cols; ++col) {
+    size_t global_col = proc_start + col;
+    for (size_t row = 0; row < rows; ++row) {
+      buffer[col * rows + row] = matrix[row][global_col];
     }
   }
+
   return buffer;
 }
 
@@ -146,12 +149,13 @@ void HandleOtherRankData(std::vector<int> &local_data) {
   if (count > 0) {
     local_data.resize(count);
     MPI_Recv(local_data.data(), count, MPI_INT, 0, 1, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+  } else {
+    local_data.clear();
   }
 }
 
 void ScatterMatrixData(int rank, int size, const std::vector<std::vector<int>> &matrix, size_t rows, size_t stolb,
                        std::vector<int> &local_data, size_t &local_cols) {
-  local_cols = 0;
   local_data.clear();
 
   auto [start_stolb, col_stolb] = GetColumnRange(rank, size, stolb);
@@ -172,9 +176,12 @@ std::vector<int> CalculateLocalMins(const std::vector<int> &local_data, size_t r
   std::vector<int> loc_min(local_cols, INT_MAX);
 
   for (size_t col = 0; col < local_cols; ++col) {
+    size_t col_offset = col * rows;
     for (size_t row = 0; row < rows; ++row) {
-      int value = local_data[(row * local_cols) + col];
-      loc_min[col] = std::min(loc_min[col], value);
+      int value = local_data[col_offset + row];
+      if (value < loc_min[col]) {
+        loc_min[col] = value;
+      }
     }
   }
 
@@ -196,7 +203,7 @@ void PrepareGathervData(int size, size_t stolb, std::vector<int> &recv_counts, s
 
   size_t current_displacement = 0;
   for (int i = 0; i < size; i++) {
-    size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
+    size_t i_cols = loc_stolb + (i < static_cast<int>(ostatok) ? 1 : 0);
     recv_counts[i] = static_cast<int>(i_cols);
     displacements[i] = static_cast<int>(current_displacement);
     current_displacement += i_cols;
@@ -258,9 +265,12 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
     GetOutput().clear();
     return false;
   }
+
   std::vector<int> local_data;
   ScatterMatrixData(rank, size, matrix, rows, stolb, local_data, local_cols);
+
   std::vector<int> loc_min = CalculateLocalMins(local_data, rows, local_cols);
+
   GatherAndBroadcastResults(loc_min, size, stolb, local_cols, GetOutput());
 
   return true;

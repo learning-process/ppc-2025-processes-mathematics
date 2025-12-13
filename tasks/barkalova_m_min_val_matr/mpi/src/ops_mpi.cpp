@@ -134,7 +134,7 @@ void PrepareScattervParams(int size, size_t rows, size_t stolb, std::vector<int>
 
   size_t current_displacement = 0;  // в элементах
   for (int i = 0; i < size; i++) {
-    size_t i_cols = base_cols + (static_cast<size_t>(i) < extra_cols ? 1 : 0);
+    size_t i_cols = base_cols + (std::cmp_less(i, extra_cols) ? 1 : 0);
     send_counts[i] = static_cast<int>(i_cols * rows);           // количество элементов для процесса i
     displacements[i] = static_cast<int>(current_displacement);  // смещение в элементах
     current_displacement += i_cols * rows;                      // увеличиваем смещение для следующего процесса

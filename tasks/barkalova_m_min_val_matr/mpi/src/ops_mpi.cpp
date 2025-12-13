@@ -126,29 +126,28 @@ void PrepareScattervParams(int size, size_t rows, size_t stolb, std::vector<int>
     return;
   }
 
-  size_t loc_stolb = stolb / static_cast<size_t>(size);
-  size_t ostatok = stolb % static_cast<size_t>(size);
+  size_t base_cols = stolb / static_cast<size_t>(size);
+  size_t extra_cols = stolb % static_cast<size_t>(size);
 
   send_counts.resize(size);
   displacements.resize(size);
 
-  size_t current_displacement = 0;
+  size_t current_displacement = 0;  // в элементах
   for (int i = 0; i < size; i++) {
-    size_t i_cols = loc_stolb + (std::cmp_less(i, ostatok) ? 1 : 0);
-    send_counts[i] = static_cast<int>(i_cols * rows);
-    displacements[i] = static_cast<int>(current_displacement * rows);
-    current_displacement += i_cols;
+    size_t i_cols = base_cols + (static_cast<size_t>(i) < extra_cols ? 1 : 0);
+    send_counts[i] = static_cast<int>(i_cols * rows);           // количество элементов для процесса i
+    displacements[i] = static_cast<int>(current_displacement);  // смещение в элементах
+    current_displacement += i_cols * rows;                      // увеличиваем смещение для следующего процесса
   }
 }
 
 void DistributeDataScatterv(int rank, int size, const std::vector<int> &all_data, size_t rows, size_t stolb,
                             std::vector<int> &local_data, size_t &local_cols) {
-  local_data.clear();
+  auto [start_col, col_count] = GetColumnRange(rank, size, stolb);
+  local_cols = col_count;
 
-  auto [start_stolb, col_stolb] = GetColumnRange(rank, size, stolb);
-  local_cols = col_stolb;
-
-  if (local_cols == 0) {
+  if (local_cols == 0 || rows == 0) {
+    local_data.clear();
     return;
   }
 
@@ -157,13 +156,11 @@ void DistributeDataScatterv(int rank, int size, const std::vector<int> &all_data
   std::vector<int> send_counts;
   std::vector<int> displacements;
   PrepareScattervParams(size, rows, stolb, send_counts, displacements);
-  if (local_cols > 0) {
-    MPI_Scatterv(all_data.data(), send_counts.data(), displacements.data(), MPI_INT, local_data.data(),
-                 static_cast<int>(local_data.size()), MPI_INT, 0, MPI_COMM_WORLD);
-  } else {
-    // Процессы с local_cols == 0 должны участвовать в коммуникации
-    MPI_Scatterv(nullptr, send_counts.data(), displacements.data(), MPI_INT, nullptr, 0, MPI_INT, 0, MPI_COMM_WORLD);
-  }
+
+  int recv_count = static_cast<int>(local_data.size());
+
+  MPI_Scatterv(all_data.empty() ? nullptr : all_data.data(), send_counts.data(), displacements.data(), MPI_INT,
+               local_data.data(), recv_count, MPI_INT, 0, MPI_COMM_WORLD);
 }
 
 std::vector<int> CalculateLocalMins(const std::vector<int> &local_data, size_t rows, size_t local_cols) {

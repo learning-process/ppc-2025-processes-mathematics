@@ -89,10 +89,9 @@ std::pair<size_t, size_t> GetMatrixDimensions(int rank,
 }
 
 std::pair<size_t, size_t> GetColumnRange(int rank, int size, size_t stolb) {
-  if (size == 0 || stolb == 0) {
+  if (stolb == 0) {
     return {0, 0};
   }
-
   size_t loc_stolb = stolb / static_cast<size_t>(size);
   size_t ostatok = stolb % static_cast<size_t>(size);
 
@@ -158,9 +157,13 @@ void DistributeDataScatterv(int rank, int size, const std::vector<int> &all_data
   std::vector<int> send_counts;
   std::vector<int> displacements;
   PrepareScattervParams(size, rows, stolb, send_counts, displacements);
-
-  MPI_Scatterv(all_data.data(), send_counts.data(), displacements.data(), MPI_INT, local_data.data(),
-               static_cast<int>(local_data.size()), MPI_INT, 0, MPI_COMM_WORLD);
+  if (local_cols > 0) {
+    MPI_Scatterv(all_data.data(), send_counts.data(), displacements.data(), MPI_INT, local_data.data(),
+                 static_cast<int>(local_data.size()), MPI_INT, 0, MPI_COMM_WORLD);
+  } else {
+    // Процессы с local_cols == 0 должны участвовать в коммуникации
+    MPI_Scatterv(nullptr, send_counts.data(), displacements.data(), MPI_INT, nullptr, 0, MPI_INT, 0, MPI_COMM_WORLD);
+  }
 }
 
 std::vector<int> CalculateLocalMins(const std::vector<int> &local_data, size_t rows, size_t local_cols) {

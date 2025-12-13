@@ -61,20 +61,36 @@ bool ValidateMatrixSize(int rank, size_t rows, size_t stolb) {
     if (rows > static_cast<size_t>(INT_MAX) || stolb > static_cast<size_t>(INT_MAX)) {
       size_valid = false;
     }
-    if (size_valid && rows > 0 && stolb > 0 && rows > SIZE_MAX / stolb) {
-      size_valid = false;
+
+    if (size_valid && rows > 0 && stolb > 0) {
+      if (rows > SIZE_MAX / stolb) {
+        size_valid = false;
+      } else {
+        size_t total = rows * stolb;
+        if (total > static_cast<size_t>(INT_MAX)) {
+          size_valid = false;
+        }
+      }
     }
   }
   MPI_Bcast(&size_valid, 1, MPI_C_BOOL, 0, MPI_COMM_WORLD);
   return size_valid;
 }
 
-bool ValidateLocalSize(size_t col_stolb) {
-  return col_stolb <= static_cast<size_t>(INT_MAX);
+bool ValidateLocalSize(size_t rows, size_t col_stolb) {
+  if (rows == 0 || col_stolb == 0) {
+    return true;
+  }
+
+  if (rows > SIZE_MAX / col_stolb) {
+    return false;
+  }
+
+  size_t total = rows * col_stolb;
+  return total <= static_cast<size_t>(INT_MAX);
 }
 
-std::pair<size_t, size_t> GetMatrixDimensions(int rank,
-                                              const std::vector<std::vector<int>> &matrix) {  // размер матрицы всем
+std::pair<size_t, size_t> GetMatrixDimensions(int rank, const std::vector<std::vector<int>> &matrix) {
   size_t rows = 0;
   size_t stolb = 0;
 
@@ -132,12 +148,12 @@ void PrepareScattervParams(int size, size_t rows, size_t stolb, std::vector<int>
   send_counts.resize(size);
   displacements.resize(size);
 
-  size_t current_displacement = 0;  // в элементах
+  size_t current_displacement = 0;
   for (int i = 0; i < size; i++) {
     size_t i_cols = base_cols + (std::cmp_less(i, extra_cols) ? 1 : 0);
-    send_counts[i] = static_cast<int>(i_cols * rows);           // количество элементов для процесса i
-    displacements[i] = static_cast<int>(current_displacement);  // смещение в элементах
-    current_displacement += i_cols * rows;                      // увеличиваем смещение для следующего процесса
+    send_counts[i] = static_cast<int>(i_cols * rows);
+    displacements[i] = static_cast<int>(current_displacement);
+    current_displacement += i_cols * rows;
   }
 }
 
@@ -235,7 +251,7 @@ bool BarkalovaMMinValMatrMPI::RunImpl() {
 
   auto [start_stolb, local_cols] = GetColumnRange(rank, size, stolb);
 
-  if (!ValidateLocalSize(local_cols)) {
+  if (!ValidateLocalSize(rows, local_cols)) {
     GetOutput().clear();
     return false;
   }

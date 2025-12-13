@@ -174,7 +174,7 @@ void DistributeDataScatterv(int rank, int size, const std::vector<int> &all_data
   PrepareScattervParams(size, rows, stolb, send_counts, displacements);
 
   int recv_count = static_cast<int>(local_data.size());
-
+  // распределяем матрицу по процессам
   MPI_Scatterv(all_data.empty() ? nullptr : all_data.data(), send_counts.data(), displacements.data(), MPI_INT,
                local_data.data(), recv_count, MPI_INT, 0, MPI_COMM_WORLD);
 }
